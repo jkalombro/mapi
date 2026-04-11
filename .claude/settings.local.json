@@ -98,7 +98,8 @@
       "Bash(git -C d:/Repository/mapi rm -r --cached \"API/tests/Mapi.API.IntegrationTests/bin/\" \"API/tests/Mapi.API.IntegrationTests/obj/\" \"API/tests/Mapi.Application.Tests/bin/\" \"API/tests/Mapi.Application.Tests/obj/\" \"API/tests/Mapi.Domain.Tests/bin/\" \"API/tests/Mapi.Domain.Tests/obj/\")",
       "Bash(git -C d:/Repository/mapi log --all --oneline -- \"UI/.env\")",
       "Bash(git -C d:/Repository/mapi ls-files \"UI/.env\")",
-      "Bash(git -C d:/Repository/mapi check-ignore -v \"UI/.env\")"
+      "Bash(git -C d:/Repository/mapi check-ignore -v \"UI/.env\")",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('\\\\n'.join\\(f'{k}: {v}' for k in ['@angular/core','@ngrx/store','@ngx-env/builder','typescript'] if k in deps for v in [deps[k]]\\)\\)\")"
     ]
   }
 }
