@@ -1,0 +1,66 @@
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+.mic-icon {
+  position: fixed;
+  bottom: $mic-icon-bottom;
+  right: $mic-icon-right;
+  z-index: $mic-icon-z-index;
+  width: $mic-icon-size;
+  height: $mic-icon-size;
+  min-width: $mic-icon-size-min;
+  min-height: $mic-icon-size-min;
+  border-radius: $border-radius-full;
+  border: none;
+  background-color: $color-primary;
+  color: $color-text-on-primary;
+  cursor: pointer;
+  box-shadow: $shadow-md;
+  transition:
+    background-color $transition-fast,
+    transform $transition-fast,
+    box-shadow $transition-fast;
+
+  @include flex-center;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+    box-shadow: $shadow-lg;
+  }
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+
+  &:disabled {
+    background-color: $color-text-disabled;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  &--active {
+    background-color: $color-accent;
+    animation: pulse 1.5s ease-in-out infinite;
+
+    &:hover:not(:disabled) {
+      background-color: $color-accent-dark;
+    }
+  }
+
+  &__svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba($color-accent, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba($color-accent, 0);
+  }
+}

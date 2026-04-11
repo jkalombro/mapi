@@ -1,0 +1,6 @@
+{
+  "Mapi.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Repository\\mapi\\backend\\src\\Mapi.API",
+  "Mapi.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Repository\\mapi\\backend\\src\\Mapi.Application",
+  "Mapi.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Repository\\mapi\\backend\\src\\Mapi.Domain",
+  "Mapi.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Repository\\mapi\\backend\\src\\Mapi.Infrastructure"
+}

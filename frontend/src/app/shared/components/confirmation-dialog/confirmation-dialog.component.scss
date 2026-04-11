@@ -1,0 +1,77 @@
+@use '../../../../assets/styles/variables' as *;
+@use '../../../../assets/styles/mixins' as *;
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  @include flex-center;
+  padding: $spacing-md;
+}
+
+.dialog {
+  background-color: $color-surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-lg;
+  padding: $spacing-xl;
+  width: 100%;
+  max-width: 400px;
+  @include flex-column;
+  gap: $spacing-lg;
+
+  &__message {
+    font-size: $font-size-base;
+    color: $color-text-primary;
+    line-height: $line-height-base;
+    margin: 0;
+    text-align: center;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: flex-end;
+
+    @include mobile {
+      flex-direction: column-reverse;
+    }
+
+    @include tablet {
+      flex-direction: row;
+    }
+  }
+
+  &__btn {
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    border: none;
+    transition: background-color $transition-fast;
+
+    &:focus-visible {
+      @include focus-visible;
+    }
+
+    &--cancel {
+      background-color: transparent;
+      color: $color-text-secondary;
+      border: 1px solid $color-border;
+
+      &:hover {
+        background-color: $color-background;
+      }
+    }
+
+    &--confirm {
+      background-color: $color-danger;
+      color: $color-text-on-primary;
+
+      &:hover {
+        background-color: darken($color-danger, 10%);
+      }
+    }
+  }
+}

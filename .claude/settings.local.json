@@ -68,7 +68,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(powershell.exe -File \".specify/scripts/powershell/create-new-feature.ps1\" \"Master Specification: Mapi - Smart Voice and Storage Hub\" -Json -ShortName \"mapi-voice-hub\" \"Mapi Smart Voice Storage Hub\")",
-      "Bash(powershell.exe -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json -PathsOnly)"
+      "Bash(powershell.exe -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json -PathsOnly)",
+      "Bash(npm --version)",
+      "Bash(npx -y @angular/cli@19 new frontend --routing=false --style=scss --ssr=false --skip-git --standalone --package-manager=npm)",
+      "Bash(dotnet remove:*)"
     ]
   }
 }

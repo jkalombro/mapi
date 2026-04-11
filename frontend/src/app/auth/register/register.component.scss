@@ -1,0 +1,133 @@
+@use '../../../assets/styles/variables' as *;
+@use '../../../assets/styles/mixins' as *;
+
+.register-page {
+  @include flex-center;
+  min-height: 100vh;
+  background-color: $color-background;
+  padding: $spacing-md;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: $color-surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  padding: $spacing-xxl $spacing-xl;
+
+  &__title {
+    font-size: $font-size-h2;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-xs;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin: 0 0 $spacing-xl;
+  }
+
+  &__footer {
+    text-align: center;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-top: $spacing-lg;
+  }
+}
+
+.register-form {
+  @include flex-column;
+  gap: $spacing-md;
+}
+
+.form-field {
+  @include flex-column;
+  gap: $spacing-xs;
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+  }
+
+  &__input {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    color: $color-text-primary;
+    transition: border-color $transition-fast;
+    outline: none;
+
+    &:focus {
+      @include focus-visible;
+    }
+
+    &--error {
+      border-color: $color-danger;
+    }
+  }
+
+  &__error {
+    font-size: $font-size-xs;
+    color: $color-danger;
+  }
+}
+
+.error-message {
+  padding: $spacing-sm $spacing-md;
+  background-color: lighten($color-danger, 40%);
+  border: 1px solid $color-danger;
+  border-radius: $border-radius-sm;
+  color: $color-danger;
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-md;
+}
+
+.btn {
+  padding: $spacing-sm $spacing-lg;
+  border: none;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: background-color $transition-fast;
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background-color: $color-primary;
+    color: $color-text-on-primary;
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-dark;
+    }
+  }
+
+  &--full {
+    width: 100%;
+  }
+}
+
+.link {
+  color: $color-primary;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+}

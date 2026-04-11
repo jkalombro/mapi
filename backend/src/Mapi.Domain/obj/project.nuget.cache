@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "kKM+E+EiC8A=",
+  "success": true,
+  "projectFilePath": "D:\\Repository\\mapi\\backend\\src\\Mapi.Domain\\Mapi.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Jk Alombro\\.nuget\\packages\\sonaranalyzer.csharp\\10.23.0.137933\\sonaranalyzer.csharp.10.23.0.137933.nupkg.sha512"
+  ],
+  "logs": []
+}

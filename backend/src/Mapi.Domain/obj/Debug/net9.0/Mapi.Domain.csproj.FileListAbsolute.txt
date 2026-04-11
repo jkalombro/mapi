@@ -1,0 +1,12 @@
+D:\Repository\mapi\backend\src\Mapi.Domain\bin\Debug\net9.0\Mapi.Domain.deps.json
+D:\Repository\mapi\backend\src\Mapi.Domain\bin\Debug\net9.0\Mapi.Domain.dll
+D:\Repository\mapi\backend\src\Mapi.Domain\bin\Debug\net9.0\Mapi.Domain.pdb
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.AssemblyInfoInputs.cache
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.AssemblyInfo.cs
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.csproj.CoreCompileInputs.cache
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.sourcelink.json
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.dll
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\refint\Mapi.Domain.dll
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\Mapi.Domain.pdb
+D:\Repository\mapi\backend\src\Mapi.Domain\obj\Debug\net9.0\ref\Mapi.Domain.dll

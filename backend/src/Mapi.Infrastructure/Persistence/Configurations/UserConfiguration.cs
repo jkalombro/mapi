@@ -1,0 +1,45 @@
+using Mapi.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Mapi.Infrastructure.Persistence.Configurations;
+
+public class UserConfiguration : IEntityTypeConfiguration<User>
+{
+    public void Configure(EntityTypeBuilder<User> builder)
+    {
+        builder.HasKey(u => u.Id);
+
+        builder.Property(u => u.Email)
+            .IsRequired()
+            .HasMaxLength(320);
+
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
+
+        builder.Property(u => u.PasswordHash)
+            .IsRequired();
+
+        builder.Property(u => u.StoreName)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(u => u.AlexaUserId)
+            .HasMaxLength(200);
+
+        builder.HasMany(u => u.Items)
+            .WithOne(i => i.User)
+            .HasForeignKey(i => i.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.Triggers)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.Actions)
+            .WithOne(a => a.User)
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}

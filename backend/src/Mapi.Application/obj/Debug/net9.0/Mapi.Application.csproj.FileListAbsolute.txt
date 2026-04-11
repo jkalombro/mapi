@@ -1,0 +1,16 @@
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.csproj.AssemblyReference.cache
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.AssemblyInfoInputs.cache
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.AssemblyInfo.cs
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.csproj.CoreCompileInputs.cache
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.sourcelink.json
+D:\Repository\mapi\backend\src\Mapi.Application\bin\Debug\net9.0\Mapi.Application.deps.json
+D:\Repository\mapi\backend\src\Mapi.Application\bin\Debug\net9.0\Mapi.Application.dll
+D:\Repository\mapi\backend\src\Mapi.Application\bin\Debug\net9.0\Mapi.Application.pdb
+D:\Repository\mapi\backend\src\Mapi.Application\bin\Debug\net9.0\Mapi.Domain.dll
+D:\Repository\mapi\backend\src\Mapi.Application\bin\Debug\net9.0\Mapi.Domain.pdb
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.App.302994B0.Up2Date
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.dll
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\refint\Mapi.Application.dll
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\Mapi.Application.pdb
+D:\Repository\mapi\backend\src\Mapi.Application\obj\Debug\net9.0\ref\Mapi.Application.dll
