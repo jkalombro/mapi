@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -15,15 +15,12 @@ import { selectAuthError, selectAuthIsLoading } from '../../store/reducers/auth.
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit {
-  form!: FormGroup;
+  private readonly _fb = inject(FormBuilder);
+  private readonly _store = inject(Store);
 
+  form!: FormGroup;
   isLoading = toSignal(this._store.select(selectAuthIsLoading), { initialValue: false });
   error = toSignal(this._store.select(selectAuthError), { initialValue: null });
-
-  constructor(
-    private readonly _fb: FormBuilder,
-    private readonly _store: Store
-  ) {}
 
   ngOnInit(): void {
     this.form = this._fb.group({

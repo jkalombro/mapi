@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ItemListComponent } from './components/item-list/item-list.component';
@@ -17,6 +17,8 @@ import { Item, ItemRequest } from './store/models/item.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemsComponent implements OnInit {
+  private readonly _store = inject(Store);
+
   items = toSignal(this._store.select(selectAllItems), { initialValue: [] });
   isLoading = toSignal(this._store.select(selectItemsIsLoading), { initialValue: false });
   error = toSignal(this._store.select(selectItemsError), { initialValue: null });
@@ -24,8 +26,6 @@ export class ItemsComponent implements OnInit {
 
   showForm = signal(false);
   pendingDeleteId = signal<string | null>(null);
-
-  constructor(private readonly _store: Store) {}
 
   ngOnInit(): void {
     this._store.dispatch(loadItems());

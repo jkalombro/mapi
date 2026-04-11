@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { TriggersApiService } from '../api/triggers.service';
@@ -6,6 +6,9 @@ import { createTrigger, createTriggerFailure, createTriggerSuccess, deleteTrigge
 
 @Injectable()
 export class TriggersEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly triggersService = inject(TriggersApiService);
+
   readonly loadTriggers$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadTriggers),
@@ -76,8 +79,4 @@ export class TriggersEffects {
     )
   );
 
-  constructor(
-    private readonly actions$: Actions,
-    private readonly triggersService: TriggersApiService
-  ) {}
 }

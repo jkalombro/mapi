@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { SpeechSynthesisService } from '../../../shared/services/speech-synthesis.service';
@@ -7,6 +7,10 @@ import { commandFailure, commandSuccess, confirmAdd, confirmAddFailure, confirmA
 
 @Injectable()
 export class VoiceEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly voiceService = inject(VoiceApiService);
+  private readonly speechSynthesis = inject(SpeechSynthesisService);
+
   readonly sendCommand$ = createEffect(() =>
     this.actions$.pipe(
       ofType(sendCommand),
@@ -44,9 +48,4 @@ export class VoiceEffects {
     { dispatch: false }
   );
 
-  constructor(
-    private readonly actions$: Actions,
-    private readonly voiceService: VoiceApiService,
-    private readonly speechSynthesis: SpeechSynthesisService
-  ) {}
 }

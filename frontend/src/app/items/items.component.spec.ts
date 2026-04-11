@@ -77,7 +77,6 @@ describe('ItemsComponent', () => {
     store.refreshState();
     fixture.detectChanges();
 
-    component.selectedItem.set(MOCK_ITEMS[0]);
     component.onSave({ itemName: 'Rice', bisayaName: 'Bugas', price: 55 });
 
     expect(dispatchSpy).toHaveBeenCalledWith(

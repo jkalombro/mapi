@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
@@ -10,6 +10,10 @@ const LOGIN_ROUTE = '/auth/login';
 
 @Injectable()
 export class AuthEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly authService = inject(AuthApiService);
+  private readonly router = inject(Router);
+
   readonly login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(login),
@@ -55,12 +59,6 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-
-  constructor(
-    private readonly actions$: Actions,
-    private readonly authService: AuthApiService,
-    private readonly router: Router
-  ) {}
 
   private extractError(error: unknown): string {
     if (error instanceof Error) {

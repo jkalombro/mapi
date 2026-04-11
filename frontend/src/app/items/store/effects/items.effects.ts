@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { ItemsApiService } from '../api/items.service';
@@ -6,6 +6,9 @@ import { createItem, createItemFailure, createItemSuccess, deleteItem, deleteIte
 
 @Injectable()
 export class ItemsEffects {
+  private readonly actions$ = inject(Actions);
+  private readonly itemsService = inject(ItemsApiService);
+
   readonly loadItems$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadItems),
@@ -62,8 +65,4 @@ export class ItemsEffects {
     )
   );
 
-  constructor(
-    private readonly actions$: Actions,
-    private readonly itemsService: ItemsApiService
-  ) {}
 }

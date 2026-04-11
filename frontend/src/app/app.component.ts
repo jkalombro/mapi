@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -28,15 +28,13 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+  private readonly _store = inject(Store);
+  private readonly _speechService = inject(SpeechRecognitionService);
+
   isListening = toSignal(this._store.select(selectIsListening), { initialValue: false });
   isConfirmationRequired = toSignal(this._store.select(selectIsConfirmationRequired), { initialValue: false });
   commandResult = toSignal(this._store.select(selectCommandResult), { initialValue: null });
   isSupported = this._speechService.isSupported;
-
-  constructor(
-    private readonly _store: Store,
-    private readonly _speechService: SpeechRecognitionService
-  ) {}
 
   ngOnInit(): void {
     this._speechService.transcript$.subscribe((transcript) => {
