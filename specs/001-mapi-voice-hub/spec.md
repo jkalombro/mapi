@@ -85,6 +85,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 
 1. **Given** a user's Alexa identity is linked to their Mapi account, **When** they ask Alexa for an item's price, **Then** Alexa responds with the correct price from the user's item list.
 2. **Given** the Alexa request includes a recognized intent, **When** processed, **Then** the same command engine used by the web voice interface resolves the request.
+3. **Given** a voice-add command via Alexa names an item that already exists, **When** the command is processed, **Then** Alexa keeps the session open and asks "Gatas already exists at 50. Do you want to update it?". If the user says "Yes" (via `ConfirmAddIntent`), the item is updated. If the user says "No", no change is made and the session ends.
 
 ---
 
@@ -93,9 +94,16 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - When a voice query matches multiple items by name, the system responds with an ambiguity message listing the matched item names and prompts the user to clarify (e.g., "Found 2 items named Gatas. Please specify which one.").
 - What happens when the browser does not support speech recognition — is the mic icon disabled with a message?
 - What happens when a user's spoken price contains non-numeric characters?
-- What happens when a trigger phrase matches more than one Trigger record?
-- When a voice-add command names an item that already exists in the user's account, the system responds with a confirmation prompt (e.g., "Gatas already exists with price 50. Do you want to update it?"). If the user confirms, the existing item's price is updated. If the user declines or does not respond, no change is made.
+- When a trigger phrase is a prefix of another trigger phrase and both match the spoken input, the system uses longest match wins — the trigger phrase that matches the most of the spoken input is selected.
+- When two actions linked to the same trigger share the same `SortOrder` value, execution order falls back to insertion order (the action linked first executes first). No error is raised.
+- When an Action is deleted, all associated `TriggerActionMap` entries are cascade-deleted. The linked Trigger remains intact with its remaining actions.
+- When `ItemName` and `BisayaName` are identical and a voice query matches that name, the system returns a single result. The ambiguity flow is only triggered when multiple distinct items match the spoken name.
+- User-defined trigger phrases always take precedence over built-in command patterns. Built-in patterns are used as fallback only when no user-defined trigger matches the spoken input.
+- When a voice-add command names an item that already exists in the user's account, the system responds with a confirmation prompt (e.g., "Gatas already exists with price 50. Do you want to update it?"). If the user confirms, the existing item's price is updated. If the user declines or does not respond within 10 seconds, the prompt is dismissed, no change is made, and the mic resets to idle.
 - What happens when an Alexa request is received for an unlinked or unknown Alexa user identity?
+- When an incoming Alexa request matches multiple Mapi accounts sharing the same `AlexaUserId`, the system resolves to the most recently created account.
+- Alexa session management: `shouldEndSession` is set to `true` after any completed response (successful query, add, update, or error). `shouldEndSession` is set to `false` only when the session is awaiting user confirmation (duplicate add flow).
+- When the Mapi backend is unavailable, Alexa responds with a spoken error — "Mapi is currently unavailable. Please try again later." — and ends the session. Silent failure is not permitted.
 
 ## Requirements *(mandatory)*
 
@@ -112,8 +120,8 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - **FR-009**: System MUST support action types: Query, Add, Update, and Remove.
 - **FR-010**: System MUST accept and process voice requests from Alexa devices via a dedicated integration endpoint.
 - **FR-011**: System MUST authenticate users and protect all data operations behind authenticated sessions.
-- **FR-012**: System MUST allow a user account to be linked to an Alexa user identity for Alexa skill requests.
-- **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded.
+- **FR-012**: System MUST allow a user account to be linked to an Alexa user identity for Alexa skill requests. Linking is performed manually via a settings page in the Mapi web app where the user enters their `AlexaUserId`. The same `AlexaUserId` may be linked to multiple Mapi accounts to support account recovery scenarios. OAuth-based Alexa account linking is explicitly out of scope for this version.
+- **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded. JWT access tokens expire after 1 hour. A refresh token valid for 7 days is issued alongside the access token and stored in an HTTP-only cookie. When an access token expires mid-session, the system silently issues a new one using the refresh token. After 7 days of inactivity the user must log in again.
 - **FR-014**: System MUST capture a `StoreName` for each user account at registration. `StoreName` is a required field representing the name of the user's store and MUST be stored on the `User` record.
 
 ### Key Entities
@@ -137,10 +145,24 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - **SC-007**: A user can create a trigger, link it to an action, and successfully invoke it via voice within a single session.
 - **SC-008**: The admin dashboard is fully usable on desktop, tablet, and mobile screen sizes without horizontal scrolling or overlapping elements.
 
+### Non-Functional Requirements
+
+- **NFR-001 (Account Deletion)**: When a user account is deleted, all associated data — items, triggers, actions, and trigger-action maps — MUST be hard-deleted immediately via cascade delete. No soft-delete or data retention is applied.
+- **NFR-002 (Sensitive Data Logging)**: Passwords, JWT tokens (access and refresh), and `AlexaUserId` values MUST never appear in application logs under any circumstances.
+- **NFR-003 (Voice Endpoint Availability)**: When the voice command engine is unavailable, the system MUST respond with a spoken and visual error — "Something went wrong. Please try again." — and reset the mic to idle. No degraded mode or fallback behavior is required.
+- **NFR-004 (Scalability Bounds)**: Per user account, the system MUST enforce the following limits: 500 items, 100 triggers, and 100 actions. Attempts to exceed these limits MUST be rejected with a clear error message.
+- **NFR-005 (Rate Limiting — Login)**: The login endpoint MUST be rate-limited to 5 failed attempts per IP within a 10-minute window. On breach, the IP is locked out for 15 minutes and the system returns `429 Too Many Requests`.
+- **NFR-006 (Rate Limiting — Registration)**: The registration endpoint MUST be rate-limited to 5 requests per IP per day. On breach, further registration attempts from that IP are blocked for the remainder of the day and the system returns `429 Too Many Requests`.
+- **NFR-008 (Alexa Certification)**: Full Alexa Skills Kit certification (privacy policy URL, skill description, Amazon testing instructions) is explicitly out of scope for this version. The Alexa integration MUST be functional and testable via the Alexa developer console. Certification submission is a separate future effort.
+- **NFR-007 (Keyboard Accessibility)**: The mic icon MUST be implemented as a native `<button>` element, making it keyboard-focusable and activatable via `Enter`/`Space` only when it is the focused element. It MUST NOT intercept keyboard input when focus is inside a text input, textarea, or any form field. Screen readers MUST announce the mic button's current state (idle, listening, processing).
+
 ## Assumptions
 
 - The application is a per-account data model: each user manages their own isolated dataset, and data isolation is enforced at the data access layer for all queries.
 - Voice input in the browser relies on the browser's built-in speech recognition capability; if unavailable in a given browser, the mic icon is hidden or disabled with a user-facing message.
+- Mic timeout behavior is delegated to the browser's built-in speech recognition lifecycle. When the browser fires the `end` event with no result (typically after 5–7 seconds of silence), the mic icon resets to idle. No custom timeout logic is implemented.
+- When speech recognition returns an empty, null, or noise-only transcript, the system responds with a spoken message ("Didn't catch that. Please try again.") and resets the mic icon to idle.
+- While a voice command is being processed, the mic icon enters a non-interactive processing state (e.g., spinner or animation). Any tap during this state is ignored. The mic resets to idle once the spoken response is delivered.
 - Voice-added items default both ItemName and BisayaName to the spoken product name; the user can later edit them individually via the manual form to separate the English and Bisaya values.
 - The voice "Add" command parses product name as everything between the keyword "Add" and the keyword "price", and the numeric value following "price" as the price.
 - The Alexa integration processes standard Alexa skill request/response payloads; Alexa user identity is stored on the User record and used to resolve the correct account.

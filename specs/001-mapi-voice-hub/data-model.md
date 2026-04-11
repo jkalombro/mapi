@@ -39,7 +39,7 @@ All entities inherit from `BaseEntity`.
 | `Email` | `string` | Required; unique index; max 256 chars |
 | `PasswordHash` | `string` | Required; BCrypt hash; never exposed in responses |
 | `StoreName` | `string` | Required; max 100 chars |
-| `AlexaUserId` | `string?` | Nullable; unique index when not null; max 256 chars |
+| `AlexaUserId` | `string?` | Nullable; no unique constraint; max 256 chars; multiple accounts may share the same AlexaUserId |
 | `CreatedAt` | `DateTime` | From BaseEntity |
 | `UpdatedAt` | `DateTime` | From BaseEntity |
 
@@ -47,7 +47,7 @@ All entities inherit from `BaseEntity`.
 - `Email` must be a valid email address format.
 - `Password` (at registration): min 8 characters (validated in `RegisterCommandValidator`; never stored raw).
 - `StoreName` must not be empty or whitespace.
-- `AlexaUserId` uniqueness enforced at DB level and checked in `RegisterCommand` / Alexa linking flow.
+- `AlexaUserId` has no uniqueness constraint — multiple Mapi accounts may share the same `AlexaUserId` to support account recovery scenarios.
 
 **Relationships**:
 - One `User` → many `Item`
@@ -226,5 +226,5 @@ SpeechSynthesisService.speak(ResponseText)
 - `ApplicationDbContext` applies global query filter: `modelBuilder.Entity<Item>().HasQueryFilter(e => e.UserId == _currentUserId)` — same for `Trigger`, `Action`, `TriggerActionMap`.
 - `Price` configured with `.HasPrecision(18, 2)`.
 - `ActionType` stored as `int` (`.HasConversion<int>()`).
-- Unique index on `User.Email` and conditional unique index on `User.AlexaUserId` (when not null, via filtered index).
+- Unique index on `User.Email` only. No unique index on `User.AlexaUserId` — multiple accounts may share the same value.
 - Unique composite index on `TriggerActionMap(TriggerId, ActionId)`.
