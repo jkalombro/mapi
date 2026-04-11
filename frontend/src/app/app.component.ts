@@ -18,6 +18,7 @@ import {
   selectIsConfirmationRequired,
   selectIsListening,
 } from './voice/store/reducers/voice.reducer';
+import { selectIsAuthenticated } from './store/reducers/auth.reducer';
 
 @Component({
   selector: 'app-root',
@@ -31,6 +32,7 @@ export class AppComponent implements OnInit {
   private readonly _store = inject(Store);
   private readonly _speechService = inject(SpeechRecognitionService);
 
+  isAuthenticated = toSignal(this._store.select(selectIsAuthenticated), { initialValue: false });
   isListening = toSignal(this._store.select(selectIsListening), { initialValue: false });
   isConfirmationRequired = toSignal(this._store.select(selectIsConfirmationRequired), { initialValue: false });
   commandResult = toSignal(this._store.select(selectCommandResult), { initialValue: null });

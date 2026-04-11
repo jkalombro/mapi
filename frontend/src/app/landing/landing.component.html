@@ -1,0 +1,77 @@
+<div class="landing">
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__inner">
+      <div class="hero__brand" aria-hidden="true">
+        <span class="hero__mic-icon">🎙</span>
+      </div>
+      <h1 id="hero-title" class="hero__title">Mapi</h1>
+      <p class="hero__tagline">Your Smart Voice &amp; Storage Hub</p>
+      <p class="hero__description">
+        Manage your store items with your voice. Ask prices in English or Bisaya,
+        add products hands-free, and integrate with Alexa — all in one place.
+      </p>
+      <div class="hero__actions">
+        <a routerLink="/auth/login" class="btn btn--primary btn--lg">Sign In</a>
+        <a routerLink="/auth/register" class="btn btn--outline btn--lg">Create Account</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" aria-labelledby="features-title">
+    <div class="features__inner">
+      <h2 id="features-title" class="features__heading">Everything you need</h2>
+      <div class="features__grid">
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">🎤</div>
+          <h3 class="feature-card__title">Voice Queries</h3>
+          <p class="feature-card__body">
+            Ask "How much is Gatas?" and get the price spoken back instantly.
+            Works with both English and Bisaya item names.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">📦</div>
+          <h3 class="feature-card__title">Bilingual Items</h3>
+          <p class="feature-card__body">
+            Store each product with an English name, a Bisaya name, and a price.
+            Search by either name — the system finds it.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">⚡</div>
+          <h3 class="feature-card__title">Custom Triggers</h3>
+          <p class="feature-card__body">
+            Define your own voice phrases and link them to actions.
+            Build personalized voice workflows for your store.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-card__icon" aria-hidden="true">🔔</div>
+          <h3 class="feature-card__title">Alexa Integration</h3>
+          <p class="feature-card__body">
+            Link your Alexa device and ask Mapi from anywhere in your store.
+            Same commands, same responses — hands completely free.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="cta" aria-labelledby="cta-title">
+    <div class="cta__inner">
+      <h2 id="cta-title" class="cta__title">Ready to get started?</h2>
+      <p class="cta__body">Create your store in seconds. No credit card required.</p>
+      <a routerLink="/auth/register" class="btn btn--primary btn--lg">Create Account</a>
+      <p class="cta__signin">
+        Already have an account?
+        <a routerLink="/auth/login" class="link">Sign in</a>
+      </p>
+    </div>
+  </section>
+</div>

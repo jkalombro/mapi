@@ -1,30 +1,34 @@
-<header class="toolbar">
-  <div class="toolbar__inner">
-    <a routerLink="/items" class="toolbar__brand" aria-label="Mapi home">
-      <span class="toolbar__name">Mapi</span>
-    </a>
-    <nav class="toolbar__nav" aria-label="Main navigation">
-      <a routerLink="/items" class="toolbar__link">Items</a>
-      <a routerLink="/triggers" class="toolbar__link">Triggers</a>
-    </nav>
-  </div>
-</header>
+@if (isAuthenticated()) {
+  <header class="toolbar">
+    <div class="toolbar__inner">
+      <a routerLink="/items" class="toolbar__brand" aria-label="Mapi home">
+        <span class="toolbar__name">Mapi</span>
+      </a>
+      <nav class="toolbar__nav" aria-label="Main navigation">
+        <a routerLink="/items" class="toolbar__link">Items</a>
+        <a routerLink="/triggers" class="toolbar__link">Triggers</a>
+      </nav>
+    </div>
+  </header>
+}
 
-<main class="main-content">
+<main class="main-content" [class.main-content--full]="!isAuthenticated()">
   <router-outlet />
 </main>
 
-<app-mic-icon
-  [isActive]="isListening()"
-  [isSupported]="isSupported()"
-  (clicked)="onMicClick()"
-/>
+@if (isAuthenticated()) {
+  <app-mic-icon
+    [isActive]="isListening()"
+    [isSupported]="isSupported()"
+    (clicked)="onMicClick()"
+  />
 
-<app-confirmation-dialog
-  [isVisible]="isConfirmationRequired()"
-  [message]="commandResult()?.responseText ?? ''"
-  confirmLabel="Yes, add it"
-  cancelLabel="No, cancel"
-  (confirmed)="onConfirmAdd()"
-  (cancelled)="onDismissConfirmation()"
-/>
+  <app-confirmation-dialog
+    [isVisible]="isConfirmationRequired()"
+    [message]="commandResult()?.responseText ?? ''"
+    confirmLabel="Yes, add it"
+    cancelLabel="No, cancel"
+    (confirmed)="onConfirmAdd()"
+    (cancelled)="onDismissConfirmation()"
+  />
+}

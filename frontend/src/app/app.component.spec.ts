@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { SpeechRecognitionService } from './shared/services/speech-recognition.service';
 import { signal } from '@angular/core';
 import { selectIsListening, selectIsConfirmationRequired, selectCommandResult } from './voice/store/reducers/voice.reducer';
+import { selectIsAuthenticated } from './store/reducers/auth.reducer';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -46,7 +47,18 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the toolbar', () => {
+  it('should not render the toolbar when unauthenticated', () => {
+    store.overrideSelector(selectIsAuthenticated, false);
+    store.refreshState();
+    fixture.detectChanges();
+    const toolbar = fixture.debugElement.query(By.css('.toolbar'));
+    expect(toolbar).toBeNull();
+  });
+
+  it('should render the toolbar when authenticated', () => {
+    store.overrideSelector(selectIsAuthenticated, true);
+    store.refreshState();
+    fixture.detectChanges();
     const toolbar = fixture.debugElement.query(By.css('.toolbar'));
     expect(toolbar).toBeTruthy();
   });
@@ -56,7 +68,18 @@ describe('AppComponent', () => {
     expect(routerOutlet).toBeTruthy();
   });
 
-  it('should render the mic-icon component', () => {
+  it('should not render mic-icon when unauthenticated', () => {
+    store.overrideSelector(selectIsAuthenticated, false);
+    store.refreshState();
+    fixture.detectChanges();
+    const micIcon = fixture.debugElement.query(By.css('app-mic-icon'));
+    expect(micIcon).toBeNull();
+  });
+
+  it('should render mic-icon when authenticated', () => {
+    store.overrideSelector(selectIsAuthenticated, true);
+    store.refreshState();
+    fixture.detectChanges();
     const micIcon = fixture.debugElement.query(By.css('app-mic-icon'));
     expect(micIcon).toBeTruthy();
   });
@@ -74,7 +97,8 @@ describe('AppComponent', () => {
     expect(speechService.stopListening).toHaveBeenCalled();
   });
 
-  it('should show confirmation dialog when confirmation is required', () => {
+  it('should show confirmation dialog when authenticated and confirmation is required', () => {
+    store.overrideSelector(selectIsAuthenticated, true);
     store.overrideSelector(selectIsConfirmationRequired, true);
     store.overrideSelector(selectCommandResult, {
       responseText: 'Add rice for 50?',
