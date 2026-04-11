@@ -73,7 +73,11 @@
       "Bash(npx -y @angular/cli@19 new frontend --routing=false --style=scss --ssr=false --skip-git --standalone --package-manager=npm)",
       "Bash(dotnet remove:*)",
       "Bash(bash .specify/scripts/powershell/check-prerequisites.ps1)",
-      "Bash(powershell -Command \"& 'd:/Repository/mapi/.specify/scripts/powershell/check-prerequisites.ps1' -Json -RequireTasks -IncludeTasks\")"
+      "Bash(powershell -Command \"& 'd:/Repository/mapi/.specify/scripts/powershell/check-prerequisites.ps1' -Json -RequireTasks -IncludeTasks\")",
+      "Bash(sqlcmd -S \"\\(localdb\\)\\\\MSSQLLocalDB\" -Q \"SELECT name FROM sys.databases WHERE name LIKE 'Mapi%'\")",
+      "Bash(sqlcmd -S \"\\(localdb\\)\\\\MSSQLLocalDB\" -d MapiDb_Dev -Q \"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ORDER BY TABLE_NAME\")",
+      "Bash(git rm:*)",
+      "Bash(npm start:*)"
     ]
   }
 }
