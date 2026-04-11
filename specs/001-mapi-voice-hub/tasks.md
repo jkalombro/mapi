@@ -64,8 +64,8 @@
 
 ### Auth Application Layer
 
-- [ ] T029 [P] Write xUnit unit tests for `RegisterCommandHandler` (valid registration, duplicate email conflict) in `backend/tests/Mapi.Application.Tests/Auth/RegisterCommandHandlerTests.cs`
-- [ ] T030 [P] Write xUnit unit tests for `LoginCommandHandler` (valid login, wrong password, unknown email) in `backend/tests/Mapi.Application.Tests/Auth/LoginCommandHandlerTests.cs`
+- [X] T029 [P] Write xUnit unit tests for `RegisterCommandHandler` (valid registration, duplicate email conflict) in `backend/tests/Mapi.Application.Tests/Auth/RegisterCommandHandlerTests.cs`
+- [X] T030 [P] Write xUnit unit tests for `LoginCommandHandler` (valid login, wrong password, unknown email) in `backend/tests/Mapi.Application.Tests/Auth/LoginCommandHandlerTests.cs`
 - [ ] T031 Create `AuthResponse`, `RegisterRequest`, `LoginRequest` DTOs in `backend/src/Mapi.Application/Auth/DTOs/`
 - [ ] T032 Implement `RegisterCommand` + handler (validate uniqueness → hash → persist → return JWT) in `backend/src/Mapi.Application/Auth/Commands/RegisterCommand.cs`
 - [ ] T033 Implement `LoginCommand` + handler (fetch user → verify hash → return JWT) in `backend/src/Mapi.Application/Auth/Commands/LoginCommand.cs`
@@ -80,15 +80,15 @@
 
 ### Integration Test Setup
 
-- [ ] T039 Configure `WebApplicationFactory<Program>` + SQL Server LocalDB test database + `[BeforeScenario]` seed hooks in `backend/tests/Mapi.API.IntegrationTests/`
-- [ ] T040 Write Auth Gherkin scenarios (register, login, duplicate email, wrong password) in `backend/tests/Mapi.API.IntegrationTests/Features/Auth.feature`
-- [ ] T041 Implement `AuthStepDefinitions` for Auth.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AuthStepDefinitions.cs`
+- [X] T039 Configure `WebApplicationFactory<Program>` + SQL Server LocalDB test database + `[BeforeScenario]` seed hooks in `backend/tests/Mapi.API.IntegrationTests/`
+- [X] T040 Write Auth Gherkin scenarios (register, login, duplicate email, wrong password) in `backend/tests/Mapi.API.IntegrationTests/Features/Auth.feature`
+- [X] T041 Implement `AuthStepDefinitions` for Auth.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AuthStepDefinitions.cs`
 
 ### Angular Foundation
 
-- [ ] T042 [P] Write Jest tests for `auth.interceptor.ts` (token attachment, missing token) in `frontend/src/app/shared/interceptors/auth.interceptor.spec.ts`
-- [ ] T043 [P] Write Jest tests for `error.interceptor.ts` (401 redirect, 5xx handling) in `frontend/src/app/shared/interceptors/error.interceptor.spec.ts`
-- [ ] T044 [P] Write Jest tests for global auth NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/store/`
+- [X] T042 [P] Write Jest tests for `auth.interceptor.ts` (token attachment, missing token) in `frontend/src/app/shared/interceptors/auth.interceptor.spec.ts`
+- [X] T043 [P] Write Jest tests for `error.interceptor.ts` (401 redirect, 5xx handling) in `frontend/src/app/shared/interceptors/error.interceptor.spec.ts`
+- [X] T044 [P] Write Jest tests for global auth NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/store/`
 - [ ] T045 Create `auth.interceptor.ts` (attach JWT from store to outgoing requests) in `frontend/src/app/shared/interceptors/auth.interceptor.ts`
 - [ ] T046 Create `error.interceptor.ts` (handle 401, 403, 5xx globally) in `frontend/src/app/shared/interceptors/error.interceptor.ts`
 - [ ] T047 Create global auth NgRx store slice (user, token, loginSuccess, loginFailure actions + effects + api service) in `frontend/src/app/store/`
@@ -108,12 +108,12 @@
 
 ### Tests for User Story 1 (write first — must FAIL before implementation)
 
-- [ ] T051 Write Gherkin CRUD scenarios (create item, edit item, delete item, data isolation between users) in `backend/tests/Mapi.API.IntegrationTests/Features/Items.feature`
-- [ ] T052 [P] [US1] Write xUnit tests for `CreateItemCommandHandler` (valid create, validation failure) in `backend/tests/Mapi.Application.Tests/Items/CreateItemCommandHandlerTests.cs`
-- [ ] T053 [P] [US1] Write xUnit tests for `UpdateItemCommandHandler` (update, not-found) in `backend/tests/Mapi.Application.Tests/Items/UpdateItemCommandHandlerTests.cs`
-- [ ] T054 [P] [US1] Write xUnit tests for `DeleteItemCommandHandler` (delete, not-found) in `backend/tests/Mapi.Application.Tests/Items/DeleteItemCommandHandlerTests.cs`
-- [ ] T055 [P] [US1] Write xUnit tests for `GetItemsQueryHandler` and `GetItemByIdQueryHandler` in `backend/tests/Mapi.Application.Tests/Items/GetItemsQueryHandlerTests.cs`
-- [ ] T056 [P] [US1] Write Jest tests for items NgRx store (actions, reducers, effects, selectors, api service) in `frontend/src/app/items/store/`
+- [X] T051 Write Gherkin CRUD scenarios (create item, edit item, delete item, data isolation between users) in `backend/tests/Mapi.API.IntegrationTests/Features/Items.feature`
+- [X] T052 [P] [US1] Write xUnit tests for `CreateItemCommandHandler` (valid create, validation failure) in `backend/tests/Mapi.Application.Tests/Items/CreateItemCommandHandlerTests.cs`
+- [X] T053 [P] [US1] Write xUnit tests for `UpdateItemCommandHandler` (update, not-found) in `backend/tests/Mapi.Application.Tests/Items/UpdateItemCommandHandlerTests.cs`
+- [X] T054 [P] [US1] Write xUnit tests for `DeleteItemCommandHandler` (delete, not-found) in `backend/tests/Mapi.Application.Tests/Items/DeleteItemCommandHandlerTests.cs`
+- [X] T055 [P] [US1] Write xUnit tests for `GetItemsQueryHandler` and `GetItemByIdQueryHandler` in `backend/tests/Mapi.Application.Tests/Items/GetItemsQueryHandlerTests.cs`
+- [X] T056 [P] [US1] Write Jest tests for items NgRx store (actions, reducers, effects, selectors, api service) in `frontend/src/app/items/store/`
 - [ ] T057 [P] [US1] Write Jest tests for `item-list` component in `frontend/src/app/items/components/item-list/item-list.component.spec.ts`
 - [ ] T058 [P] [US1] Write Jest tests for `item-form` component (add mode, edit mode, validation) in `frontend/src/app/items/components/item-form/item-form.component.spec.ts`
 - [ ] T059 [P] [US1] Write Jest tests for `items` smart component in `frontend/src/app/items/items.component.spec.ts`
@@ -134,7 +134,7 @@
 - [ ] T071 [US1] Create FluentValidation validators for all Item commands/queries in `backend/src/Mapi.Application/Items/Validators/`
 - [ ] T072 [US1] Create `ItemsEndpoints` (GET `/api/v1/items`, GET `/api/v1/items/{id}`, POST, PUT, DELETE) with `.RequireAuthorization()`, `.WithTags("Items")`, response type annotations in `backend/src/Mapi.API/Endpoints/ItemsEndpoints.cs`
 - [ ] T073 [US1] Add and apply EF migration `AddItemsTable` — run `dotnet ef migrations add AddItemsTable`
-- [ ] T074 [US1] Implement `ItemsStepDefinitions` for Items.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/ItemsStepDefinitions.cs`
+- [X] T074 [US1] Implement `ItemsStepDefinitions` for Items.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/ItemsStepDefinitions.cs`
 - [ ] T075 [US1] Create items NgRx store (models, loadItems/createItem/updateItem/deleteItem actions + reducers + effects + api service hitting `/api/v1/items`) in `frontend/src/app/items/store/`
 - [ ] T076 [US1] Create `item-list` presentational component (displays item rows, emits edit/delete events) in `frontend/src/app/items/components/item-list/item-list.component.{ts,html,scss}`
 - [ ] T077 [US1] Create `item-form` presentational component (Reactive Form: ItemName, BisayaName, Price; supports add and edit mode) in `frontend/src/app/items/components/item-form/item-form.component.{ts,html,scss}`
@@ -153,13 +153,13 @@
 
 ### Tests for User Story 2 (write first — must FAIL before implementation)
 
-- [ ] T080 Write Gherkin voice query scenarios (exact match, BisayaName match, not found, ambiguous) in `backend/tests/Mapi.API.IntegrationTests/Features/Voice.feature`
-- [ ] T081 [P] [US2] Write xUnit tests for `ProcessVoiceCommandHandler` (dispatches to ICommandService, returns result) in `backend/tests/Mapi.Application.Tests/Voice/ProcessVoiceCommandHandlerTests.cs`
-- [ ] T082 [P] [US2] Write xUnit tests for `CommandService` query logic (exact match, BisayaName match, no match, ambiguous multi-match) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceQueryTests.cs`
-- [ ] T083 [P] [US2] Write Jest tests for `SpeechRecognitionService` (feature detection, start/stop listening, transcript$ stream, unsupported browser signal) in `frontend/src/app/shared/services/speech-recognition.service.spec.ts`
-- [ ] T084 [P] [US2] Write Jest tests for `SpeechSynthesisService` (speak method, queue behavior) in `frontend/src/app/shared/services/speech-synthesis.service.spec.ts`
+- [X] T080 Write Gherkin voice query scenarios (exact match, BisayaName match, not found, ambiguous) in `backend/tests/Mapi.API.IntegrationTests/Features/Voice.feature`
+- [X] T081 [P] [US2] Write xUnit tests for `ProcessVoiceCommandHandler` (dispatches to ICommandService, returns result) in `backend/tests/Mapi.Application.Tests/Voice/ProcessVoiceCommandHandlerTests.cs`
+- [X] T082 [P] [US2] Write xUnit tests for `CommandService` query logic (exact match, BisayaName match, no match, ambiguous multi-match) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceQueryTests.cs`
+- [X] T083 [P] [US2] Write Jest tests for `SpeechRecognitionService` (feature detection, start/stop listening, transcript$ stream, unsupported browser signal) in `frontend/src/app/shared/services/speech-recognition.service.spec.ts`
+- [X] T084 [P] [US2] Write Jest tests for `SpeechSynthesisService` (speak method, queue behavior) in `frontend/src/app/shared/services/speech-synthesis.service.spec.ts`
 - [ ] T085 [P] [US2] Write Jest tests for `mic-icon` component (enabled state, disabled state when browser unsupported, click event) in `frontend/src/app/shared/components/mic-icon/mic-icon.component.spec.ts`
-- [ ] T086 [P] [US2] Write Jest tests for voice NgRx store (listening state, transcript, command result, spoken response) in `frontend/src/app/voice/store/`
+- [X] T086 [P] [US2] Write Jest tests for voice NgRx store (listening state, transcript, command result, spoken response) in `frontend/src/app/voice/store/`
 
 ### Implementation for User Story 2
 
@@ -168,7 +168,7 @@
 - [ ] T089 [US2] Implement `ProcessVoiceCommand` + handler (invokes `ICommandService.ExecuteAsync`, never calls repos directly) in `backend/src/Mapi.Application/Voice/Commands/ProcessVoiceCommand.cs`
 - [ ] T090 [US2] Create `ProcessVoiceCommandValidator` (transcript not empty) in `backend/src/Mapi.Application/Voice/Validators/ProcessVoiceCommandValidator.cs`
 - [ ] T091 [US2] Create `VoiceEndpoints` (POST `/api/v1/voice/command`) with `.RequireAuthorization()`, `.WithTags("Voice")` in `backend/src/Mapi.API/Endpoints/VoiceEndpoints.cs`
-- [ ] T092 [US2] Implement voice query Reqnroll step definitions in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/VoiceStepDefinitions.cs`
+- [X] T092 [US2] Implement voice query Reqnroll step definitions in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/VoiceStepDefinitions.cs`
 - [ ] T093 [P] [US2] Create `SpeechRecognitionService` — wraps `SpeechRecognition`/`webkitSpeechRecognition`, exposes `transcript$` Observable and `isListening` signal, handles unsupported-browser detection — in `frontend/src/app/shared/services/speech-recognition.service.ts`
 - [ ] T094 [P] [US2] Create `SpeechSynthesisService` — wraps `window.speechSynthesis.speak()`, exposes `speak(text: string)` method — in `frontend/src/app/shared/services/speech-synthesis.service.ts`
 - [ ] T095 [US2] Create `mic-icon` shared component (OnPush; shows active/inactive/disabled states; accessible aria-label; hidden when speech unsupported) in `frontend/src/app/shared/components/mic-icon/mic-icon.component.{ts,html,scss}`
@@ -187,8 +187,8 @@
 
 ### Tests for User Story 3 (write first — must FAIL before implementation)
 
-- [ ] T098 [P] [US3] Write xUnit tests for `CommandService` add logic (new item, duplicate triggers confirmation, malformed command returns error) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceAddTests.cs`
-- [ ] T099 [P] [US3] Write xUnit tests for `ConfirmVoiceAddCommandHandler` (item updated, not-found) in `backend/tests/Mapi.Application.Tests/Voice/ConfirmVoiceAddCommandHandlerTests.cs`
+- [X] T098 [P] [US3] Write xUnit tests for `CommandService` add logic (new item, duplicate triggers confirmation, malformed command returns error) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceAddTests.cs`
+- [X] T099 [P] [US3] Write xUnit tests for `ConfirmVoiceAddCommandHandler` (item updated, not-found) in `backend/tests/Mapi.Application.Tests/Voice/ConfirmVoiceAddCommandHandlerTests.cs`
 - [ ] T100 [P] [US3] Write Jest tests for `confirmation-dialog` component (displays message, confirm/cancel events) in `frontend/src/app/shared/components/confirmation-dialog/confirmation-dialog.component.spec.ts`
 
 ### Implementation for User Story 3
@@ -196,7 +196,7 @@
 - [ ] T101 [US3] Extend `CommandService` with Add pattern (`^add (?<name>.+) price (?<price>\d+(\.\d+)?)$`) — new item path calls `CreateItemCommand`, duplicate path returns `IsConfirmationRequired = true` — in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
 - [ ] T102 [US3] Implement `ConfirmVoiceAddCommand` + handler (updates existing item's price) + `ConfirmVoiceAddCommandValidator` in `backend/src/Mapi.Application/Voice/Commands/ConfirmVoiceAddCommand.cs`
 - [ ] T103 [US3] Add POST `/api/v1/voice/confirm-add` endpoint to `VoiceEndpoints` in `backend/src/Mapi.API/Endpoints/VoiceEndpoints.cs`
-- [ ] T104 [US3] Add voice add + confirmation Gherkin scenarios to `Voice.feature` and implement step definitions in `backend/tests/Mapi.API.IntegrationTests/`
+- [X] T104 [US3] Add voice add + confirmation Gherkin scenarios to `Voice.feature` and implement step definitions in `backend/tests/Mapi.API.IntegrationTests/`
 - [ ] T105 [US3] Create `confirmation-dialog` shared component (displays message string, emits confirm/cancel; OnPush) in `frontend/src/app/shared/components/confirmation-dialog/confirmation-dialog.component.{ts,html,scss}`
 - [ ] T106 [US3] Extend voice NgRx store with add-confirmation state (`isConfirmationRequired`, `pendingItem`, `confirmAdd` action + effect calling `/api/v1/voice/confirm-add`) in `frontend/src/app/voice/store/`
 - [ ] T107 [US3] Wire `confirmation-dialog` into `app.component.html` — show when `isConfirmationRequired` is true; dispatch `confirmAdd` or dismiss on user choice — in `frontend/src/app/app.component.ts`
@@ -213,12 +213,12 @@
 
 ### Tests for User Story 4 (write first — must FAIL before implementation)
 
-- [ ] T108 Write Gherkin scenarios for Trigger + Action CRUD and trigger invocation in `backend/tests/Mapi.API.IntegrationTests/Features/Triggers.feature`
-- [ ] T109 [P] [US4] Write xUnit tests for Trigger CRUD command handlers in `backend/tests/Mapi.Application.Tests/Triggers/`
-- [ ] T110 [P] [US4] Write xUnit tests for Action CRUD command handlers in `backend/tests/Mapi.Application.Tests/Actions/`
-- [ ] T111 [P] [US4] Write xUnit tests for `CommandService` trigger matching logic (phrase prefix match, multi-action execution in SortOrder, no-match fallback) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceTriggerTests.cs`
-- [ ] T112 [P] [US4] Write Jest tests for triggers NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/triggers/store/`
-- [ ] T113 [P] [US4] Write Jest tests for `trigger-form` and `action-link-form` components in `frontend/src/app/triggers/components/`
+- [X] T108 Write Gherkin scenarios for Trigger + Action CRUD and trigger invocation in `backend/tests/Mapi.API.IntegrationTests/Features/Triggers.feature`
+- [X] T109 [P] [US4] Write xUnit tests for Trigger CRUD command handlers in `backend/tests/Mapi.Application.Tests/Triggers/`
+- [X] T110 [P] [US4] Write xUnit tests for Action CRUD command handlers in `backend/tests/Mapi.Application.Tests/Actions/`
+- [X] T111 [P] [US4] Write xUnit tests for `CommandService` trigger matching logic (phrase prefix match, multi-action execution in SortOrder, no-match fallback) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceTriggerTests.cs`
+- [X] T112 [P] [US4] Write Jest tests for triggers NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/triggers/store/`
+- [X] T113 [P] [US4] Write Jest tests for `trigger-form` and `action-link-form` components in `frontend/src/app/triggers/components/`
 
 ### Implementation for User Story 4
 
@@ -236,11 +236,11 @@
 - [ ] T125 [US4] Create `ActionsEndpoints` (GET/POST/PUT/DELETE; 409 Conflict on delete if linked) in `backend/src/Mapi.API/Endpoints/ActionsEndpoints.cs`
 - [ ] T126 [US4] Extend `CommandService` with trigger-first matching (case-insensitive prefix match against user's Triggers; execute linked Actions in SortOrder; resolve response template `{name}` / `{price}` placeholders) in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
 - [ ] T127 [US4] Add and apply EF migration `AddTriggersActionsAndMaps` — run `dotnet ef migrations add AddTriggersActionsAndMaps`
-- [ ] T128 [US4] Implement `TriggersStepDefinitions` for Triggers.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/TriggersStepDefinitions.cs`
-- [ ] T129 [US4] Create triggers NgRx store (models, loadTriggers/createTrigger/deleteTrigger/linkAction/unlinkAction actions + reducers + effects + api service) in `frontend/src/app/triggers/store/`
-- [ ] T130 [US4] Create `trigger-form` component (Reactive Form: Phrase field) in `frontend/src/app/triggers/components/trigger-form/trigger-form.component.{ts,html,scss}`
-- [ ] T131 [US4] Create `action-link-form` component (select actionId from user's actions, set sortOrder) in `frontend/src/app/triggers/components/action-link-form/action-link-form.component.{ts,html,scss}`
-- [ ] T132 [US4] Create `triggers` smart component (lists triggers with linked actions; compose trigger-form + action-link-form) in `frontend/src/app/triggers/triggers.component.{ts,html,scss}`
+- [X] T128 [US4] Implement `TriggersStepDefinitions` for Triggers.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/TriggersStepDefinitions.cs`
+- [X] T129 [US4] Create triggers NgRx store (models, loadTriggers/createTrigger/deleteTrigger/linkAction/unlinkAction actions + reducers + effects + api service) in `frontend/src/app/triggers/store/`
+- [X] T130 [US4] Create `trigger-form` component (Reactive Form: Phrase field) in `frontend/src/app/triggers/components/trigger-form/trigger-form.component.{ts,html,scss}`
+- [X] T131 [US4] Create `action-link-form` component (select actionId from user's actions, set sortOrder) in `frontend/src/app/triggers/components/action-link-form/action-link-form.component.{ts,html,scss}`
+- [X] T132 [US4] Create `triggers` smart component (lists triggers with linked actions; compose trigger-form + action-link-form) in `frontend/src/app/triggers/triggers.component.{ts,html,scss}`
 - [ ] T133 [US4] Create `triggers.routes.ts` and register as lazy-loaded route in `frontend/src/app/app.routes.ts`
 
 **Checkpoint**: User can create a trigger "What's the price of", link a Query action, speak the phrase, and hear the action's response template filled with the item's price.
@@ -255,17 +255,17 @@
 
 ### Tests for User Story 5 (write first — must FAIL before implementation)
 
-- [ ] T134 Write Gherkin Alexa scenarios (linked user price query, linked user item add, unlinked user error) in `backend/tests/Mapi.API.IntegrationTests/Features/Alexa.feature`
-- [ ] T135 [P] [US5] Write xUnit tests for `AlexaController` (intent routing, AlexaUserId resolution, IMediator dispatch, unlinked user response) in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AlexaStepDefinitions.cs`
+- [X] T134 Write Gherkin Alexa scenarios (linked user price query, linked user item add, unlinked user error) in `backend/tests/Mapi.API.IntegrationTests/Features/Alexa.feature`
+- [X] T135 [P] [US5] Write xUnit tests for `AlexaController` (intent routing, AlexaUserId resolution, IMediator dispatch, unlinked user response) in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AlexaStepDefinitions.cs`
 
 ### Implementation for User Story 5
 
 - [ ] T136 [US5] Add `FindByAlexaUserIdAsync` implementation to `UserRepository` in `backend/src/Mapi.Infrastructure/Persistence/Repositories/UserRepository.cs`
 - [ ] T137 [US5] Install `Alexa.NET` NuGet package in `Mapi.API.csproj`
 - [ ] T138 [US5] Implement `AlexaController` (POST `/alexa/skill`) — extract `session.user.userId` → resolve `User` by `AlexaUserId` → extract slot value → dispatch `ProcessVoiceCommand` via `IMediator` → return `SkillResponse` with `PlainTextOutputSpeech` — in `backend/src/Mapi.API/Controllers/AlexaController.cs`
-- [ ] T139 [US5] Implement `AlexaRequestVerificationService` (stub for development; real `RequestVerification.Verify()` call for production) in `backend/src/Mapi.Infrastructure/Services/AlexaRequestVerificationService.cs`
+- [X] T139 [US5] Implement `AlexaRequestVerificationService` (stub for development; real `RequestVerification.Verify()` call for production) in `backend/src/Mapi.Infrastructure/Services/AlexaRequestVerificationService.cs`
 - [ ] T140 [US5] Register `AddControllers()` and `MapControllers()` in `backend/src/Mapi.API/Program.cs` alongside existing Minimal API endpoint mapping
-- [ ] T141 [US5] Implement Reqnroll step definitions for Alexa.feature using simulated `SkillRequest` payloads in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AlexaStepDefinitions.cs`
+- [X] T141 [US5] Implement Reqnroll step definitions for Alexa.feature using simulated `SkillRequest` payloads in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/AlexaStepDefinitions.cs`
 
 **Checkpoint**: Simulated Alexa skill requests return correct spoken responses via `AlexaController`; unlinked users receive a clear error message; same `ICommandService` resolves both web and Alexa commands.
 

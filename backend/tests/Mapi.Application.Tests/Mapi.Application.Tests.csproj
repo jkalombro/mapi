@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mapi.Application\Mapi.Application.csproj" />
     <ProjectReference Include="..\..\src\Mapi.Domain\Mapi.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Mapi.Infrastructure\Mapi.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

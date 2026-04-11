@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Mapi.Domain.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+81182fb9bc2f3a3f837642df03b37df1e1378292")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d9b35978ca93ccb3aedc2c30c5c72935031b7dce")]
 [assembly: System.Reflection.AssemblyProductAttribute("Mapi.Domain.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Mapi.Domain.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

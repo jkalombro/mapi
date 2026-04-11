@@ -514,3 +514,4 @@ D:\Repository\mapi\backend\tests\Mapi.API.IntegrationTests\obj\Debug\net9.0\Mapi
 D:\Repository\mapi\backend\tests\Mapi.API.IntegrationTests\obj\Debug\net9.0\Mapi.API.IntegrationTests.genruntimeconfig.cache
 D:\Repository\mapi\backend\tests\Mapi.API.IntegrationTests\obj\Debug\net9.0\ref\Mapi.API.IntegrationTests.dll
 D:\Repository\mapi\backend\tests\Mapi.API.IntegrationTests\bin\Debug\net9.0\Alexa.NET.dll
+D:\Repository\mapi\backend\tests\Mapi.API.IntegrationTests\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.InMemory.dll

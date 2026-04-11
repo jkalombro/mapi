@@ -1,0 +1,161 @@
+@use '../../assets/styles/variables' as *;
+@use '../../assets/styles/mixins' as *;
+
+.triggers {
+  @include container;
+  padding-top: $spacing-xl;
+  padding-bottom: $spacing-xxl;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-lg;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-md;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-h2;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  &__loading,
+  &__empty {
+    color: $color-text-secondary;
+    text-align: center;
+    padding: $spacing-xl 0;
+  }
+}
+
+.trigger-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.trigger-card {
+  background-color: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-sm;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+    }
+  }
+
+  &__phrase {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  &__controls {
+    @include flex-start;
+    gap: $spacing-xs;
+  }
+
+  &__actions {
+    list-style: none;
+    padding: 0;
+    margin: $spacing-sm 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+}
+
+.trigger-action {
+  @include flex-between;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $color-surface-alt;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+
+  &__type {
+    font-weight: $font-weight-medium;
+    color: $color-primary;
+    flex-shrink: 0;
+    margin-right: $spacing-sm;
+  }
+
+  &__template {
+    color: $color-text-secondary;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.btn {
+  padding: $spacing-sm $spacing-lg;
+  border: none;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: background-color $transition-fast;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+  }
+
+  &--xs {
+    padding: 2px $spacing-xs;
+    font-size: $font-size-xs;
+  }
+
+  &--primary {
+    background-color: $color-primary;
+    color: $color-text-on-primary;
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-dark;
+    }
+  }
+
+  &--ghost {
+    background-color: transparent;
+    color: $color-primary;
+    border: 1px solid $color-primary;
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-light;
+    }
+  }
+
+  &--danger {
+    background-color: transparent;
+    color: $color-danger;
+    border: 1px solid $color-danger;
+
+    &:hover:not(:disabled) {
+      background-color: lighten($color-danger, 40%);
+    }
+  }
+}
