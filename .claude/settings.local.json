@@ -95,7 +95,10 @@
       "Bash(git -C d:/Repository/mapi status --short)",
       "Bash(git -C d:/Repository/mapi add UI/ API/)",
       "Bash(git -C d:/Repository/mapi add -u backend/ frontend/)",
-      "Bash(git -C d:/Repository/mapi rm -r --cached \"API/tests/Mapi.API.IntegrationTests/bin/\" \"API/tests/Mapi.API.IntegrationTests/obj/\" \"API/tests/Mapi.Application.Tests/bin/\" \"API/tests/Mapi.Application.Tests/obj/\" \"API/tests/Mapi.Domain.Tests/bin/\" \"API/tests/Mapi.Domain.Tests/obj/\")"
+      "Bash(git -C d:/Repository/mapi rm -r --cached \"API/tests/Mapi.API.IntegrationTests/bin/\" \"API/tests/Mapi.API.IntegrationTests/obj/\" \"API/tests/Mapi.Application.Tests/bin/\" \"API/tests/Mapi.Application.Tests/obj/\" \"API/tests/Mapi.Domain.Tests/bin/\" \"API/tests/Mapi.Domain.Tests/obj/\")",
+      "Bash(git -C d:/Repository/mapi log --all --oneline -- \"UI/.env\")",
+      "Bash(git -C d:/Repository/mapi ls-files \"UI/.env\")",
+      "Bash(git -C d:/Repository/mapi check-ignore -v \"UI/.env\")"
     ]
   }
 }
