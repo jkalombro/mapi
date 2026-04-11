@@ -84,7 +84,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 **Acceptance Scenarios**:
 
 1. **Given** a user's Alexa identity is linked to their Mapi account, **When** they ask Alexa for an item's price, **Then** Alexa responds with the correct price from the user's item list.
-2. **Given** the Alexa request includes a recognized intent, **When** processed, **Then** the same command engine used by the web voice interface resolves the request.
+2. **Given** the Alexa request includes a recognized intent, **When** processed, **Then** the same command engine used by the web voice interface resolves the request and the same spoken response template patterns defined in FR-007 are used across both surfaces.
 3. **Given** a voice-add command via Alexa names an item that already exists, **When** the command is processed, **Then** Alexa keeps the session open and asks "Gatas already exists at 50. Do you want to update it?". If the user says "Yes" (via `ConfirmAddIntent`), the item is updated. If the user says "No", no change is made and the session ends.
 
 ---
@@ -99,7 +99,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - When an Action is deleted, all associated `TriggerActionMap` entries are cascade-deleted. The linked Trigger remains intact with its remaining actions.
 - When `ItemName` and `BisayaName` are identical and a voice query matches that name, the system returns a single result. The ambiguity flow is only triggered when multiple distinct items match the spoken name.
 - User-defined trigger phrases always take precedence over built-in command patterns. Built-in patterns are used as fallback only when no user-defined trigger matches the spoken input.
-- When a voice-add command names an item that already exists in the user's account, the system responds with a confirmation prompt (e.g., "Gatas already exists with price 50. Do you want to update it?"). If the user confirms, the existing item's price is updated. If the user declines or does not respond within 10 seconds, the prompt is dismissed, no change is made, and the mic resets to idle.
+- When a voice-add command names an item that already exists in the user's account, the system responds with a spoken and visual confirmation prompt using the template: *"{name} already exists at {price} pesos. Do you want to update it?"* The visual prompt displays "Yes" and "No" buttons. If the user confirms, the existing item's price is updated. If the user declines or does not respond within 10 seconds, the prompt is dismissed, no change is made, and the mic resets to idle.
 - What happens when an Alexa request is received for an unlinked or unknown Alexa user identity?
 - When an incoming Alexa request matches multiple Mapi accounts sharing the same `AlexaUserId`, the system resolves to the most recently created account.
 - Alexa session management: `shouldEndSession` is set to `true` after any completed response (successful query, add, update, or error). `shouldEndSession` is set to `false` only when the session is awaiting user confirmation (duplicate add flow).
@@ -109,41 +109,48 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 
 ### Functional Requirements
 
-- **FR-001**: System MUST enforce data isolation per user — no user can access, view, or modify another user's items, triggers, or actions.
+- **FR-001**: System MUST enforce data isolation per user — no user can access, view, or modify another user's items, triggers, or actions. Isolation MUST be enforced via a global query filter at the data access layer applied to all queries for Item, Trigger, Action, and TriggerActionMap. Individual endpoints MUST NOT implement their own data filtering.
 - **FR-002**: System MUST allow users to create, read, update, and delete items through a manual form interface, with ItemName, BisayaName, and Price as distinct, required fields.
-- **FR-003**: System MUST provide a persistent voice activation control (microphone icon) visible and accessible on every screen of the application.
+- **FR-003**: System MUST provide a persistent voice activation control (microphone icon) visible and accessible on every screen of the application. The mic button MUST be fixed at the bottom-center of the screen, floating above content at all scroll positions. Minimum size: 48×48px to meet touch target guidelines. The mic button MUST display three distinct visual states: idle (default mic icon, no animation), listening (pulsing/ripple animation while capturing audio), and processing (spinner replaces mic icon while the command is being resolved).
 - **FR-004**: System MUST accept spoken input and process it as a command for the authenticated user.
-- **FR-005**: System MUST search items by both ItemName and BisayaName when resolving voice queries for price.
+- **FR-005**: System MUST search items by both ItemName and BisayaName when resolving voice queries for price. Name matching MUST be case-insensitive for both fields.
 - **FR-006**: System MUST map a voice-added item's spoken name to both ItemName and BisayaName fields simultaneously.
-- **FR-007**: System MUST synthesize and play back a spoken response to the user after processing a voice command.
+- **FR-007**: System MUST synthesize and play back a spoken response to the user after processing a voice command. Prices in spoken responses are formatted as *"{price} pesos"* — no decimal places for whole numbers (e.g., "50 pesos"), up to 2 decimal places when needed (e.g., "50.50 pesos"). Response template patterns are as follows:
+  - Item found: *"{name} costs {price} pesos."*
+  - Item not found: *"I couldn't find {name}."*
+  - Ambiguous match: *"Found {count} items matching {name}: {list of matched names}. Please specify which one."*
+  - Add success: *"{name} has been added at {price} pesos."*
+  - Add duplicate: *"{name} already exists at {price} pesos. Do you want to update it?"*
+  - Malformed command: *"Sorry, I didn't understand that. Please try again."*
 - **FR-008**: System MUST allow users to define custom trigger phrases and link them to one or more actions (many-to-many relationship).
 - **FR-009**: System MUST support action types: Query, Add, Update, and Remove.
-- **FR-010**: System MUST accept and process voice requests from Alexa devices via a dedicated integration endpoint.
+- **FR-010**: System MUST accept and process voice requests from Alexa devices via a dedicated integration endpoint. The endpoint MUST verify Alexa request signatures on every incoming request in production and reject any request that fails signature verification. Signature verification MUST be bypassable in non-production environments via an environment variable flag to support local development and testing. The Alexa skill invocation name MUST be "Mapi".
 - **FR-011**: System MUST authenticate users and protect all data operations behind authenticated sessions.
 - **FR-012**: System MUST allow a user account to be linked to an Alexa user identity for Alexa skill requests. Linking is performed manually via a settings page in the Mapi web app where the user enters their `AlexaUserId`. The same `AlexaUserId` may be linked to multiple Mapi accounts to support account recovery scenarios. OAuth-based Alexa account linking is explicitly out of scope for this version.
-- **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded. JWT access tokens expire after 1 hour. A refresh token valid for 7 days is issued alongside the access token and stored in an HTTP-only cookie. When an access token expires mid-session, the system silently issues a new one using the refresh token. After 7 days of inactivity the user must log in again.
-- **FR-014**: System MUST capture a `StoreName` for each user account at registration. `StoreName` is a required field representing the name of the user's store and MUST be stored on the `User` record.
+- **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded. JWT access tokens expire after 1 hour. A refresh token valid for 7 days is issued alongside the access token and stored in an HTTP-only cookie. When an access token expires mid-session, the system silently issues a new one using the refresh token. After 7 days of inactivity the user must log in again. Password MUST meet the following minimum requirements: at least 8 characters, at least one uppercase letter, and at least one number.
+- **FR-014**: System MUST capture a `StoreName` for each user account at registration. `StoreName` is a required field representing the name of the user's store and MUST be stored on the `User` record. `StoreName` MUST be displayed in the dashboard header so the user knows which store they are managing. It does not appear in voice or Alexa responses.
 
 ### Key Entities
 
 - **User**: Represents a registered account stored in a custom `User` table. Fields: `Id` (unique identifier), `Email` (unique, required), `PasswordHash` (required), `AlexaUserId` (nullable, for Alexa account linking), `StoreName` (required, the name of the user's store). Authentication is email/password with JWT tokens. All other entities belong to a User.
 - **Item**: A product or good tracked by the user. Has an English name (ItemName), a Bisaya name (BisayaName), and a price. Both name fields are searchable by voice commands.
-- **Trigger**: A voice phrase defined by the user that the system listens for (e.g., "How much is", "Add").
-- **Action**: A system operation (Query, Add, Update, Remove) with a configurable response template. Belongs to a user.
+- **Trigger**: A voice phrase defined by the user that the system listens for (e.g., "How much is", "Add"). The `Phrase` field has a maximum length of 200 characters.
+- **Action**: A system operation (Query, Add, Update, Remove) with a configurable response template. Belongs to a user. The `ResponseTemplate` field has a maximum length of 500 characters.
 - **TriggerActionMap**: A many-to-many relationship linking one Trigger to one or more Actions, defining what the system does when a trigger phrase is spoken.
+- **ResponseTemplate placeholder rules**: Supported placeholders are `{name}` and `{price}`. Unrecognized placeholders (e.g., `{foo}`) are left as-is in the spoken response. If a supported placeholder's value is missing at runtime, it is replaced with "unknown". No errors are thrown in either case.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
 - **SC-001**: A user can add an item manually in under 60 seconds from opening the form to seeing it in their item list.
-- **SC-002**: A voice price query for an existing item returns a spoken result within 3 seconds of the user finishing speaking.
-- **SC-003**: A voice-added item is retrievable by both its ItemName and BisayaName in subsequent voice queries, with 100% accuracy.
+- **SC-002**: A voice price query for an existing item begins playing a spoken result within 3 seconds of the user finishing speaking. The 3-second window covers server processing time only — speech synthesis playback duration is excluded.
+- **SC-003**: For every item in a user's account, querying by either its exact `ItemName` or exact `BisayaName` (case-insensitive) MUST return that item. A test pass requires a correct result for 100% of items tested. Fuzzy or partial matching is not included in this criterion — exact name match only.
 - **SC-004**: The microphone icon is reachable within 1 interaction (click or tap) from any screen in the application.
 - **SC-005**: Items belonging to one user are never returned in queries made by a different user's session — verified across 100% of tested scenarios.
-- **SC-006**: An Alexa skill request for a linked account returns the correct spoken response with the same accuracy as the web voice interface.
+- **SC-006**: For every recognized Alexa intent, the correct spoken response MUST be returned in 100% of tested scenarios. A test pass requires a correct result for 100% of intents tested.
 - **SC-007**: A user can create a trigger, link it to an action, and successfully invoke it via voice within a single session.
-- **SC-008**: The admin dashboard is fully usable on desktop, tablet, and mobile screen sizes without horizontal scrolling or overlapping elements.
+- **SC-008**: The admin dashboard is fully usable at the following breakpoints without horizontal scrolling or overlapping elements: mobile (375px and above), tablet (768px and above), and desktop (1280px and above). A test pass requires no horizontal scrolling and no overlapping elements at each of these widths.
 
 ### Non-Functional Requirements
 
@@ -159,7 +166,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 ## Assumptions
 
 - The application is a per-account data model: each user manages their own isolated dataset, and data isolation is enforced at the data access layer for all queries.
-- Voice input in the browser relies on the browser's built-in speech recognition capability; if unavailable in a given browser, the mic icon is hidden or disabled with a user-facing message.
+- Voice input in the browser relies on the browser's built-in speech recognition capability. Supported browsers: Chrome and Edge. On unsupported browsers (Firefox, Safari), the mic button is shown in a disabled state with a tooltip: "Voice input is not supported in this browser."
 - Mic timeout behavior is delegated to the browser's built-in speech recognition lifecycle. When the browser fires the `end` event with no result (typically after 5–7 seconds of silence), the mic icon resets to idle. No custom timeout logic is implemented.
 - When speech recognition returns an empty, null, or noise-only transcript, the system responds with a spoken message ("Didn't catch that. Please try again.") and resets the mic icon to idle.
 - While a voice command is being processed, the mic icon enters a non-interactive processing state (e.g., spinner or animation). Any tap during this state is ignored. The mic resets to idle once the spoken response is delivered.
