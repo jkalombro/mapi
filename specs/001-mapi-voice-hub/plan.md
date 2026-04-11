@@ -57,6 +57,7 @@ Mapi is a full-stack web application combining a manual item management dashboar
 | Signals: `input()`, `output()`, `signal()`, `toSignal()` | ✅ PASS | |
 | `@ngx-env/builder` for env variable support | ✅ PASS | |
 | HTTP interceptors: auth + error | ✅ PASS | |
+| Functional route guards (`authGuard`, `guestGuard`) | ✅ PASS | `CanActivateFn` pattern; reads NgRx store for auth state |
 | 100% Jest coverage enforced | ✅ PASS | |
 
 ## Complexity Tracking
@@ -172,6 +173,8 @@ frontend/
 │       ├── app.config.ts
 │       ├── app.routes.ts
 │       ├── app.component.{ts,html,scss}
+│       ├── landing/                — public landing page (guest-only route at `/`)
+│       │   └── landing.component.{ts,html,scss,spec.ts}
 │       ├── store/                  — global state: auth slice (user, token), voice status
 │       │   ├── models/
 │       │   ├── actions/
@@ -203,6 +206,9 @@ frontend/
 │           ├── components/
 │           │   ├── mic-icon/       — persistent microphone button (rendered in app.component)
 │           │   └── confirmation-dialog/
+│           ├── guards/
+│           │   ├── auth.guard.ts       — protects /items and /triggers; redirects to /auth/login
+│           │   └── guest.guard.ts      — protects / and /auth; redirects authenticated users to /items
 │           ├── interceptors/
 │           │   ├── auth.interceptor.ts
 │           │   └── error.interceptor.ts

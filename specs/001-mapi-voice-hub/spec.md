@@ -7,6 +7,24 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
+### User Story 0 – Landing Page & Route Guards (Priority: P0)
+
+A public-facing landing page greets unauthenticated visitors at the root path (`/`), explaining Mapi's features and providing direct links to sign in or create an account. Authenticated users are automatically redirected away from the landing and auth pages. Unauthenticated users attempting to access protected pages are redirected to the login page.
+
+**Why this priority**: Route guards establish the security boundary between public and protected areas of the app. Without them, unauthenticated users can access the dashboard, and authenticated users land on the sign-in page unnecessarily.
+
+**Independent Test**: Can be tested without any items or voice setup — open the app as a guest and verify the landing page loads; sign in and verify automatic redirect to items; try accessing `/items` while logged out and verify redirect to login.
+
+**Acceptance Scenarios**:
+
+1. **Given** an unauthenticated user visits the root path (`/`), **When** the page loads, **Then** the landing page is displayed with links to sign in and create an account.
+2. **Given** an authenticated user visits the root path (`/`) or any `/auth` route, **When** the guard evaluates, **Then** the user is automatically redirected to `/items`.
+3. **Given** an unauthenticated user attempts to navigate to `/items` or `/triggers`, **When** the guard evaluates, **Then** the user is redirected to `/auth/login`.
+4. **Given** an unauthenticated user on the landing page, **When** they click "Sign In", **Then** they are taken to the login page.
+5. **Given** an unauthenticated user on the landing page, **When** they click "Create Account", **Then** they are taken to the registration page.
+
+---
+
 ### User Story 1 – Manual Item Management (Priority: P1)
 
 A registered user can create, view, update, and delete items from a standard admin dashboard. Each item has an English name (ItemName), a Bisaya name (BisayaName), and a price. All CRUD operations are performed through a data-entry form — voice is not required for this flow.
@@ -129,6 +147,9 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - **FR-012**: System MUST allow a user account to be linked to an Alexa user identity for Alexa skill requests. Linking is performed manually via a settings page in the Mapi web app where the user enters their `AlexaUserId`. The same `AlexaUserId` may be linked to multiple Mapi accounts to support account recovery scenarios. OAuth-based Alexa account linking is explicitly out of scope for this version.
 - **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded. JWT access tokens expire after 1 hour. A refresh token valid for 7 days is issued alongside the access token and stored in an HTTP-only cookie. When an access token expires mid-session, the system silently issues a new one using the refresh token. After 7 days of inactivity the user must log in again. Password MUST meet the following minimum requirements: at least 8 characters, at least one uppercase letter, and at least one number.
 - **FR-014**: System MUST capture a `StoreName` for each user account at registration. `StoreName` is a required field representing the name of the user's store and MUST be stored on the `User` record. `StoreName` MUST be displayed in the dashboard header so the user knows which store they are managing. It does not appear in voice or Alexa responses.
+- **FR-015**: System MUST display a public landing page at the root route (`/`). The landing page MUST contain: a hero section (app name, tagline, description, Sign In and Create Account CTAs), a features grid (Voice Queries, Bilingual Items, Custom Triggers, Alexa Integration), and a footer call-to-action section with a "Create Account" link and a "Sign in" inline link. The landing page is a guest-only route.
+- **FR-016**: System MUST protect the `/items` and `/triggers` routes with an authentication guard (`authGuard`) that redirects unauthenticated users to `/auth/login`.
+- **FR-017**: System MUST protect the root (`/`) and `/auth` routes with a guest guard (`guestGuard`) that redirects authenticated users to `/items`. The wildcard route (`**`) MUST redirect to the root path (`''`).
 
 ### Key Entities
 
@@ -151,6 +172,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - **SC-006**: For every recognized Alexa intent, the correct spoken response MUST be returned in 100% of tested scenarios. A test pass requires a correct result for 100% of intents tested.
 - **SC-007**: A user can create a trigger, link it to an action, and successfully invoke it via voice within a single session.
 - **SC-008**: The admin dashboard is fully usable at the following breakpoints without horizontal scrolling or overlapping elements: mobile (375px and above), tablet (768px and above), and desktop (1280px and above). A test pass requires no horizontal scrolling and no overlapping elements at each of these widths.
+- **SC-009**: An unauthenticated user visiting the root path (`/`) sees the landing page without being redirected. An authenticated user visiting `/` or any `/auth` route is immediately redirected to `/items` within a single Angular navigation cycle.
 
 ### Non-Functional Requirements
 

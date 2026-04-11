@@ -89,14 +89,21 @@
 - [X] T042 [P] Write Jest tests for `auth.interceptor.ts` (token attachment, missing token) in `frontend/src/app/shared/interceptors/auth.interceptor.spec.ts`
 - [X] T043 [P] Write Jest tests for `error.interceptor.ts` (401 redirect, 5xx handling) in `frontend/src/app/shared/interceptors/error.interceptor.spec.ts`
 - [X] T044 [P] Write Jest tests for global auth NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/store/`
+- [X] T044a [P] Write Jest tests for `auth.guard.ts` (authenticated user passes, unauthenticated user redirects to `/auth/login`) in `frontend/src/app/shared/guards/auth.guard.spec.ts`
+- [X] T044b [P] Write Jest tests for `guest.guard.ts` (authenticated user redirects to `/items`, unauthenticated user passes) in `frontend/src/app/shared/guards/guest.guard.spec.ts`
 - [ ] T045 Create `auth.interceptor.ts` (attach JWT from store to outgoing requests) in `frontend/src/app/shared/interceptors/auth.interceptor.ts`
 - [ ] T046 Create `error.interceptor.ts` (handle 401, 403, 5xx globally) in `frontend/src/app/shared/interceptors/error.interceptor.ts`
 - [ ] T047 Create global auth NgRx store slice (user, token, loginSuccess, loginFailure actions + effects + api service) in `frontend/src/app/store/`
 - [ ] T048 Create login page component (Reactive Form) in `frontend/src/app/auth/login/login.component.{ts,html,scss}`
 - [ ] T049 Create register page component (Reactive Form: email, password, storeName) in `frontend/src/app/auth/register/register.component.{ts,html,scss}`
-- [ ] T050 Configure `frontend/src/app/app.config.ts` (provideStore, provideEffects, provideRouter, provideHttpClient with interceptors), `app.routes.ts` (lazy-load auth, items, triggers routes), `app.component.{ts,html,scss}` (root shell + router-outlet)
+- [ ] T050 Configure `frontend/src/app/app.config.ts` (provideStore, provideEffects, provideRouter, provideHttpClient with interceptors), `app.component.{ts,html,scss}` (root shell + router-outlet)
+- [X] T050a [P] Implement `authGuard` functional guard (reads `selectIsAuthenticated` from NgRx store via `take(1)`; redirects to `/auth/login` if not authenticated) in `frontend/src/app/shared/guards/auth.guard.ts`
+- [X] T050b [P] Implement `guestGuard` functional guard (reads `selectIsAuthenticated` from NgRx store via `take(1)`; redirects to `/items` if authenticated) in `frontend/src/app/shared/guards/guest.guard.ts`
+- [X] T050c [P] Write Jest tests for `LandingComponent` (renders hero section, features grid, CTA section; contains links to `/auth/login` and `/auth/register`) in `frontend/src/app/landing/landing.component.spec.ts`
+- [X] T050d Create `LandingComponent` (standalone, OnPush; imports RouterLink; hero section with brand icon + tagline, 4-card features grid, footer CTA) in `frontend/src/app/landing/landing.component.{ts,html,scss}`
+- [X] T050e Configure `app.routes.ts`: root path (`''`) loads `LandingComponent` with `guestGuard`; apply `authGuard` to `items` and `triggers` routes; apply `guestGuard` to `auth` route; wildcard redirects to `''` in `frontend/src/app/app.routes.ts`
 
-**Checkpoint**: Backend API starts, register/login endpoints return JWTs, Angular app loads login page, interceptors attach tokens.
+**Checkpoint**: Backend API starts, register/login endpoints return JWTs, Angular app loads landing page for guests (redirects authenticated users to /items), interceptors attach tokens.
 
 ---
 
