@@ -1,0 +1,159 @@
+# Feature Specification: Mapi – Smart Voice & Storage Hub
+
+**Feature Branch**: `001-mapi-voice-hub`  
+**Created**: 2026-04-11  
+**Status**: Draft  
+**Input**: User description: "Master Specification: Mapi – Smart Voice & Storage Hub"
+
+## User Scenarios & Testing *(mandatory)*
+
+### User Story 1 – Manual Item Management (Priority: P1)
+
+A registered user can create, view, update, and delete items from a standard admin dashboard. Each item has an English name (ItemName), a Bisaya name (BisayaName), and a price. All CRUD operations are performed through a data-entry form — voice is not required for this flow.
+
+**Why this priority**: This is the foundational data layer. Without items in the system, voice commands have nothing to act on. It also serves users who prefer or require manual data entry.
+
+**Independent Test**: Can be fully tested by logging in and using the item management form; voice and Alexa integrations are not needed.
+
+**Acceptance Scenarios**:
+
+1. **Given** a logged-in user on the Items page, **When** they submit the "Add Item" form with a valid ItemName, BisayaName, and Price, **Then** the new item appears in their item list and is associated only with their account.
+2. **Given** a logged-in user viewing their item list, **When** they edit an item and submit the form, **Then** the item reflects the updated values immediately.
+3. **Given** a logged-in user, **When** they delete an item, **Then** the item is permanently removed from their list and no longer retrievable.
+4. **Given** two separate users each have an item named "Gatas", **When** either user views their item list, **Then** they see only their own items — never the other user's.
+
+---
+
+### User Story 2 – Voice Price Query (Priority: P2)
+
+A logged-in user can speak a query (e.g., "How much is Gatas?") using the persistent microphone icon available on every screen. The system returns the price of the matching item by searching across both the English and Bisaya names.
+
+**Why this priority**: Voice querying is the primary differentiator of Mapi. It delivers immediate value once items exist in the system.
+
+**Independent Test**: Can be fully tested by adding at least one item and using the mic icon on any screen to ask for its price by either name.
+
+**Acceptance Scenarios**:
+
+1. **Given** an item "Gatas" (BisayaName) / "Milk" (ItemName) exists for the user, **When** the user says "How much is Gatas?", **Then** the system responds with the correct price.
+2. **Given** the same item, **When** the user says "How much is Milk?", **Then** the system responds with the same correct price.
+3. **Given** the user asks for an item that does not exist in their account, **When** the query is processed, **Then** the system responds that the item was not found.
+4. **Given** the microphone icon is visible on any screen, **When** the user activates it, **Then** the system begins listening and processes the spoken input.
+
+---
+
+### User Story 3 – Voice Item Addition (Priority: P3)
+
+A logged-in user can add a new item by speaking a command (e.g., "Add Gatas price 50"). The system stores the spoken product name as both the ItemName and the BisayaName, allowing users to query it by that name in either language field.
+
+**Why this priority**: Voice-driven addition extends the voice interface beyond read-only use, reducing friction for users who prefer hands-free data entry.
+
+**Independent Test**: Can be fully tested by speaking an "Add" command and then querying the newly added item by name.
+
+**Acceptance Scenarios**:
+
+1. **Given** a logged-in user speaks "Add Gatas price 50", **When** the command is processed, **Then** a new item is created with both ItemName and BisayaName set to "Gatas" and Price set to 50.
+2. **Given** the same item was added via voice, **When** the user opens the manual item list, **Then** the item appears in the list with the correct values.
+3. **Given** a malformed voice command (e.g., "Add price"), **When** the command is processed, **Then** the system responds with a helpful error message without creating a record.
+
+---
+
+### User Story 4 – Trigger & Action Logic Management (Priority: P4)
+
+A logged-in user can define custom voice trigger phrases and link them to one or more actions (Query, Add, Update, Remove) with configurable response templates. A trigger can map to multiple actions (many-to-many).
+
+**Why this priority**: This enables extensibility beyond hardcoded commands, allowing users to define personalized voice workflows.
+
+**Independent Test**: Can be fully tested by creating a trigger phrase, linking it to an action, and verifying that speaking that phrase executes the linked action.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user creates a trigger phrase "What's the price of", **When** they link it to a "Query" action with a response template, **Then** speaking that phrase triggers a price lookup.
+2. **Given** a trigger is linked to multiple actions, **When** the trigger phrase is spoken, **Then** all linked actions are executed in sequence.
+3. **Given** a user deletes a trigger, **When** that phrase is spoken, **Then** the system does not recognize it as a command.
+
+---
+
+### User Story 5 – Alexa Voice Integration (Priority: P5)
+
+A registered user with a linked Alexa account can speak Mapi commands through an Alexa device. The system processes Alexa skill requests and returns spoken responses via the same command engine used by the web interface.
+
+**Why this priority**: Alexa integration expands the voice interface to smart home devices, extending Mapi's reach beyond the browser.
+
+**Independent Test**: Can be tested independently by sending a simulated Alexa skill request to the backend and verifying the correct spoken response is returned.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user's Alexa identity is linked to their Mapi account, **When** they ask Alexa for an item's price, **Then** Alexa responds with the correct price from the user's item list.
+2. **Given** the Alexa request includes a recognized intent, **When** processed, **Then** the same command engine used by the web voice interface resolves the request.
+
+---
+
+### Edge Cases
+
+- When a voice query matches multiple items by name, the system responds with an ambiguity message listing the matched item names and prompts the user to clarify (e.g., "Found 2 items named Gatas. Please specify which one.").
+- What happens when the browser does not support speech recognition — is the mic icon disabled with a message?
+- What happens when a user's spoken price contains non-numeric characters?
+- What happens when a trigger phrase matches more than one Trigger record?
+- When a voice-add command names an item that already exists in the user's account, the system responds with a confirmation prompt (e.g., "Gatas already exists with price 50. Do you want to update it?"). If the user confirms, the existing item's price is updated. If the user declines or does not respond, no change is made.
+- What happens when an Alexa request is received for an unlinked or unknown Alexa user identity?
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+- **FR-001**: System MUST enforce data isolation per user — no user can access, view, or modify another user's items, triggers, or actions.
+- **FR-002**: System MUST allow users to create, read, update, and delete items through a manual form interface, with ItemName, BisayaName, and Price as distinct, required fields.
+- **FR-003**: System MUST provide a persistent voice activation control (microphone icon) visible and accessible on every screen of the application.
+- **FR-004**: System MUST accept spoken input and process it as a command for the authenticated user.
+- **FR-005**: System MUST search items by both ItemName and BisayaName when resolving voice queries for price.
+- **FR-006**: System MUST map a voice-added item's spoken name to both ItemName and BisayaName fields simultaneously.
+- **FR-007**: System MUST synthesize and play back a spoken response to the user after processing a voice command.
+- **FR-008**: System MUST allow users to define custom trigger phrases and link them to one or more actions (many-to-many relationship).
+- **FR-009**: System MUST support action types: Query, Add, Update, and Remove.
+- **FR-010**: System MUST accept and process voice requests from Alexa devices via a dedicated integration endpoint.
+- **FR-011**: System MUST authenticate users and protect all data operations behind authenticated sessions.
+- **FR-012**: System MUST allow a user account to be linked to an Alexa user identity for Alexa skill requests.
+- **FR-013**: System MUST authenticate users via a custom `User` table (fields: `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`). Authentication tokens MUST be issued as JWTs using email and password credentials. Social login providers (Google, Facebook) are explicitly excluded.
+- **FR-014**: System MUST capture a `StoreName` for each user account at registration. `StoreName` is a required field representing the name of the user's store and MUST be stored on the `User` record.
+
+### Key Entities
+
+- **User**: Represents a registered account stored in a custom `User` table. Fields: `Id` (unique identifier), `Email` (unique, required), `PasswordHash` (required), `AlexaUserId` (nullable, for Alexa account linking), `StoreName` (required, the name of the user's store). Authentication is email/password with JWT tokens. All other entities belong to a User.
+- **Item**: A product or good tracked by the user. Has an English name (ItemName), a Bisaya name (BisayaName), and a price. Both name fields are searchable by voice commands.
+- **Trigger**: A voice phrase defined by the user that the system listens for (e.g., "How much is", "Add").
+- **Action**: A system operation (Query, Add, Update, Remove) with a configurable response template. Belongs to a user.
+- **TriggerActionMap**: A many-to-many relationship linking one Trigger to one or more Actions, defining what the system does when a trigger phrase is spoken.
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: A user can add an item manually in under 60 seconds from opening the form to seeing it in their item list.
+- **SC-002**: A voice price query for an existing item returns a spoken result within 3 seconds of the user finishing speaking.
+- **SC-003**: A voice-added item is retrievable by both its ItemName and BisayaName in subsequent voice queries, with 100% accuracy.
+- **SC-004**: The microphone icon is reachable within 1 interaction (click or tap) from any screen in the application.
+- **SC-005**: Items belonging to one user are never returned in queries made by a different user's session — verified across 100% of tested scenarios.
+- **SC-006**: An Alexa skill request for a linked account returns the correct spoken response with the same accuracy as the web voice interface.
+- **SC-007**: A user can create a trigger, link it to an action, and successfully invoke it via voice within a single session.
+- **SC-008**: The admin dashboard is fully usable on desktop, tablet, and mobile screen sizes without horizontal scrolling or overlapping elements.
+
+## Assumptions
+
+- The application is a per-account data model: each user manages their own isolated dataset, and data isolation is enforced at the data access layer for all queries.
+- Voice input in the browser relies on the browser's built-in speech recognition capability; if unavailable in a given browser, the mic icon is hidden or disabled with a user-facing message.
+- Voice-added items default both ItemName and BisayaName to the spoken product name; the user can later edit them individually via the manual form to separate the English and Bisaya values.
+- The voice "Add" command parses product name as everything between the keyword "Add" and the keyword "price", and the numeric value following "price" as the price.
+- The Alexa integration processes standard Alexa skill request/response payloads; Alexa user identity is stored on the User record and used to resolve the correct account.
+- Multi-tenancy is enforced at the data access layer via a per-user filter on all queries — individual endpoints do not implement their own data filtering.
+- Web voice endpoints are implemented as Minimal API feature endpoints (e.g., `VoiceEndpoints`). The Alexa integration endpoint is implemented as a traditional MVC controller (`AlexaController`) due to its structured request/response payload requirements. Both surfaces share the same application/domain layer.
+- `ICommandService` is an Application layer interface encapsulating voice parsing and resolution logic. Endpoints (Minimal API and `AlexaController`) dispatch MediatR commands only; MediatR handlers invoke `ICommandService` internally. No direct service calls from endpoints.
+
+## Clarifications
+
+### Session 2026-04-11
+
+- Q: Should Mapi use the constitution-standard ASP.NET Core Identity stack (with social providers), or a custom User table with email/password and JWT only? → A: ~~ASP.NET Core Identity with Google as the sole social login provider~~ (revised) Custom `User` table with `Id`, `Email`, `PasswordHash`, `AlexaUserId`, `StoreName`; email/password + JWT only; all social login providers excluded.
+- Q: Should the backend use traditional MVC controllers or Minimal API feature endpoints? → A: Minimal API for web voice endpoints; MVC controller (`AlexaController`) for the Alexa interface; both share the same application/domain layer.
+- Q: Should `ICommandService` replace MediatR as the dispatch mechanism, or live inside MediatR handlers? → A: `ICommandService` is an Application layer service invoked inside MediatR command handlers; endpoints only dispatch MediatR commands.
+- Q: What should the system do when a voice query matches multiple items by name? → A: Respond with an ambiguity message listing matched item names and prompt the user to clarify.
+- Q: What should happen when a voice-add command names an item that already exists? → A: Prompt the user to confirm if they want to update the existing item's price; update on confirmation, no change on decline.
