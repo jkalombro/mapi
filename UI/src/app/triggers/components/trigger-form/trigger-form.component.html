@@ -1,0 +1,43 @@
+<form class="trigger-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <h3 class="trigger-form__title">New Trigger</h3>
+
+  <div class="trigger-form__field">
+    <label for="phrase" class="trigger-form__label">Trigger Phrase</label>
+    <input
+      id="phrase"
+      type="text"
+      class="trigger-form__input"
+      formControlName="phrase"
+      placeholder="e.g. What's the price of"
+      aria-describedby="phrase-error"
+    />
+    @if (form.get('phrase')?.invalid && form.get('phrase')?.touched) {
+      <span id="phrase-error" class="trigger-form__error" role="alert">
+        Phrase is required and must be at least 2 characters.
+      </span>
+    }
+  </div>
+
+  <div class="trigger-form__actions">
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="form.invalid || isLoading()"
+      aria-label="Save trigger"
+    >
+      @if (isLoading()) {
+        Saving...
+      } @else {
+        Save Trigger
+      }
+    </button>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="onCancel()"
+      aria-label="Cancel"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

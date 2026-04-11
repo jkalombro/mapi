@@ -1,0 +1,44 @@
+<section class="items">
+  <div class="items__header">
+    <h1 class="items__title">Items</h1>
+    @if (!showForm()) {
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="onAddClick()"
+        aria-label="Add new item"
+      >
+        + Add Item
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="items__error" role="alert">{{ error() }}</div>
+  }
+
+  @if (showForm()) {
+    <app-item-form
+      [editItem]="selectedItem()"
+      [isLoading]="isLoading()"
+      (saved)="onSave($event)"
+      (cancelled)="onCancelForm()"
+    />
+  }
+
+  <app-item-list
+    [items]="items()"
+    [isLoading]="isLoading() && !showForm()"
+    (editClicked)="onEdit($event)"
+    (deleteClicked)="onDelete($event)"
+  />
+
+  <app-confirmation-dialog
+    [isVisible]="pendingDeleteId() !== null"
+    message="Are you sure you want to delete this item? This action cannot be undone."
+    confirmLabel="Yes, delete"
+    cancelLabel="Cancel"
+    (confirmed)="onDeleteConfirmed(pendingDeleteId()!)"
+    (cancelled)="onDeleteCancelled()"
+  />
+</section>

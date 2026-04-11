@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Mapi.API/Mapi.API.csproj" />
+    <Project Path="src/Mapi.Application/Mapi.Application.csproj" />
+    <Project Path="src/Mapi.Domain/Mapi.Domain.csproj" />
+    <Project Path="src/Mapi.Infrastructure/Mapi.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mapi.API.IntegrationTests/Mapi.API.IntegrationTests.csproj" />
+    <Project Path="tests/Mapi.Application.Tests/Mapi.Application.Tests.csproj" />
+    <Project Path="tests/Mapi.Domain.Tests/Mapi.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

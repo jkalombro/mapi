@@ -1,0 +1,59 @@
+<form class="action-link-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <h4 class="action-link-form__title">Link an Action</h4>
+
+  <div class="action-link-form__field">
+    <label for="actionId" class="action-link-form__label">Action</label>
+    <select
+      id="actionId"
+      class="action-link-form__select"
+      formControlName="actionId"
+      aria-describedby="actionId-error"
+    >
+      <option value="">— Select an action —</option>
+      @for (action of actions(); track action.id) {
+        <option [value]="action.id">{{ action.actionType }} — {{ action.responseTemplate }}</option>
+      }
+    </select>
+    @if (form.get('actionId')?.invalid && form.get('actionId')?.touched) {
+      <span id="actionId-error" class="action-link-form__error" role="alert">
+        Please select an action.
+      </span>
+    }
+  </div>
+
+  <div class="action-link-form__field">
+    <label for="sortOrder" class="action-link-form__label">Sort Order</label>
+    <input
+      id="sortOrder"
+      type="number"
+      class="action-link-form__input"
+      formControlName="sortOrder"
+      min="1"
+      aria-describedby="sortOrder-error"
+    />
+    @if (form.get('sortOrder')?.invalid && form.get('sortOrder')?.touched) {
+      <span id="sortOrder-error" class="action-link-form__error" role="alert">
+        Sort order must be at least 1.
+      </span>
+    }
+  </div>
+
+  <div class="action-link-form__actions">
+    <button
+      type="submit"
+      class="btn btn--primary"
+      [disabled]="form.invalid || isLoading()"
+      aria-label="Link action"
+    >
+      Link Action
+    </button>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="onCancel()"
+      aria-label="Cancel"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

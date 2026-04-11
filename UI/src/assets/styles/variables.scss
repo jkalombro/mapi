@@ -1,0 +1,93 @@
+// ============================================================
+// Design Tokens — Colors
+// ============================================================
+$color-primary: #1976d2;
+$color-primary-dark: #1565c0;
+$color-primary-light: #42a5f5;
+
+$color-accent: #f50057;
+$color-accent-dark: #c51162;
+
+$color-success: #4caf50;
+$color-warning: #ff9800;
+$color-danger: #f44336;
+$color-info: #2196f3;
+
+$color-background: #fafafa;
+$color-surface: #ffffff;
+$color-surface-alt: #f5f5f5;
+$color-surface-hover: #eeeeee;
+$color-border: #e0e0e0;
+
+$color-text-primary: #212121;
+$color-text-secondary: #757575;
+$color-text-disabled: #bdbdbd;
+$color-text-on-primary: #ffffff;
+
+// ============================================================
+// Design Tokens — Spacing
+// ============================================================
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// ============================================================
+// Design Tokens — Typography
+// ============================================================
+$font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-xxl: 1.5rem;
+$font-size-h1: 2rem;
+$font-size-h2: 1.75rem;
+$font-size-h3: 1.5rem;
+$font-size-h4: 1.25rem;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-base: 1.5;
+
+// ============================================================
+// Design Tokens — Layout & Breakpoints
+// ============================================================
+$breakpoint-mobile: 375px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1280px;
+
+$container-max-width: 1200px;
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 16px;
+$border-radius-full: 50%;
+
+// ============================================================
+// Design Tokens — Mic Icon (Voice UX)
+// ============================================================
+$mic-icon-size: 56px;
+$mic-icon-size-min: 48px;
+$mic-icon-z-index: 1000;
+$mic-icon-bottom: 24px;
+$mic-icon-right: 24px;
+
+// ============================================================
+// Design Tokens — Shadows
+// ============================================================
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+$shadow-md: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+$shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+
+// ============================================================
+// Design Tokens — Transitions
+// ============================================================
+$transition-fast: 150ms ease-in-out;
+$transition-base: 250ms ease-in-out;
+$transition-slow: 400ms ease-in-out;

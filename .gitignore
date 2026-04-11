@@ -14,6 +14,7 @@
 
 # Environment files
 /.env
+/UI/.env
 
 # Angular CLI and build artefacts
 /.angular-cli.json
@@ -28,3 +29,28 @@ yarn-debug.log*
 yarn-error.log*
 
 /.scaffolding/
+
+# .NET / C# build artifacts
+API/**/bin/
+API/**/obj/
+API/**/*.user
+API/**/*.suo
+API/.vs/
+
+# .NET test results
+API/**/TestResults/
+API/**/*.trx
+API/**/*.coverage
+
+# EF Core migrations lock
+API/**/*.mdf
+API/**/*.ldf
+
+# Secrets / local config overrides
+API/**/appsettings.*.json
+!API/**/appsettings.Development.json
+!API/**/appsettings.Testing.json
+
+# macOS / Windows artifacts
+.DS_Store
+Thumbs.db

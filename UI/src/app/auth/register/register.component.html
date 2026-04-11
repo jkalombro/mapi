@@ -1,0 +1,97 @@
+<div class="register-page">
+  <div class="register-card">
+    <h1 class="register-card__title">Create Account</h1>
+    <p class="register-card__subtitle">Set up your Mapi store</p>
+
+    @if (error()) {
+      <div class="error-message" role="alert">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="register-form" novalidate>
+      <div class="form-field">
+        <label for="email" class="form-field__label">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-field__input"
+          [class.form-field__input--error]="form.get('email')?.invalid && form.get('email')?.touched"
+          placeholder="you@example.com"
+          autocomplete="email"
+          aria-describedby="email-error"
+        />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span id="email-error" class="form-field__error" role="alert">
+            @if (form.get('email')?.errors?.['required']) {
+              Email is required.
+            } @else if (form.get('email')?.errors?.['email']) {
+              Please enter a valid email address.
+            }
+          </span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="storeName" class="form-field__label">Store Name</label>
+        <input
+          id="storeName"
+          type="text"
+          formControlName="storeName"
+          class="form-field__input"
+          [class.form-field__input--error]="form.get('storeName')?.invalid && form.get('storeName')?.touched"
+          placeholder="My Sari-Sari Store"
+          autocomplete="organization"
+          aria-describedby="storeName-error"
+        />
+        @if (form.get('storeName')?.invalid && form.get('storeName')?.touched) {
+          <span id="storeName-error" class="form-field__error" role="alert">
+            Store name is required.
+          </span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="password" class="form-field__label">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-field__input"
+          [class.form-field__input--error]="form.get('password')?.invalid && form.get('password')?.touched"
+          placeholder="••••••••"
+          autocomplete="new-password"
+          aria-describedby="password-error"
+        />
+        @if (form.get('password')?.invalid && form.get('password')?.touched) {
+          <span id="password-error" class="form-field__error" role="alert">
+            @if (form.get('password')?.errors?.['required']) {
+              Password is required.
+            } @else if (form.get('password')?.errors?.['minlength']) {
+              Password must be at least 8 characters.
+            } @else if (form.get('password')?.errors?.['pattern']) {
+              Password must contain at least one uppercase letter and one number.
+            }
+          </span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn--primary btn--full"
+        [disabled]="isLoading()"
+        [attr.aria-busy]="isLoading()"
+      >
+        @if (isLoading()) {
+          Creating account…
+        } @else {
+          Create Account
+        }
+      </button>
+    </form>
+
+    <p class="register-card__footer">
+      Already have an account?
+      <a routerLink="/auth/login" class="link">Sign in</a>
+    </p>
+  </div>
+</div>

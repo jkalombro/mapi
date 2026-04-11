@@ -1,0 +1,83 @@
+<div class="item-form">
+  <h2 class="item-form__title">{{ editItem() ? 'Edit Item' : 'Add Item' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="form-field">
+      <label for="itemName" class="form-field__label">Item Name</label>
+      <input
+        id="itemName"
+        type="text"
+        formControlName="itemName"
+        class="form-field__input"
+        [class.form-field__input--error]="form.get('itemName')?.invalid && form.get('itemName')?.touched"
+        placeholder="e.g. Rice"
+        aria-describedby="itemName-error"
+      />
+      @if (form.get('itemName')?.invalid && form.get('itemName')?.touched) {
+        <span id="itemName-error" class="form-field__error" role="alert">Item name is required.</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="bisayaName" class="form-field__label">Bisaya Name</label>
+      <input
+        id="bisayaName"
+        type="text"
+        formControlName="bisayaName"
+        class="form-field__input"
+        [class.form-field__input--error]="form.get('bisayaName')?.invalid && form.get('bisayaName')?.touched"
+        placeholder="e.g. Bugas"
+        aria-describedby="bisayaName-error"
+      />
+      @if (form.get('bisayaName')?.invalid && form.get('bisayaName')?.touched) {
+        <span id="bisayaName-error" class="form-field__error" role="alert">Bisaya name is required.</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="price" class="form-field__label">Price (₱)</label>
+      <input
+        id="price"
+        type="number"
+        formControlName="price"
+        class="form-field__input"
+        [class.form-field__input--error]="form.get('price')?.invalid && form.get('price')?.touched"
+        placeholder="0"
+        min="0"
+        step="0.01"
+        aria-describedby="price-error"
+      />
+      @if (form.get('price')?.invalid && form.get('price')?.touched) {
+        <span id="price-error" class="form-field__error" role="alert">
+          @if (form.get('price')?.errors?.['required']) {
+            Price is required.
+          } @else if (form.get('price')?.errors?.['min']) {
+            Price must be 0 or greater.
+          }
+        </span>
+      }
+    </div>
+
+    <div class="item-form__actions">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="onCancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="isLoading()"
+        [attr.aria-busy]="isLoading()"
+      >
+        @if (isLoading()) {
+          Saving…
+        } @else {
+          {{ editItem() ? 'Update' : 'Add' }}
+        }
+      </button>
+    </div>
+  </form>
+</div>
