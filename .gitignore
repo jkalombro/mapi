@@ -31,25 +31,25 @@ yarn-error.log*
 /.scaffolding/
 
 # .NET / C# build artifacts
-backend/**/bin/
-backend/**/obj/
-backend/**/*.user
-backend/**/*.suo
-backend/.vs/
+API/**/bin/
+API/**/obj/
+API/**/*.user
+API/**/*.suo
+API/.vs/
 
 # .NET test results
-backend/**/TestResults/
-backend/**/*.trx
-backend/**/*.coverage
+API/**/TestResults/
+API/**/*.trx
+API/**/*.coverage
 
 # EF Core migrations lock
-backend/**/*.mdf
-backend/**/*.ldf
+API/**/*.mdf
+API/**/*.ldf
 
 # Secrets / local config overrides
-backend/**/appsettings.*.json
-!backend/**/appsettings.Development.json
-!backend/**/appsettings.Testing.json
+API/**/appsettings.*.json
+!API/**/appsettings.Development.json
+!API/**/appsettings.Testing.json
 
 # macOS / Windows artifacts
 .DS_Store

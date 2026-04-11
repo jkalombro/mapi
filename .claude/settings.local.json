@@ -79,7 +79,23 @@
       "Bash(git rm:*)",
       "Bash(npm start:*)",
       "Bash(node_modules/.bin/ngc --noEmit)",
-      "Bash(timeout 60 node_modules/.bin/ng build --configuration development)"
+      "Bash(timeout 60 node_modules/.bin/ng build --configuration development)",
+      "Bash(npm list:*)",
+      "Bash(git mv:*)",
+      "Bash(powershell -Command \"Rename-Item -Path 'd:\\\\Repository\\\\mapi\\\\frontend' -NewName 'UI'\")",
+      "Bash(powershell -Command \"Get-Process node, ng -ErrorAction SilentlyContinue | Select-Object Name, Id\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Select-Object Name, Id, CPU\")",
+      "Bash(powershell -Command \"openfiles /query /fo csv 2>&1 | Select-String -Pattern 'frontend' -SimpleMatch\")",
+      "Bash(powershell -Command \"Stop-Process -Id 3672 -Force\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Select-Object Name, Id\")",
+      "Bash(powershell -Command \"Rename-Item -Path 'd:\\\\Repository\\\\mapi\\\\frontend' -NewName 'UI' -Force\")",
+      "Bash(powershell -Command ':*)",
+      "Bash(powershell -Command \"Stop-Process -Id \\(Get-Process buf5btiu0 -ErrorAction SilentlyContinue\\).Id -Force -ErrorAction SilentlyContinue\")",
+      "Bash(kill %buf5btiu0)",
+      "Bash(git -C d:/Repository/mapi status --short)",
+      "Bash(git -C d:/Repository/mapi add UI/ API/)",
+      "Bash(git -C d:/Repository/mapi add -u backend/ frontend/)",
+      "Bash(git -C d:/Repository/mapi rm -r --cached \"API/tests/Mapi.API.IntegrationTests/bin/\" \"API/tests/Mapi.API.IntegrationTests/obj/\" \"API/tests/Mapi.Application.Tests/bin/\" \"API/tests/Mapi.Application.Tests/obj/\" \"API/tests/Mapi.Domain.Tests/bin/\" \"API/tests/Mapi.Domain.Tests/obj/\")"
     ]
   }
 }
