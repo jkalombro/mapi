@@ -7,12 +7,16 @@ import { Router } from '@angular/router';
 import { AuthEffects } from './effects/auth.effects';
 import { AuthApiService } from './api/auth.service';
 import { login, loginFailure, loginSuccess, logout, register, registerFailure, registerSuccess } from './actions/auth.actions';
-import { authReducer, initialAuthState, selectToken, selectIsAuthenticated, selectAuthIsLoading, selectAuthError } from './reducers/auth.reducer';
+import { authReducer, initialAuthState, AUTH_TOKEN_KEY, selectToken, selectIsAuthenticated, selectAuthIsLoading, selectAuthError } from './reducers/auth.reducer';
 import { AuthResponse } from './models/auth.model';
+
+const CLEAN_STATE = { user: null, token: null, isLoading: false, error: null };
 
 // ── Reducer Tests ─────────────────────────────────────────────────────────────
 
 describe('authReducer', () => {
+  beforeEach(() => localStorage.clear());
+
   it('should return initial state for unknown action', () => {
     const state = authReducer(undefined, { type: '@@UNKNOWN' } as Action);
     expect(state).toEqual(initialAuthState);
@@ -39,10 +43,10 @@ describe('authReducer', () => {
     expect(state.token).toBeNull();
   });
 
-  it('should reset to initial state on logout', () => {
+  it('should reset to unauthenticated state on logout', () => {
     const authenticatedState = { ...initialAuthState, token: 'some-token', user: { email: 'a@b.com' } };
     const state = authReducer(authenticatedState, logout());
-    expect(state).toEqual(initialAuthState);
+    expect(state).toEqual(CLEAN_STATE);
   });
 });
 
@@ -84,6 +88,7 @@ describe('AuthEffects', () => {
   let routerMock: { navigate: jest.Mock };
 
   beforeEach(() => {
+    localStorage.clear();
     authServiceMock = { login: jest.fn(), register: jest.fn() } as unknown as jest.Mocked<AuthApiService>;
     routerMock = { navigate: jest.fn() };
 
@@ -146,20 +151,33 @@ describe('AuthEffects', () => {
     });
   });
 
-  it('should navigate to /items on loginSuccess', (done) => {
+  it('should navigate to /items and persist token on loginSuccess', (done) => {
     actions$ = of(loginSuccess({ response: { accessToken: 'tok', tokenType: 'Bearer' } }));
 
     effects.loginSuccess$.subscribe(() => {
       expect(routerMock.navigate).toHaveBeenCalledWith(['/items']);
+      expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBe('tok');
       done();
     });
   });
 
-  it('should navigate to /auth/login on logout', (done) => {
+  it('should navigate to /items and persist token on registerSuccess', (done) => {
+    actions$ = of(registerSuccess({ response: { accessToken: 'reg-tok', tokenType: 'Bearer' } }));
+
+    effects.loginSuccess$.subscribe(() => {
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/items']);
+      expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBe('reg-tok');
+      done();
+    });
+  });
+
+  it('should navigate to /auth/login and clear token on logout', (done) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, 'existing-token');
     actions$ = of(logout());
 
     effects.logout$.subscribe(() => {
       expect(routerMock.navigate).toHaveBeenCalledWith(['/auth/login']);
+      expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBeNull();
       done();
     });
   });

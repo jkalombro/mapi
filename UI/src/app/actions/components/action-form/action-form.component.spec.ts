@@ -68,6 +68,20 @@ describe('ActionFormComponent — Create Mode', () => {
     });
   });
 
+  it('should reset the form after a successful submit', () => {
+    const textarea: HTMLTextAreaElement = fixture.debugElement.query(By.css('[formControlName="responseTemplate"]')).nativeElement;
+    textarea.value = 'Valid response template';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const submitBtn = fixture.debugElement.query(By.css('[type="submit"]'));
+    submitBtn.nativeElement.click();
+    fixture.detectChanges();
+
+    expect(component.form.get('responseTemplate')?.value).toBe('');
+    expect(component.form.get('actionType')?.value).toBe('Query');
+  });
+
   it('should emit cancelled on cancel click', () => {
     const cancelledSpy = jest.fn();
     component.cancelled.subscribe(cancelledSpy);

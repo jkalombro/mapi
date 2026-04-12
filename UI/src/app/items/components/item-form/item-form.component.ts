@@ -45,6 +45,7 @@ export class ItemFormComponent implements OnInit, OnChanges {
       return;
     }
     this.saved.emit(this.form.value as ItemRequest);
+    this.form.reset();
   }
 
   onCancel(): void {

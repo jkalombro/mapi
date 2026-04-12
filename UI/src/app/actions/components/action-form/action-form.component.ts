@@ -82,6 +82,8 @@ export class ActionFormComponent implements OnInit, OnChanges {
       };
       this.saved.emit(request);
     }
+
+    this.form.reset({ actionType: 'Query', responseTemplate: '' });
   }
 
   onCancel(): void {

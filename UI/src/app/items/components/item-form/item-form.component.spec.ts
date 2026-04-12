@@ -87,6 +87,15 @@ describe('ItemFormComponent', () => {
     expect(savedSpy).toHaveBeenCalledWith(expected);
   });
 
+  it('should reset the form after a successful submit', () => {
+    component.form.setValue({ itemName: 'Salt', bisayaName: 'Asin', price: 10 });
+    component.onSubmit();
+
+    expect(component.form.get('itemName')?.value).toBeNull();
+    expect(component.form.get('bisayaName')?.value).toBeNull();
+    expect(component.form.get('price')?.value).toBeNull();
+  });
+
   it('should not emit if form is invalid', () => {
     const savedSpy = jest.fn();
     component.saved.subscribe(savedSpy);
