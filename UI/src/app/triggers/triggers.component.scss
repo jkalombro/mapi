@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../assets/styles/variables' as *;
 @use '../../assets/styles/mixins' as *;
 
@@ -155,7 +156,7 @@
     border: 1px solid $color-danger;
 
     &:hover:not(:disabled) {
-      background-color: lighten($color-danger, 40%);
+      background-color: color.adjust($color-danger, $lightness: 40%);
     }
   }
 }

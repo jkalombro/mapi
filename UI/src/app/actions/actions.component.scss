@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../assets/styles/variables' as *;
 @use '../../assets/styles/mixins' as *;
 
@@ -31,7 +32,7 @@
 
   &__error {
     padding: $spacing-md;
-    background-color: lighten($color-danger, 40%);
+    background-color: color.adjust($color-danger, $lightness: 40%);
     border: 1px solid $color-danger;
     border-radius: $border-radius-sm;
     color: $color-danger;
@@ -154,7 +155,7 @@
     color: $color-text-on-primary;
 
     &:hover:not(:disabled) {
-      background-color: darken($color-danger, 10%);
+      background-color: color.adjust($color-danger, $lightness: -10%);
     }
   }
 

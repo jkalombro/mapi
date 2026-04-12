@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../../../assets/styles/variables' as *;
 @use '../../../../assets/styles/mixins' as *;
 
@@ -78,7 +79,7 @@
       color: $color-text-on-primary;
 
       &:hover {
-        background-color: darken($color-info, 10%);
+        background-color: color.adjust($color-info, $lightness: -10%);
       }
     }
 
@@ -87,7 +88,7 @@
       color: $color-text-on-primary;
 
       &:hover {
-        background-color: darken($color-danger, 10%);
+        background-color: color.adjust($color-danger, $lightness: -10%);
       }
     }
   }
@@ -111,7 +112,7 @@
     background: linear-gradient(
       90deg,
       $color-border 25%,
-      lighten($color-border, 10%) 50%,
+      color.adjust($color-border, $lightness: 10%) 50%,
       $color-border 75%
     );
     background-size: 200% 100%;
