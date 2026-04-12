@@ -1,9 +1,11 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Mapi.API.Endpoints;
 using Mapi.API.Middleware;
 using Mapi.Application;
 using Mapi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -22,6 +24,9 @@ try
         .ReadFrom.Configuration(ctx.Configuration)
         .Enrich.FromLogContext()
         .WriteTo.Console());
+
+    builder.Services.Configure<JsonOptions>(options =>
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
@@ -46,7 +51,9 @@ try
 
     builder.Services.AddAuthorization();
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddCors(options =>
     {

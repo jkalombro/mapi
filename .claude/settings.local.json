@@ -114,7 +114,8 @@
       "Bash(powershell.exe -Command \"Get-Content 'D:\\\\Repository\\\\mapi\\\\UI\\\\node_modules\\\\jest-preset-angular\\\\package.json' | Out-String\")",
       "Bash(powershell.exe -Command \"& { cd 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest --version }\")",
       "Bash(powershell.exe -Command \"& { cd 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest 'src/app/shared/components/confirmation-dialog' --no-coverage 2>&1 }\")",
-      "Bash(grep -vE \"^\\\\s*$|Test Suites|Tests:|Snapshots|Time:\")"
+      "Bash(grep -vE \"^\\\\s*$|Test Suites|Tests:|Snapshots|Time:\")",
+      "Bash(dotnet list:*)"
     ]
   }
 }

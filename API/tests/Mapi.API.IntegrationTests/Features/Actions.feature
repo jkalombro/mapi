@@ -39,6 +39,18 @@ Feature: Action Management
     And the action response should contain template "{name} costs {price}"
     And the response should have a Location header
 
+  Scenario Outline: Create action accepts all ActionType string values
+    When I create an action with type "<actionType>" and template "Item {name} has been <actionWord>"
+    Then the response status should be 201
+    And the action response should have action type "<actionType>"
+
+    Examples:
+      | actionType | actionWord |
+      | Query      | queried    |
+      | Add        | added      |
+      | Update     | updated    |
+      | Remove     | removed    |
+
   Scenario: Create action with empty ResponseTemplate returns 400
     When I try to create an action with type "Query" and empty template
     Then the response status should be 400

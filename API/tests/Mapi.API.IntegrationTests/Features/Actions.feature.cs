@@ -116,7 +116,7 @@ namespace Mapi.API.IntegrationTests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Actions.feature.ndjson", 14);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Actions.feature.ndjson", 18);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -310,15 +310,21 @@ namespace Mapi.API.IntegrationTests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create action with empty ResponseTemplate returns 400")]
+        [global::Xunit.SkippableTheoryAttribute(DisplayName="Create action accepts all ActionType string values")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Create action with empty ResponseTemplate returns 400")]
-        public async global::System.Threading.Tasks.Task CreateActionWithEmptyResponseTemplateReturns400()
+        [global::Xunit.TraitAttribute("Description", "Create action accepts all ActionType string values")]
+        [global::Xunit.InlineDataAttribute("Query", "queried", "4", new string[0])]
+        [global::Xunit.InlineDataAttribute("Add", "added", "5", new string[0])]
+        [global::Xunit.InlineDataAttribute("Update", "updated", "6", new string[0])]
+        [global::Xunit.InlineDataAttribute("Remove", "removed", "7", new string[0])]
+        public async global::System.Threading.Tasks.Task CreateActionAcceptsAllActionTypeStringValues(string actionType, string actionWord, string @__pickleIndex, string[] exampleTags)
         {
-            string[] tagsOfScenario = ((string[])(null));
+            string[] tagsOfScenario = exampleTags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create action with empty ResponseTemplate returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            argumentsOfScenario.Add("actionType", actionType);
+            argumentsOfScenario.Add("actionWord", actionWord);
+            string pickleIndex = @__pickleIndex;
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create action accepts all ActionType string values", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 42
@@ -335,58 +341,27 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 43
-    await testRunner.WhenAsync("I try to create an action with type \"Query\" and empty template", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync(string.Format("I create an action with type \"{0}\" and template \"Item {{name}} has been {1}\"", actionType, actionWord), ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 44
-    await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the response status should be 201", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 45
+    await testRunner.AndAsync(string.Format("the action response should have action type \"{0}\"", actionType), ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create action with ResponseTemplate over 500 characters returns 400")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create action with empty ResponseTemplate returns 400")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Create action with ResponseTemplate over 500 characters returns 400")]
-        public async global::System.Threading.Tasks.Task CreateActionWithResponseTemplateOver500CharactersReturns400()
+        [global::Xunit.TraitAttribute("Description", "Create action with empty ResponseTemplate returns 400")]
+        public async global::System.Threading.Tasks.Task CreateActionWithEmptyResponseTemplateReturns400()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create action with ResponseTemplate over 500 characters returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 46
-  this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 6
-  await this.FeatureBackgroundAsync();
-#line hidden
-#line 47
-    await testRunner.WhenAsync("I try to create an action with type \"Query\" and template over 500 chars", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 48
-    await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update action ResponseTemplate returns 200 with ActionType unchanged")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Update action ResponseTemplate returns 200 with ActionType unchanged")]
-        public async global::System.Threading.Tasks.Task UpdateActionResponseTemplateReturns200WithActionTypeUnchanged()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "6";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action ResponseTemplate returns 200 with ActionType unchanged", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create action with empty ResponseTemplate returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 54
@@ -403,36 +378,27 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 55
-    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Original template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.WhenAsync("I try to create an action with type \"Query\" and empty template", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 56
-    await testRunner.WhenAsync("I update the action response template to \"Updated template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 57
-    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 58
-    await testRunner.AndAsync("the action response should contain template \"Updated template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 59
-    await testRunner.AndAsync("the action response should have action type \"Query\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update action with empty ResponseTemplate returns 400")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create action with ResponseTemplate over 500 characters returns 400")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Update action with empty ResponseTemplate returns 400")]
-        public async global::System.Threading.Tasks.Task UpdateActionWithEmptyResponseTemplateReturns400()
+        [global::Xunit.TraitAttribute("Description", "Create action with ResponseTemplate over 500 characters returns 400")]
+        public async global::System.Threading.Tasks.Task CreateActionWithResponseTemplateOver500CharactersReturns400()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "7";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action with empty ResponseTemplate returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create action with ResponseTemplate over 500 characters returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 61
+#line 58
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -445,28 +411,25 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 62
-    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Original template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 59
+    await testRunner.WhenAsync("I try to create an action with type \"Query\" and template over 500 chars", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 63
-    await testRunner.WhenAsync("I try to update the action with empty response template", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 64
+#line 60
     await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Update action with unknown id returns 404")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update action ResponseTemplate returns 200 with ActionType unchanged")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Update action with unknown id returns 404")]
-        public async global::System.Threading.Tasks.Task UpdateActionWithUnknownIdReturns404()
+        [global::Xunit.TraitAttribute("Description", "Update action ResponseTemplate returns 200 with ActionType unchanged")]
+        public async global::System.Threading.Tasks.Task UpdateActionResponseTemplateReturns200WithActionTypeUnchanged()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "8";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action with unknown id returns 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action ResponseTemplate returns 200 with ActionType unchanged", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 66
@@ -483,9 +446,89 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 67
-    await testRunner.WhenAsync("I try to update a non-existent action with template \"Some template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Original template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 68
+    await testRunner.WhenAsync("I update the action response template to \"Updated template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 69
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 70
+    await testRunner.AndAsync("the action response should contain template \"Updated template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 71
+    await testRunner.AndAsync("the action response should have action type \"Query\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update action with empty ResponseTemplate returns 400")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
+        [global::Xunit.TraitAttribute("Description", "Update action with empty ResponseTemplate returns 400")]
+        public async global::System.Threading.Tasks.Task UpdateActionWithEmptyResponseTemplateReturns400()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "11";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action with empty ResponseTemplate returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 73
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 74
+    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Original template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 75
+    await testRunner.WhenAsync("I try to update the action with empty response template", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 76
+    await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update action with unknown id returns 404")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
+        [global::Xunit.TraitAttribute("Description", "Update action with unknown id returns 404")]
+        public async global::System.Threading.Tasks.Task UpdateActionWithUnknownIdReturns404()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "12";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update action with unknown id returns 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 78
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 79
+    await testRunner.WhenAsync("I try to update a non-existent action with template \"Some template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 80
     await testRunner.ThenAsync("the response status should be 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -499,88 +542,8 @@ namespace Mapi.API.IntegrationTests.Features
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "9";
+            string pickleIndex = "13";
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete unlinked action returns 204", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 74
-  this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 6
-  await this.FeatureBackgroundAsync();
-#line hidden
-#line 75
-    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Deletable template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 76
-    await testRunner.WhenAsync("I delete the action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 77
-    await testRunner.ThenAsync("the response status should be 204", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.SkippableFactAttribute(DisplayName="Delete linked action returns 409 Conflict")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Delete linked action returns 409 Conflict")]
-        public async global::System.Threading.Tasks.Task DeleteLinkedActionReturns409Conflict()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "10";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete linked action returns 409 Conflict", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 79
-  this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 6
-  await this.FeatureBackgroundAsync();
-#line hidden
-#line 80
-    await testRunner.GivenAsync("I have a trigger with phrase \"Ask about price\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 81
-    await testRunner.AndAsync("I have an action with type \"Query\" and template \"{name} costs {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 82
-    await testRunner.AndAsync("the action is linked to the trigger", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 83
-    await testRunner.WhenAsync("I try to delete the action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 84
-    await testRunner.ThenAsync("the response status should be 409", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.SkippableFactAttribute(DisplayName="Delete non-existent action returns 404")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Delete non-existent action returns 404")]
-        public async global::System.Threading.Tasks.Task DeleteNon_ExistentActionReturns404()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "11";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete non-existent action returns 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 86
@@ -597,9 +560,89 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 87
-    await testRunner.WhenAsync("I try to delete a non-existent action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("I have an action with type \"Query\" and template \"Deletable template\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 88
+    await testRunner.WhenAsync("I delete the action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 89
+    await testRunner.ThenAsync("the response status should be 204", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Delete linked action returns 409 Conflict")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
+        [global::Xunit.TraitAttribute("Description", "Delete linked action returns 409 Conflict")]
+        public async global::System.Threading.Tasks.Task DeleteLinkedActionReturns409Conflict()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "14";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete linked action returns 409 Conflict", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 91
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 92
+    await testRunner.GivenAsync("I have a trigger with phrase \"Ask about price\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 93
+    await testRunner.AndAsync("I have an action with type \"Query\" and template \"{name} costs {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 94
+    await testRunner.AndAsync("the action is linked to the trigger", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 95
+    await testRunner.WhenAsync("I try to delete the action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 96
+    await testRunner.ThenAsync("the response status should be 409", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Delete non-existent action returns 404")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Action Management")]
+        [global::Xunit.TraitAttribute("Description", "Delete non-existent action returns 404")]
+        public async global::System.Threading.Tasks.Task DeleteNon_ExistentActionReturns404()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "15";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete non-existent action returns 404", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 98
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 99
+    await testRunner.WhenAsync("I try to delete a non-existent action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 100
     await testRunner.ThenAsync("the response status should be 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
