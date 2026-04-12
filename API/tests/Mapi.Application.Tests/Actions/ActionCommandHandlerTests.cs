@@ -61,11 +61,11 @@ public class ActionCommandHandlerTests
 
         // Act
         var result = await _updateHandler.Handle(
-            new UpdateActionCommand(actionId, ActionType.Add, "New template"),
+            new UpdateActionCommand(actionId, "New template"),
             CancellationToken.None);
 
         // Assert
-        Assert.Equal(ActionType.Add, result.ActionType);
+        Assert.Equal(ActionType.Query, result.ActionType);
         Assert.Equal("New template", result.ResponseTemplate);
         _actionRepositoryMock.Verify(r => r.UpdateAsync(existing, It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -81,7 +81,7 @@ public class ActionCommandHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            _updateHandler.Handle(new UpdateActionCommand(actionId, ActionType.Query, "template"), CancellationToken.None));
+            _updateHandler.Handle(new UpdateActionCommand(actionId, "template"), CancellationToken.None));
     }
 
     [Fact]

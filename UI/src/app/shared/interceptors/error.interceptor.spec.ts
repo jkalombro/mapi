@@ -64,4 +64,5 @@ describe('errorInterceptor', () => {
     const req = httpMock.expectOne('/api/test');
     req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
   });
+
 });

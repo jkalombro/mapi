@@ -115,6 +115,24 @@ describe('ItemFormComponent', () => {
     expect(title.nativeElement.textContent.trim()).toBe('Add Item');
   });
 
+  it('should clear form fields when editItem changes to null via ngOnChanges', () => {
+    fixture.componentRef.setInput('editItem', MOCK_ITEM);
+    fixture.detectChanges();
+
+    component.ngOnChanges({
+      editItem: {
+        currentValue: null,
+        previousValue: MOCK_ITEM,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+
+    expect(component.form.get('itemName')?.value).toBe('');
+    expect(component.form.get('bisayaName')?.value).toBe('');
+    expect(component.form.get('price')?.value).toBeNull();
+  });
+
   it('should show loading state on submit button when isLoading', () => {
     fixture.componentRef.setInput('isLoading', true);
     fixture.detectChanges();

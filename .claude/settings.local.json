@@ -99,7 +99,22 @@
       "Bash(git -C d:/Repository/mapi log --all --oneline -- \"UI/.env\")",
       "Bash(git -C d:/Repository/mapi ls-files \"UI/.env\")",
       "Bash(git -C d:/Repository/mapi check-ignore -v \"UI/.env\")",
-      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('\\\\n'.join\\(f'{k}: {v}' for k in ['@angular/core','@ngrx/store','@ngx-env/builder','typescript'] if k in deps for v in [deps[k]]\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\), **p.get\\('devDependencies',{}\\)}; print\\('\\\\n'.join\\(f'{k}: {v}' for k in ['@angular/core','@ngrx/store','@ngx-env/builder','typescript'] if k in deps for v in [deps[k]]\\)\\)\")",
+      "Bash(powershell.exe -File \".specify/scripts/powershell/create-new-feature.ps1\" \"I want to address what's missing here. Which is the ability to add actions. What exists: ActionsApiService only has getAll\\(\\), no create/update/delete. action-link-form component for linking an existing action to a trigger \\(T131, done\\). The triggers page links/unlinks actions, but there is no page to manage actions themselves \\(create, edit, delete\\). What is missing: T125 ActionsEndpoints on the backend \\(GET/POST/PUT/DELETE\\) not done. T122 Action CRUD commands/handlers/validators on the backend not done. A frontend Actions management page \\(list, create, edit, delete actions\\). The backend tasks for Action CRUD \\(T122, T125\\) are still incomplete.\" -Json -ShortName \"action-crud\" \"Action CRUD Management\")",
+      "Bash(powershell.exe -File \"d:/Repository/mapi/.specify/scripts/powershell/update-agent-context.ps1\" -AgentType claude)",
+      "Bash(powershell.exe -File .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks)",
+      "Bash(powershell.exe -Command \"Set-Location 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest --testPathPatterns='action-form|actions.component|actions.reducer|modal.component' --no-coverage 2>&1\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('exports', {}\\).get\\('./setup-jest', 'NOT FOUND'\\)\\); print\\(d.get\\('main', 'no main'\\)\\)\")",
+      "Bash(node -e \"const p=require\\('/d/Repository/mapi/UI/node_modules/jest-preset-angular/package.json'\\); console.log\\(JSON.stringify\\(Object.keys\\(p.exports||{}\\),null,2\\)\\); console.log\\('version:', p.version\\)\")",
+      "Bash(node -e \"const p=require\\('D:\\\\\\\\\\\\\\\\Repository\\\\\\\\\\\\\\\\mapi\\\\\\\\\\\\\\\\UI\\\\\\\\\\\\\\\\node_modules\\\\\\\\\\\\\\\\jest-preset-angular\\\\\\\\\\\\\\\\package.json'\\); console.log\\('version:', p.version\\); const ex=p.exports||{}; const k=Object.keys\\(ex\\); console.log\\(k.slice\\(0,10\\)\\)\")",
+      "Bash(powershell.exe -Command \"Get-Content 'D:\\\\Repository\\\\mapi\\\\UI\\\\node_modules\\\\jest-preset-angular\\\\package.json' | Select-String 'setup-jest|version' | Select-Object -First 10\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'D:\\\\Repository\\\\mapi\\\\UI\\\\node_modules\\\\jest-preset-angular' -Recurse -Name | Select-String 'setup'\")",
+      "Bash(powershell.exe -Command \"Get-Content 'D:\\\\Repository\\\\mapi\\\\UI\\\\node_modules\\\\jest-preset-angular\\\\package.json'\")",
+      "Bash(Select-String '\"exports\"' -Context 0,30)",
+      "Bash(powershell.exe -Command \"Get-Content 'D:\\\\Repository\\\\mapi\\\\UI\\\\node_modules\\\\jest-preset-angular\\\\package.json' | Out-String\")",
+      "Bash(powershell.exe -Command \"& { cd 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest --version }\")",
+      "Bash(powershell.exe -Command \"& { cd 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest 'src/app/shared/components/confirmation-dialog' --no-coverage 2>&1 }\")",
+      "Bash(grep -vE \"^\\\\s*$|Test Suites|Tests:|Snapshots|Time:\")"
     ]
   }
 }

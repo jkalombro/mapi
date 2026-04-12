@@ -17,6 +17,10 @@ export interface TriggerRequest {
   phrase: string;
 }
 
+export interface UpdateTriggerRequest {
+  phrase: string;
+}
+
 export interface ActionLinkRequest {
   actionId: string;
   sortOrder: number;
@@ -26,4 +30,5 @@ export interface TriggersState {
   triggers: Trigger[];
   isLoading: boolean;
   error: string | null;
+  selectedTrigger: Trigger | null;
 }

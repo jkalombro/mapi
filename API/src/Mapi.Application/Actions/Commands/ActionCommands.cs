@@ -8,7 +8,7 @@ using MediatR;
 namespace Mapi.Application.Actions.Commands;
 
 public record CreateActionCommand(ActionType ActionType, string ResponseTemplate) : IRequest<ActionResponse>;
-public record UpdateActionCommand(Guid Id, ActionType ActionType, string ResponseTemplate) : IRequest<ActionResponse>;
+public record UpdateActionCommand(Guid Id, string ResponseTemplate) : IRequest<ActionResponse>;
 public record DeleteActionCommand(Guid Id) : IRequest;
 
 public class CreateActionCommandHandler : IRequestHandler<CreateActionCommand, ActionResponse>
@@ -54,7 +54,6 @@ public class UpdateActionCommandHandler : IRequestHandler<UpdateActionCommand, A
             throw new NotFoundException("Action", request.Id);
         }
 
-        action.ActionType = request.ActionType;
         action.ResponseTemplate = request.ResponseTemplate;
 
         await _actionRepository.UpdateAsync(action, cancellationToken);

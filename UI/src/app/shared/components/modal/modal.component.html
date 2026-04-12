@@ -1,0 +1,26 @@
+@if (isVisible()) {
+  <div class="modal-overlay" (click)="onBackdropClick()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      (click)="onDialogClick($event)"
+    >
+      <header class="modal__header">
+        <h2 id="modal-title" class="modal__title">{{ title() }}</h2>
+        <button
+          type="button"
+          class="modal__close"
+          aria-label="Close modal"
+          (click)="onCloseClick()"
+        >
+          &times;
+        </button>
+      </header>
+      <div class="modal__body">
+        <ng-content />
+      </div>
+    </div>
+  </div>
+}

@@ -19,6 +19,11 @@ export const appRoutes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'actions',
+    loadChildren: () => import('./actions/actions.routes').then((m) => m.actionsRoutes),
+    canActivate: [authGuard],
+  },
+  {
     path: 'triggers',
     loadChildren: () => import('./triggers/triggers.routes').then((m) => m.triggersRoutes),
     canActivate: [authGuard],

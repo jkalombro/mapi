@@ -1,37 +1,51 @@
 <section class="items">
   <div class="items__header">
     <h1 class="items__title">Items</h1>
-    @if (!showForm()) {
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="onAddClick()"
-        aria-label="Add new item"
-      >
-        + Add Item
-      </button>
-    }
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="onAddClick()"
+      aria-label="Add new item"
+    >
+      + Add Item
+    </button>
   </div>
 
   @if (error()) {
     <div class="items__error" role="alert">{{ error() }}</div>
   }
 
-  @if (showForm()) {
-    <app-item-form
-      [editItem]="selectedItem()"
-      [isLoading]="isLoading()"
-      (saved)="onSave($event)"
-      (cancelled)="onCancelForm()"
-    />
-  }
-
   <app-item-list
     [items]="items()"
-    [isLoading]="isLoading() && !showForm()"
+    [isLoading]="isLoading()"
     (editClicked)="onEdit($event)"
     (deleteClicked)="onDelete($event)"
   />
+
+  <app-modal
+    [isVisible]="showCreateModal()"
+    title="Add Item"
+    (closed)="onCreateCancel()"
+  >
+    <app-item-form
+      [isLoading]="isLoading()"
+      (saved)="onCreateSave($event)"
+      (cancelled)="onCreateCancel()"
+    />
+  </app-modal>
+
+  <app-modal
+    [isVisible]="showEditModal()"
+    title="Edit Item"
+    (closed)="onEditCancel()"
+  >
+    <app-item-form
+      [editItem]="selectedItem()"
+      [isLoading]="isLoading()"
+      (saved)="onEditSave($event)"
+      (cancelled)="onEditCancel()"
+    />
+  </app-modal>
 
   <app-confirmation-dialog
     [isVisible]="pendingDeleteId() !== null"

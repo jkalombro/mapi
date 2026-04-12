@@ -163,4 +163,15 @@ describe('AuthEffects', () => {
       done();
     });
   });
+
+  it('should dispatch loginFailure with fallback message for non-Error', (done) => {
+    authServiceMock.login.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(login({ request: { email: 'a@b.com', password: 'pw' } }));
+
+    effects.login$.subscribe((action) => {
+      expect(action).toEqual(loginFailure({ error: 'An unexpected error occurred. Please try again.' }));
+      done();
+    });
+  });
 });

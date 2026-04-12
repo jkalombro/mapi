@@ -1,0 +1,73 @@
+@use '../../../../../assets/styles/variables' as *;
+@use '../../../../../assets/styles/mixins' as *;
+
+.action-form {
+  @include flex-column;
+  gap: $spacing-lg;
+
+  &__actions {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: flex-end;
+
+    @include mobile {
+      flex-direction: column-reverse;
+    }
+
+    @include tablet {
+      flex-direction: row;
+    }
+  }
+}
+
+.form-field {
+  @include flex-column;
+  gap: $spacing-xs;
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+  }
+
+  &__select,
+  &__textarea {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    font-family: $font-family-base;
+    color: $color-text-primary;
+    background-color: $color-surface;
+    transition: border-color $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+
+    &:focus-visible {
+      @include focus-visible;
+    }
+
+    &--error {
+      border-color: $color-danger;
+    }
+
+    &:disabled {
+      background-color: $color-surface-alt;
+      color: $color-text-disabled;
+      cursor: not-allowed;
+    }
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  &__error {
+    font-size: $font-size-sm;
+    color: $color-danger;
+  }
+}

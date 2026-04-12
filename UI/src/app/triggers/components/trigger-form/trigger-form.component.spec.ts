@@ -2,9 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { TriggerFormComponent } from './trigger-form.component';
-import { TriggerRequest } from '../../store/models/trigger.model';
+import { Trigger, TriggerRequest } from '../../store/models/trigger.model';
 
-describe('TriggerFormComponent', () => {
+const mockTrigger: Trigger = {
+  id: '1',
+  phrase: "What's the price of",
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+  actions: [],
+};
+
+describe('TriggerFormComponent — Create Mode (editTrigger = null)', () => {
   let component: TriggerFormComponent;
   let fixture: ComponentFixture<TriggerFormComponent>;
 
@@ -22,7 +30,7 @@ describe('TriggerFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with an empty phrase field', () => {
+  it('should initialize with an empty phrase field when editTrigger is null', () => {
     expect(component.form.get('phrase')?.value).toBe('');
   });
 
@@ -89,5 +97,51 @@ describe('TriggerFormComponent', () => {
     fixture.detectChanges();
     const submitBtn = fixture.debugElement.query(By.css('button[type="submit"]'));
     expect(submitBtn.nativeElement.disabled).toBe(false);
+  });
+});
+
+describe('TriggerFormComponent — Edit Mode (editTrigger is non-null)', () => {
+  let component: TriggerFormComponent;
+  let fixture: ComponentFixture<TriggerFormComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TriggerFormComponent, ReactiveFormsModule],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TriggerFormComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('editTrigger', mockTrigger);
+    fixture.detectChanges();
+  });
+
+  it('should pre-fill phrase from editTrigger', () => {
+    expect(component.form.get('phrase')?.value).toBe("What's the price of");
+  });
+
+  it('should be valid when editTrigger phrase is pre-filled', () => {
+    expect(component.form.valid).toBe(true);
+  });
+
+  it('should emit saved with the updated phrase on submit', () => {
+    const savedSpy = jest.fn();
+    component.saved.subscribe(savedSpy);
+
+    component.form.patchValue({ phrase: 'Updated phrase' });
+    component.onSubmit();
+
+    expect(savedSpy).toHaveBeenCalledWith({ phrase: 'Updated phrase' });
+  });
+
+  it('should clear phrase when editTrigger changes to null via ngOnChanges', () => {
+    component.ngOnChanges({
+      editTrigger: {
+        currentValue: null,
+        previousValue: mockTrigger,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+    expect(component.form.get('phrase')?.value).toBe('');
   });
 });

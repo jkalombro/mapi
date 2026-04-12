@@ -10,9 +10,11 @@ import {
   deleteTrigger, deleteTriggerFailure, deleteTriggerSuccess,
   linkAction, linkActionFailure, linkActionSuccess,
   loadTriggers, loadTriggersFailure, loadTriggersSuccess,
+  selectTrigger,
   unlinkAction, unlinkActionFailure, unlinkActionSuccess,
+  updateTrigger, updateTriggerFailure, updateTriggerSuccess,
 } from './actions/triggers.actions';
-import { initialTriggersState, triggersReducer, selectAllTriggers, selectTriggersIsLoading } from './reducers/triggers.reducer';
+import { initialTriggersState, triggersReducer, selectAllTriggers, selectTriggersIsLoading, selectTriggersError, selectSelectedTrigger } from './reducers/triggers.reducer';
 import { Trigger } from './models/trigger.model';
 
 const mockTrigger: Trigger = {
@@ -20,6 +22,14 @@ const mockTrigger: Trigger = {
   phrase: "What's the price of",
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
+  actions: [],
+};
+
+const mockTrigger2: Trigger = {
+  id: '2',
+  phrase: 'How much is',
+  createdAt: '2024-01-02T00:00:00Z',
+  updatedAt: '2024-01-02T00:00:00Z',
   actions: [],
 };
 
@@ -47,6 +57,27 @@ describe('triggersReducer', () => {
     expect(state.triggers).toContain(mockTrigger);
   });
 
+  it('should replace trigger on updateTriggerSuccess', () => {
+    const updatedTrigger: Trigger = { ...mockTrigger, phrase: 'Updated phrase' };
+    const withTrigger = { ...initialTriggersState, triggers: [mockTrigger, mockTrigger2] };
+    const state = triggersReducer(withTrigger, updateTriggerSuccess({ trigger: updatedTrigger }));
+    expect(state.triggers).toHaveLength(2);
+    expect(state.triggers.find((t) => t.id === '1')?.phrase).toBe('Updated phrase');
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('should clear selectedTrigger on updateTriggerSuccess', () => {
+    const withSelected = { ...initialTriggersState, triggers: [mockTrigger], selectedTrigger: mockTrigger };
+    const state = triggersReducer(withSelected, updateTriggerSuccess({ trigger: mockTrigger }));
+    expect(state.selectedTrigger).toBeNull();
+  });
+
+  it('should set error on updateTriggerFailure', () => {
+    const state = triggersReducer(initialTriggersState, updateTriggerFailure({ error: 'Update failed' }));
+    expect(state.error).toBe('Update failed');
+    expect(state.isLoading).toBe(false);
+  });
+
   it('should remove trigger on deleteTriggerSuccess', () => {
     const withTriggers = { ...initialTriggersState, triggers: [mockTrigger] };
     const state = triggersReducer(withTriggers, deleteTriggerSuccess({ id: '1' }));
@@ -56,6 +87,35 @@ describe('triggersReducer', () => {
   it('should set error on loadTriggersFailure', () => {
     const state = triggersReducer(initialTriggersState, loadTriggersFailure({ error: 'Error' }));
     expect(state.error).toBe('Error');
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('selectTrigger: should set selectedTrigger', () => {
+    const state = triggersReducer(initialTriggersState, selectTrigger({ trigger: mockTrigger }));
+    expect(state.selectedTrigger).toEqual(mockTrigger);
+  });
+
+  it('selectTrigger with null: should clear selectedTrigger', () => {
+    const withSelected = { ...initialTriggersState, selectedTrigger: mockTrigger };
+    const state = triggersReducer(withSelected, selectTrigger({ trigger: null }));
+    expect(state.selectedTrigger).toBeNull();
+  });
+
+  it('should set isLoading=false on linkActionSuccess', () => {
+    const loading = { ...initialTriggersState, isLoading: true };
+    const state = triggersReducer(loading, linkActionSuccess());
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('should set isLoading=false on unlinkActionSuccess', () => {
+    const loading = { ...initialTriggersState, isLoading: true };
+    const state = triggersReducer(loading, unlinkActionSuccess());
+    expect(state.isLoading).toBe(false);
+  });
+
+  it('should set error on deleteTriggerFailure', () => {
+    const state = triggersReducer(initialTriggersState, deleteTriggerFailure({ error: 'Delete failed' }));
+    expect(state.error).toBe('Delete failed');
     expect(state.isLoading).toBe(false);
   });
 });
@@ -72,6 +132,16 @@ describe('triggers selectors', () => {
     const state = { triggers: { ...initialTriggersState, isLoading: true } };
     expect(selectTriggersIsLoading(state)).toBe(true);
   });
+
+  it('selectSelectedTrigger should return selectedTrigger', () => {
+    const state = { triggers: { ...initialTriggersState, selectedTrigger: mockTrigger } };
+    expect(selectSelectedTrigger(state)).toEqual(mockTrigger);
+  });
+
+  it('selectTriggersError should return the error', () => {
+    const state = { triggers: { ...initialTriggersState, error: 'Something failed' } };
+    expect(selectTriggersError(state)).toBe('Something failed');
+  });
 });
 
 // ── Effects Tests ─────────────────────────────────────────────────────────────
@@ -85,6 +155,7 @@ describe('TriggersEffects', () => {
     triggersServiceMock = {
       getAll: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
       linkAction: jest.fn(),
       unlinkAction: jest.fn(),
@@ -104,9 +175,7 @@ describe('TriggersEffects', () => {
 
   it('should dispatch loadTriggersSuccess on successful load', (done) => {
     triggersServiceMock.getAll.mockReturnValue(of([mockTrigger]));
-
     actions$ = of(loadTriggers());
-
     effects.loadTriggers$.subscribe((action) => {
       expect(action).toEqual(loadTriggersSuccess({ triggers: [mockTrigger] }));
       done();
@@ -115,9 +184,7 @@ describe('TriggersEffects', () => {
 
   it('should dispatch loadTriggersFailure on error', (done) => {
     triggersServiceMock.getAll.mockReturnValue(throwError(() => new Error('Network error')));
-
     actions$ = of(loadTriggers());
-
     effects.loadTriggers$.subscribe((action) => {
       expect(action).toEqual(loadTriggersFailure({ error: 'Network error' }));
       done();
@@ -126,20 +193,44 @@ describe('TriggersEffects', () => {
 
   it('should dispatch createTriggerSuccess on successful create', (done) => {
     triggersServiceMock.create.mockReturnValue(of(mockTrigger));
-
     actions$ = of(createTrigger({ request: { phrase: "What's the price of" } }));
-
     effects.createTrigger$.subscribe((action) => {
       expect(action).toEqual(createTriggerSuccess({ trigger: mockTrigger }));
       done();
     });
   });
 
+  it('should dispatch createTriggerFailure on create error', (done) => {
+    triggersServiceMock.create.mockReturnValue(throwError(() => new Error('Server error')));
+    actions$ = of(createTrigger({ request: { phrase: 'test' } }));
+    effects.createTrigger$.subscribe((action) => {
+      expect(action).toEqual(createTriggerFailure({ error: 'Server error' }));
+      done();
+    });
+  });
+
+  it('should dispatch updateTriggerSuccess on successful update', (done) => {
+    const updatedTrigger: Trigger = { ...mockTrigger, phrase: 'Updated phrase' };
+    triggersServiceMock.update.mockReturnValue(of(updatedTrigger));
+    actions$ = of(updateTrigger({ id: '1', request: { phrase: 'Updated phrase' } }));
+    effects.updateTrigger$.subscribe((action) => {
+      expect(action).toEqual(updateTriggerSuccess({ trigger: updatedTrigger }));
+      done();
+    });
+  });
+
+  it('should dispatch updateTriggerFailure on update error', (done) => {
+    triggersServiceMock.update.mockReturnValue(throwError(() => new Error('Not found')));
+    actions$ = of(updateTrigger({ id: 'bad-id', request: { phrase: 'phrase' } }));
+    effects.updateTrigger$.subscribe((action) => {
+      expect(action).toEqual(updateTriggerFailure({ error: 'Not found' }));
+      done();
+    });
+  });
+
   it('should dispatch deleteTriggerSuccess on successful delete', (done) => {
     triggersServiceMock.delete.mockReturnValue(of(void 0));
-
     actions$ = of(deleteTrigger({ id: '1' }));
-
     effects.deleteTrigger$.subscribe((action) => {
       expect(action).toEqual(deleteTriggerSuccess({ id: '1' }));
       done();
@@ -148,9 +239,7 @@ describe('TriggersEffects', () => {
 
   it('should dispatch linkActionSuccess on successful link', (done) => {
     triggersServiceMock.linkAction.mockReturnValue(of(void 0));
-
     actions$ = of(linkAction({ triggerId: '1', request: { actionId: '2', sortOrder: 1 } }));
-
     effects.linkAction$.subscribe((action) => {
       expect(action).toEqual(linkActionSuccess());
       done();
@@ -159,22 +248,63 @@ describe('TriggersEffects', () => {
 
   it('should dispatch unlinkActionSuccess on successful unlink', (done) => {
     triggersServiceMock.unlinkAction.mockReturnValue(of(void 0));
-
     actions$ = of(unlinkAction({ triggerId: '1', actionId: '2' }));
-
     effects.unlinkAction$.subscribe((action) => {
       expect(action).toEqual(unlinkActionSuccess());
       done();
     });
   });
 
-  it('should dispatch createTriggerFailure on create error', (done) => {
-    triggersServiceMock.create.mockReturnValue(throwError(() => new Error('Server error')));
+  it('should dispatch loadTriggersFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.getAll.mockReturnValue(throwError(() => ({ code: 500 })));
+    actions$ = of(loadTriggers());
+    effects.loadTriggers$.subscribe((action) => {
+      expect(action).toEqual(loadTriggersFailure({ error: 'Failed to load triggers.' }));
+      done();
+    });
+  });
 
+  it('should dispatch createTriggerFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.create.mockReturnValue(throwError(() => ({ code: 500 })));
     actions$ = of(createTrigger({ request: { phrase: 'test' } }));
-
     effects.createTrigger$.subscribe((action) => {
-      expect(action).toEqual(createTriggerFailure({ error: 'Server error' }));
+      expect(action).toEqual(createTriggerFailure({ error: 'Failed to create trigger.' }));
+      done();
+    });
+  });
+
+  it('should dispatch updateTriggerFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.update.mockReturnValue(throwError(() => ({ code: 500 })));
+    actions$ = of(updateTrigger({ id: '1', request: { phrase: 'phrase' } }));
+    effects.updateTrigger$.subscribe((action) => {
+      expect(action).toEqual(updateTriggerFailure({ error: 'Failed to update trigger.' }));
+      done();
+    });
+  });
+
+  it('should dispatch deleteTriggerFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.delete.mockReturnValue(throwError(() => ({ code: 500 })));
+    actions$ = of(deleteTrigger({ id: '1' }));
+    effects.deleteTrigger$.subscribe((action) => {
+      expect(action).toEqual(deleteTriggerFailure({ error: 'Failed to delete trigger.' }));
+      done();
+    });
+  });
+
+  it('should dispatch linkActionFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.linkAction.mockReturnValue(throwError(() => ({ code: 500 })));
+    actions$ = of(linkAction({ triggerId: '1', request: { actionId: '2', sortOrder: 1 } }));
+    effects.linkAction$.subscribe((action) => {
+      expect(action).toEqual(linkActionFailure({ error: 'Failed to link action.' }));
+      done();
+    });
+  });
+
+  it('should dispatch unlinkActionFailure with fallback message for non-Error', (done) => {
+    triggersServiceMock.unlinkAction.mockReturnValue(throwError(() => ({ code: 500 })));
+    actions$ = of(unlinkAction({ triggerId: '1', actionId: '2' }));
+    effects.unlinkAction$.subscribe((action) => {
+      expect(action).toEqual(unlinkActionFailure({ error: 'Failed to unlink action.' }));
       done();
     });
   });

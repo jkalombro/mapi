@@ -2,7 +2,26 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { TriggersApiService } from '../api/triggers.service';
-import { createTrigger, createTriggerFailure, createTriggerSuccess, deleteTrigger, deleteTriggerFailure, deleteTriggerSuccess, linkAction, linkActionFailure, linkActionSuccess, loadTriggers, loadTriggersFailure, loadTriggersSuccess, unlinkAction, unlinkActionFailure, unlinkActionSuccess } from '../actions/triggers.actions';
+import {
+  createTrigger,
+  createTriggerFailure,
+  createTriggerSuccess,
+  deleteTrigger,
+  deleteTriggerFailure,
+  deleteTriggerSuccess,
+  linkAction,
+  linkActionFailure,
+  linkActionSuccess,
+  loadTriggers,
+  loadTriggersFailure,
+  loadTriggersSuccess,
+  unlinkAction,
+  unlinkActionFailure,
+  unlinkActionSuccess,
+  updateTrigger,
+  updateTriggerFailure,
+  updateTriggerSuccess,
+} from '../actions/triggers.actions';
 
 @Injectable()
 export class TriggersEffects {
@@ -31,6 +50,20 @@ export class TriggersEffects {
           map((trigger) => createTriggerSuccess({ trigger })),
           catchError((error: unknown) =>
             of(createTriggerFailure({ error: error instanceof Error ? error.message : 'Failed to create trigger.' }))
+          )
+        )
+      )
+    )
+  );
+
+  readonly updateTrigger$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateTrigger),
+      switchMap(({ id, request }) =>
+        this.triggersService.update(id, request).pipe(
+          map((trigger) => updateTriggerSuccess({ trigger })),
+          catchError((error: unknown) =>
+            of(updateTriggerFailure({ error: error instanceof Error ? error.message : 'Failed to update trigger.' }))
           )
         )
       )
@@ -78,5 +111,4 @@ export class TriggersEffects {
       )
     )
   );
-
 }

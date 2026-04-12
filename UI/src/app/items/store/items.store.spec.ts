@@ -49,10 +49,12 @@ describe('itemsReducer', () => {
   });
 
   it('should update item in list on updateItemSuccess', () => {
-    const withItems = { ...initialItemsState, items: [mockItem] };
+    const otherItem = { ...mockItem, id: '2', itemName: 'Rice' };
+    const withItems = { ...initialItemsState, items: [mockItem, otherItem] };
     const updatedItem = { ...mockItem, itemName: 'Updated Milk' };
     const state = itemsReducer(withItems, updateItemSuccess({ item: updatedItem }));
     expect(state.items[0].itemName).toBe('Updated Milk');
+    expect(state.items[1].itemName).toBe('Rice');
     expect(state.selectedItem).toBeNull();
   });
 
@@ -194,6 +196,50 @@ describe('ItemsEffects', () => {
 
     effects.deleteItem$.subscribe((action) => {
       expect(action).toEqual(deleteItemSuccess({ id: '1' }));
+      done();
+    });
+  });
+
+  it('should dispatch loadItemsFailure with fallback message for non-Error', (done) => {
+    itemsServiceMock.getAll.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(loadItems());
+
+    effects.loadItems$.subscribe((action) => {
+      expect(action).toEqual(loadItemsFailure({ error: 'Failed to load items.' }));
+      done();
+    });
+  });
+
+  it('should dispatch createItemFailure with fallback message for non-Error', (done) => {
+    itemsServiceMock.create.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(createItem({ request: { itemName: 'Milk', bisayaName: 'Gatas', price: 50 } }));
+
+    effects.createItem$.subscribe((action) => {
+      expect(action).toEqual(createItemFailure({ error: 'Failed to create item.' }));
+      done();
+    });
+  });
+
+  it('should dispatch updateItemFailure with fallback message for non-Error', (done) => {
+    itemsServiceMock.update.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(updateItem({ id: '1', request: { itemName: 'Milk', bisayaName: 'Gatas', price: 50 } }));
+
+    effects.updateItem$.subscribe((action) => {
+      expect(action).toEqual(updateItemFailure({ error: 'Failed to update item.' }));
+      done();
+    });
+  });
+
+  it('should dispatch deleteItemFailure with fallback message for non-Error', (done) => {
+    itemsServiceMock.delete.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(deleteItem({ id: '1' }));
+
+    effects.deleteItem$.subscribe((action) => {
+      expect(action).toEqual(deleteItemFailure({ error: 'Failed to delete item.' }));
       done();
     });
   });

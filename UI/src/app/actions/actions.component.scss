@@ -1,0 +1,165 @@
+@use '../../assets/styles/variables' as *;
+@use '../../assets/styles/mixins' as *;
+
+.actions {
+  @include container;
+  padding-top: $spacing-xl;
+  padding-bottom: $spacing-xxl;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-xl;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-md;
+    }
+
+    @include tablet {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-h2;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0;
+  }
+
+  &__error {
+    padding: $spacing-md;
+    background-color: lighten($color-danger, 40%);
+    border: 1px solid $color-danger;
+    border-radius: $border-radius-sm;
+    color: $color-danger;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__loading {
+    text-align: center;
+    color: $color-text-secondary;
+    padding: $spacing-xxl 0;
+  }
+
+  &__empty {
+    text-align: center;
+    color: $color-text-secondary;
+    padding: $spacing-xxl 0;
+    font-size: $font-size-lg;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    @include flex-column;
+    gap: $spacing-md;
+  }
+}
+
+.action-item {
+  @include flex-between;
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  gap: $spacing-md;
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  @include tablet {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  &__details {
+    @include flex-column;
+    gap: $spacing-xs;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__type {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__template {
+    font-size: $font-size-base;
+    color: $color-text-primary;
+    margin: 0;
+    @include truncate;
+  }
+
+  &__controls {
+    display: flex;
+    gap: $spacing-sm;
+    flex-shrink: 0;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  border: none;
+  transition: background-color $transition-fast;
+  text-decoration: none;
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background-color: $color-primary;
+    color: $color-text-on-primary;
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-dark;
+    }
+  }
+
+  &--secondary {
+    background-color: transparent;
+    color: $color-text-secondary;
+    border: 1px solid $color-border;
+
+    &:hover:not(:disabled) {
+      background-color: $color-surface-hover;
+    }
+  }
+
+  &--danger {
+    background-color: $color-danger;
+    color: $color-text-on-primary;
+
+    &:hover:not(:disabled) {
+      background-color: darken($color-danger, 10%);
+    }
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+  }
+}

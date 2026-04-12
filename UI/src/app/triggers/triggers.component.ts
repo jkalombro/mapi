@@ -4,15 +4,24 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TriggerFormComponent } from './components/trigger-form/trigger-form.component';
 import { ActionLinkFormComponent } from './components/action-link-form/action-link-form.component';
 import { ConfirmationDialogComponent } from '../shared/components/confirmation-dialog/confirmation-dialog.component';
-import { createTrigger, deleteTrigger, linkAction, loadTriggers, unlinkAction } from './store/actions/triggers.actions';
-import { selectAllTriggers, selectTriggersIsLoading } from './store/reducers/triggers.reducer';
+import { ModalComponent } from '../shared/components/modal/modal.component';
+import {
+  createTrigger,
+  deleteTrigger,
+  linkAction,
+  loadTriggers,
+  selectTrigger,
+  unlinkAction,
+  updateTrigger,
+} from './store/actions/triggers.actions';
+import { selectAllTriggers, selectSelectedTrigger, selectTriggersIsLoading } from './store/reducers/triggers.reducer';
 import { ActionLinkRequest, Trigger, TriggerRequest } from './store/models/trigger.model';
 import { Action, ActionsApiService } from '../shared/services/actions-api.service';
 
 @Component({
   selector: 'app-triggers',
   standalone: true,
-  imports: [TriggerFormComponent, ActionLinkFormComponent, ConfirmationDialogComponent],
+  imports: [TriggerFormComponent, ActionLinkFormComponent, ConfirmationDialogComponent, ModalComponent],
   templateUrl: './triggers.component.html',
   styleUrl: './triggers.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,8 +32,10 @@ export class TriggersComponent implements OnInit {
 
   triggers = toSignal(this._store.select(selectAllTriggers), { initialValue: [] });
   isLoading = toSignal(this._store.select(selectTriggersIsLoading), { initialValue: false });
+  selectedTrigger = toSignal(this._store.select(selectSelectedTrigger), { initialValue: null });
 
-  showTriggerForm = signal(false);
+  showCreateModal = signal(false);
+  showEditModal = signal(false);
   linkingTriggerId = signal<string | null>(null);
   pendingDeleteId = signal<string | null>(null);
   availableActions = signal<Action[]>([]);
@@ -40,16 +51,34 @@ export class TriggersComponent implements OnInit {
   }
 
   onAddTriggerClick(): void {
-    this.showTriggerForm.set(true);
+    this.showCreateModal.set(true);
   }
 
   onTriggerSaved(request: TriggerRequest): void {
     this._store.dispatch(createTrigger({ request }));
-    this.showTriggerForm.set(false);
+    this.showCreateModal.set(false);
   }
 
   onTriggerFormCancelled(): void {
-    this.showTriggerForm.set(false);
+    this.showCreateModal.set(false);
+  }
+
+  onEditTriggerClick(trigger: Trigger): void {
+    this._store.dispatch(selectTrigger({ trigger }));
+    this.showEditModal.set(true);
+  }
+
+  onTriggerEditSaved(request: TriggerRequest): void {
+    const current = this.selectedTrigger();
+    if (current) {
+      this._store.dispatch(updateTrigger({ id: current.id, request }));
+    }
+    this.showEditModal.set(false);
+  }
+
+  onTriggerEditCancelled(): void {
+    this._store.dispatch(selectTrigger({ trigger: null }));
+    this.showEditModal.set(false);
   }
 
   onDeleteTrigger(id: string): void {

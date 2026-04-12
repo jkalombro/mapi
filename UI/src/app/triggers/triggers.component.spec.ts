@@ -3,8 +3,16 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { TriggersComponent } from './triggers.component';
 import { ActionsApiService } from '../shared/services/actions-api.service';
-import { createTrigger, deleteTrigger, linkAction, loadTriggers, unlinkAction } from './store/actions/triggers.actions';
-import { initialTriggersState } from './store/reducers/triggers.reducer';
+import {
+  createTrigger,
+  deleteTrigger,
+  linkAction,
+  loadTriggers,
+  selectTrigger,
+  unlinkAction,
+  updateTrigger,
+} from './store/actions/triggers.actions';
+import { initialTriggersState, selectSelectedTrigger } from './store/reducers/triggers.reducer';
 import { Trigger, TriggerRequest } from './store/models/trigger.model';
 
 const mockTrigger: Trigger = {
@@ -40,6 +48,10 @@ describe('TriggersComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    store.resetSelectors();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -48,27 +60,78 @@ describe('TriggersComponent', () => {
     expect(store.dispatch).toHaveBeenCalledWith(loadTriggers());
   });
 
-  it('should show the trigger form when add button is clicked', () => {
-    expect(component.showTriggerForm()).toBe(false);
+  // =========================================================
+  // Create modal (replaces showTriggerForm inline form)
+  // =========================================================
+
+  it('should set showCreateModal to true when add button is clicked', () => {
+    expect(component.showCreateModal()).toBe(false);
     component.onAddTriggerClick();
-    expect(component.showTriggerForm()).toBe(true);
+    expect(component.showCreateModal()).toBe(true);
   });
 
-  it('should dispatch createTrigger and hide form on trigger saved', () => {
-    component.showTriggerForm.set(true);
+  it('should dispatch createTrigger and close create modal on trigger saved', () => {
+    component.showCreateModal.set(true);
     const request: TriggerRequest = { phrase: 'Check price of' };
 
     component.onTriggerSaved(request);
 
     expect(store.dispatch).toHaveBeenCalledWith(createTrigger({ request }));
-    expect(component.showTriggerForm()).toBe(false);
+    expect(component.showCreateModal()).toBe(false);
   });
 
-  it('should hide form on cancel', () => {
-    component.showTriggerForm.set(true);
+  it('should close create modal on cancel', () => {
+    component.showCreateModal.set(true);
     component.onTriggerFormCancelled();
-    expect(component.showTriggerForm()).toBe(false);
+    expect(component.showCreateModal()).toBe(false);
   });
+
+  // =========================================================
+  // Edit modal (US6)
+  // =========================================================
+
+  it('should dispatch selectTrigger and set showEditModal on edit click', () => {
+    component.onEditTriggerClick(mockTrigger);
+
+    expect(store.dispatch).toHaveBeenCalledWith(selectTrigger({ trigger: mockTrigger }));
+    expect(component.showEditModal()).toBe(true);
+  });
+
+  it('should dispatch updateTrigger and close edit modal on edit saved', () => {
+    store.overrideSelector(selectSelectedTrigger, mockTrigger);
+    store.refreshState();
+    fixture.detectChanges();
+
+    component.showEditModal.set(true);
+    component.onTriggerEditSaved({ phrase: 'Updated phrase' });
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      updateTrigger({ id: '1', request: { phrase: 'Updated phrase' } })
+    );
+    expect(component.showEditModal()).toBe(false);
+  });
+
+  it('should close edit modal on edit cancel', () => {
+    component.showEditModal.set(true);
+    component.onTriggerEditCancelled();
+    expect(component.showEditModal()).toBe(false);
+  });
+
+  it('should not dispatch updateTrigger when selectedTrigger is null', () => {
+    store.overrideSelector(selectSelectedTrigger, null);
+    store.refreshState();
+    fixture.detectChanges();
+
+    component.showEditModal.set(true);
+    component.onTriggerEditSaved({ phrase: 'Updated phrase' });
+
+    expect(store.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: updateTrigger.type }));
+    expect(component.showEditModal()).toBe(false);
+  });
+
+  // =========================================================
+  // Delete
+  // =========================================================
 
   it('should set pendingDeleteId when delete is requested', () => {
     component.onDeleteTrigger('1');
@@ -88,6 +151,10 @@ describe('TriggersComponent', () => {
     component.onDeleteCancelled();
     expect(component.pendingDeleteId()).toBeNull();
   });
+
+  // =========================================================
+  // Action link
+  // =========================================================
 
   it('should set linkingTriggerId when link action is clicked', () => {
     component.onLinkActionClick('1');
@@ -117,5 +184,15 @@ describe('TriggersComponent', () => {
     component.linkingTriggerId.set('1');
     expect(component.isLinkingFor('1')).toBe(true);
     expect(component.isLinkingFor('2')).toBe(false);
+  });
+
+  it('onActionLinked should return early and not dispatch when linkingTriggerId is null', () => {
+    component.linkingTriggerId.set(null);
+    component.onActionLinked({ actionId: '2', sortOrder: 1 });
+    expect(store.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: linkAction.type }));
+  });
+
+  it('trackById should return the trigger id', () => {
+    expect(component.trackById(0, mockTrigger)).toBe('1');
   });
 });

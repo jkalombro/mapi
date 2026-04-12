@@ -1,31 +1,21 @@
 <section class="triggers">
   <div class="triggers__header">
     <h1 class="triggers__title">Triggers</h1>
-    @if (!showTriggerForm()) {
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="onAddTriggerClick()"
-        aria-label="Add new trigger"
-      >
-        + Add Trigger
-      </button>
-    }
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="onAddTriggerClick()"
+      aria-label="Add new trigger"
+    >
+      + Add Trigger
+    </button>
   </div>
-
-  @if (showTriggerForm()) {
-    <app-trigger-form
-      [isLoading]="isLoading()"
-      (saved)="onTriggerSaved($event)"
-      (cancelled)="onTriggerFormCancelled()"
-    />
-  }
 
   @if (isLoading() && triggers().length === 0) {
     <p class="triggers__loading" aria-live="polite">Loading triggers…</p>
   }
 
-  @if (!isLoading() && triggers().length === 0 && !showTriggerForm()) {
+  @if (!isLoading() && triggers().length === 0) {
     <p class="triggers__empty">No triggers yet. Add one to get started.</p>
   }
 
@@ -35,6 +25,14 @@
         <div class="trigger-card__header">
           <span class="trigger-card__phrase" aria-label="Trigger phrase">{{ trigger.phrase }}</span>
           <div class="trigger-card__controls">
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              (click)="onEditTriggerClick(trigger)"
+              [attr.aria-label]="'Edit trigger: ' + trigger.phrase"
+            >
+              Edit
+            </button>
             <button
               type="button"
               class="btn btn--ghost btn--sm"
@@ -84,6 +82,31 @@
       </li>
     }
   </ul>
+
+  <app-modal
+    [isVisible]="showCreateModal()"
+    title="New Trigger"
+    (closed)="onTriggerFormCancelled()"
+  >
+    <app-trigger-form
+      [isLoading]="isLoading()"
+      (saved)="onTriggerSaved($event)"
+      (cancelled)="onTriggerFormCancelled()"
+    />
+  </app-modal>
+
+  <app-modal
+    [isVisible]="showEditModal()"
+    title="Edit Trigger"
+    (closed)="onTriggerEditCancelled()"
+  >
+    <app-trigger-form
+      [editTrigger]="selectedTrigger()"
+      [isLoading]="isLoading()"
+      (saved)="onTriggerEditSaved($event)"
+      (cancelled)="onTriggerEditCancelled()"
+    />
+  </app-modal>
 
   <app-confirmation-dialog
     [isVisible]="pendingDeleteId() !== null"

@@ -69,11 +69,11 @@ public static class ActionsEndpoints
 
     private static async Task<IResult> UpdateActionAsync(
         Guid id,
-        [FromBody] ActionRequest request,
+        [FromBody] UpdateActionRequest request,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateActionCommand(id, request.ActionType, request.ResponseTemplate), cancellationToken);
+        var result = await mediator.Send(new UpdateActionCommand(id, request.ResponseTemplate), cancellationToken);
         return TypedResults.Ok(result);
     }
 

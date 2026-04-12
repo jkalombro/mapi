@@ -70,6 +70,11 @@ describe('voiceReducer', () => {
     const state = voiceReducer(withConfirmation, dismissConfirmation());
     expect(state.commandResult?.isConfirmationRequired).toBe(false);
   });
+
+  it('dismissConfirmation should leave commandResult null when it is already null', () => {
+    const state = voiceReducer(initialVoiceState, dismissConfirmation());
+    expect(state.commandResult).toBeNull();
+  });
 });
 
 // ── Selector Tests ────────────────────────────────────────────────────────────
@@ -165,6 +170,28 @@ describe('VoiceEffects', () => {
 
     effects.speakResponse$.subscribe(() => {
       expect(speechSynthesisMock.speak).toHaveBeenCalledWith(mockResult.responseText);
+      done();
+    });
+  });
+
+  it('should dispatch commandFailure with fallback message for non-Error', (done) => {
+    voiceServiceMock.sendCommand.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(sendCommand({ transcript: 'how much is milk?' }));
+
+    effects.sendCommand$.subscribe((action) => {
+      expect(action).toEqual(commandFailure({ error: 'Command failed.' }));
+      done();
+    });
+  });
+
+  it('should dispatch confirmAddFailure with fallback message for non-Error', (done) => {
+    voiceServiceMock.confirmAdd.mockReturnValue(throwError(() => ({ code: 500 })));
+
+    actions$ = of(confirmAdd({ request: { itemName: 'Milk', price: 60 } }));
+
+    effects.confirmAdd$.subscribe((action) => {
+      expect(action).toEqual(confirmAddFailure({ error: 'Confirmation failed.' }));
       done();
     });
   });

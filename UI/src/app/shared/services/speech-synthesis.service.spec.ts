@@ -12,6 +12,11 @@ describe('SpeechSynthesisService', () => {
       writable: true,
     });
 
+    (globalThis as Record<string, unknown>)['SpeechSynthesisUtterance'] = class {
+      text: string;
+      constructor(text: string) { this.text = text; }
+    };
+
     TestBed.configureTestingModule({});
     service = TestBed.inject(SpeechSynthesisService);
   });
