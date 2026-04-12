@@ -9,15 +9,9 @@ import {
   deleteTrigger,
   deleteTriggerFailure,
   deleteTriggerSuccess,
-  linkAction,
-  linkActionFailure,
-  linkActionSuccess,
   loadTriggers,
   loadTriggersFailure,
   loadTriggersSuccess,
-  unlinkAction,
-  unlinkActionFailure,
-  unlinkActionSuccess,
   updateTrigger,
   updateTriggerFailure,
   updateTriggerSuccess,
@@ -78,34 +72,6 @@ export class TriggersEffects {
           map(() => deleteTriggerSuccess({ id })),
           catchError((error: unknown) =>
             of(deleteTriggerFailure({ error: error instanceof Error ? error.message : 'Failed to delete trigger.' }))
-          )
-        )
-      )
-    )
-  );
-
-  readonly linkAction$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(linkAction),
-      switchMap(({ triggerId, request }) =>
-        this.triggersService.linkAction(triggerId, request).pipe(
-          map(() => linkActionSuccess()),
-          catchError((error: unknown) =>
-            of(linkActionFailure({ error: error instanceof Error ? error.message : 'Failed to link action.' }))
-          )
-        )
-      )
-    )
-  );
-
-  readonly unlinkAction$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(unlinkAction),
-      switchMap(({ triggerId, actionId }) =>
-        this.triggersService.unlinkAction(triggerId, actionId).pipe(
-          map(() => unlinkActionSuccess()),
-          catchError((error: unknown) =>
-            of(unlinkActionFailure({ error: error instanceof Error ? error.message : 'Failed to unlink action.' }))
           )
         )
       )

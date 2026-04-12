@@ -14,6 +14,7 @@ public class CommonStepDefinitions
     }
 
     [Given(@"I am authenticated as ""(.*)"" with password ""(.*)"" and store name ""(.*)""")]
+    [When(@"I am authenticated as ""(.*)"" with password ""(.*)"" and store name ""(.*)""")]
     public async Task GivenIAmAuthenticated(string email, string password, string storeName)
     {
         await _ctx.AuthenticateAsync(email, password, storeName);

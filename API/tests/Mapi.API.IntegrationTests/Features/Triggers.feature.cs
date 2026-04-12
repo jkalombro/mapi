@@ -17,22 +17,22 @@ namespace Mapi.API.IntegrationTests.Features
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class TriggerAndActionManagementFeature : object, global::Xunit.IClassFixture<TriggerAndActionManagementFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class TriggerManagementFeature : object, global::Xunit.IClassFixture<TriggerManagementFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Trigger and Action Management", "  As a store owner\r\n  I want to define custom trigger phrases and linked actions\r" +
-                "\n  So that I can create custom voice commands", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Trigger Management", "  As a store owner\r\n  I want to define custom trigger phrases with assigned actio" +
+                "ns\r\n  So that I can create custom voice commands", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
 #line 1 "Triggers.feature"
 #line hidden
         
-        public TriggerAndActionManagementFeature(TriggerAndActionManagementFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public TriggerManagementFeature(TriggerManagementFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -144,15 +144,15 @@ namespace Mapi.API.IntegrationTests.Features
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create a trigger")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger and Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Create a trigger")]
-        public async global::System.Threading.Tasks.Task CreateATrigger()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create a trigger with an action")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger Management")]
+        [global::Xunit.TraitAttribute("Description", "Create a trigger with an action")]
+        public async global::System.Threading.Tasks.Task CreateATriggerWithAnAction()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a trigger", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a trigger with an action", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 9
@@ -169,7 +169,7 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 10
-    await testRunner.WhenAsync("I create a trigger with phrase \"What\'s the price of\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.WhenAsync("I create a trigger with phrase \"What\'s the price of\" and the Query action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 11
     await testRunner.ThenAsync("the response status should be 201", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
@@ -177,22 +177,25 @@ namespace Mapi.API.IntegrationTests.Features
 #line 12
     await testRunner.AndAsync("the trigger response should contain phrase \"What\'s the price of\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
+#line 13
+    await testRunner.AndAsync("the trigger response should have an action type of \"Query\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create an action")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger and Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Create an action")]
-        public async global::System.Threading.Tasks.Task CreateAnAction()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create a trigger without an action returns 400")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger Management")]
+        [global::Xunit.TraitAttribute("Description", "Create a trigger without an action returns 400")]
+        public async global::System.Threading.Tasks.Task CreateATriggerWithoutAnActionReturns400()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "1";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create an action", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a trigger without an action returns 400", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 14
+#line 15
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -205,28 +208,25 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 15
-    await testRunner.WhenAsync("I create an action with type \"Query\" and template \"{name} costs {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
 #line 16
-    await testRunner.ThenAsync("the response status should be 201", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("I try to create a trigger with phrase \"Missing action\" and no action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 17
-    await testRunner.AndAsync("the action response should contain template \"{name} costs {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the response status should be 400", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Link action to trigger")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger and Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Link action to trigger")]
-        public async global::System.Threading.Tasks.Task LinkActionToTrigger()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update a trigger\'s phrase and action")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger Management")]
+        [global::Xunit.TraitAttribute("Description", "Update a trigger\'s phrase and action")]
+        public async global::System.Threading.Tasks.Task UpdateATriggersPhraseAndAction()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Link action to trigger", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update a trigger\'s phrase and action", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 19
@@ -243,33 +243,36 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 20
-    await testRunner.GivenAsync("I have a trigger with phrase \"Check price of\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.GivenAsync("I have a trigger with phrase \"Old phrase\" and the Query action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 21
-    await testRunner.AndAsync("I have an action with type \"Query\" and template \"{name} is {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I update the trigger phrase to \"New phrase\" and assign the Add action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 22
-    await testRunner.WhenAsync("I link the action to the trigger with sort order 1", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 23
-    await testRunner.ThenAsync("the response status should be 204", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("the trigger response should contain phrase \"New phrase\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 24
+    await testRunner.AndAsync("the trigger response should have an action type of \"Add\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Delete action linked to trigger fails")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger and Action Management")]
-        [global::Xunit.TraitAttribute("Description", "Delete action linked to trigger fails")]
-        public async global::System.Threading.Tasks.Task DeleteActionLinkedToTriggerFails()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Delete a trigger")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger Management")]
+        [global::Xunit.TraitAttribute("Description", "Delete a trigger")]
+        public async global::System.Threading.Tasks.Task DeleteATrigger()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete action linked to trigger fails", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Delete a trigger", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 25
+#line 26
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -282,27 +285,21 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 26
-    await testRunner.GivenAsync("I have a trigger with phrase \"Ask price\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
 #line 27
-    await testRunner.AndAsync("I have an action with type \"Query\" and template \"{name} is {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("I have a trigger with phrase \"Delete me\" and the Query action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 28
-    await testRunner.AndAsync("the action is linked to the trigger", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I delete the trigger", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 29
-    await testRunner.WhenAsync("I try to delete the action", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 30
-    await testRunner.ThenAsync("the response status should be 409", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("the response status should be 204", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [global::Xunit.SkippableFactAttribute(DisplayName="Trigger invocation via voice command")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger and Action Management")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Trigger Management")]
         [global::Xunit.TraitAttribute("Description", "Trigger invocation via voice command")]
         public async global::System.Threading.Tasks.Task TriggerInvocationViaVoiceCommand()
         {
@@ -312,7 +309,7 @@ namespace Mapi.API.IntegrationTests.Features
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Trigger invocation via voice command", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 32
+#line 31
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -325,25 +322,19 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 33
+#line 32
     await testRunner.GivenAsync("I have an item with name \"Milk\" and bisaya name \"Gatas\" and price 50.00", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
+#line 33
+    await testRunner.AndAsync("I have a trigger with phrase \"How much does\" and the Query action", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
 #line 34
-    await testRunner.AndAsync("I have a trigger with phrase \"How much does\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 35
-    await testRunner.AndAsync("I have an action with type \"Query\" and template \"{name} is {price}\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 36
-    await testRunner.AndAsync("the action is linked to the trigger with sort order 1", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 37
     await testRunner.WhenAsync("I send a voice command \"How much does milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 38
+#line 35
     await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 39
+#line 36
     await testRunner.AndAsync("the voice response should contain \"Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -357,12 +348,12 @@ namespace Mapi.API.IntegrationTests.Features
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await TriggerAndActionManagementFeature.FeatureSetupAsync();
+                await TriggerManagementFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await TriggerAndActionManagementFeature.FeatureTearDownAsync();
+                await TriggerManagementFeature.FeatureTearDownAsync();
             }
         }
     }

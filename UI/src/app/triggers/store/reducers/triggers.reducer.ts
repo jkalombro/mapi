@@ -6,16 +6,10 @@ import {
   deleteTrigger,
   deleteTriggerFailure,
   deleteTriggerSuccess,
-  linkAction,
-  linkActionFailure,
-  linkActionSuccess,
   loadTriggers,
   loadTriggersFailure,
   loadTriggersSuccess,
   selectTrigger,
-  unlinkAction,
-  unlinkActionFailure,
-  unlinkActionSuccess,
   updateTrigger,
   updateTriggerFailure,
   updateTriggerSuccess,
@@ -33,7 +27,7 @@ export const initialTriggersState: TriggersState = {
 
 export const triggersReducer = createReducer(
   initialTriggersState,
-  on(loadTriggers, createTrigger, updateTrigger, deleteTrigger, linkAction, unlinkAction, (state) => ({
+  on(loadTriggers, createTrigger, updateTrigger, deleteTrigger, (state) => ({
     ...state,
     isLoading: true,
     error: null,
@@ -55,20 +49,11 @@ export const triggersReducer = createReducer(
     triggers: state.triggers.filter((t) => t.id !== id),
     isLoading: false,
   })),
-  on(linkActionSuccess, unlinkActionSuccess, (state) => ({ ...state, isLoading: false })),
-  on(
-    loadTriggersFailure,
-    createTriggerFailure,
-    updateTriggerFailure,
-    deleteTriggerFailure,
-    linkActionFailure,
-    unlinkActionFailure,
-    (state, { error }) => ({
-      ...state,
-      isLoading: false,
-      error,
-    })
-  ),
+  on(loadTriggersFailure, createTriggerFailure, updateTriggerFailure, deleteTriggerFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error,
+  })),
   on(selectTrigger, (state, { trigger }) => ({ ...state, selectedTrigger: trigger }))
 );
 

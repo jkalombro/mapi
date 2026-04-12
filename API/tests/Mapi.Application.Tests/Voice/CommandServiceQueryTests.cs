@@ -17,7 +17,7 @@ public class CommandServiceQueryTests
         _itemRepositoryMock = new Mock<IItemRepository>();
         _triggerRepositoryMock = new Mock<ITriggerRepository>();
         _triggerRepositoryMock
-            .Setup(r => r.GetAllWithActionsAsync(_userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Trigger>());
         _service = new CommandService(_itemRepositoryMock.Object, _triggerRepositoryMock.Object);
     }

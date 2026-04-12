@@ -9,5 +9,4 @@ public class User : BaseEntity
 
     public ICollection<Item> Items { get; set; } = new List<Item>();
     public ICollection<Trigger> Triggers { get; set; } = new List<Trigger>();
-    public ICollection<Action> Actions { get; set; } = new List<Action>();
 }

@@ -1,93 +1,116 @@
-# Data Model: Action CRUD Management & Modal UI Standardisation
+# Data Model: Trigger-Action Binding & Modal UI Standardisation
 
-**Feature**: `002-action-crud` | **Date**: 2026-04-12
+**Feature**: `002-action-crud` | **Revised**: 2026-04-12
 
 ---
 
 ## Backend Entities
 
-### Action (existing — no schema changes)
+### Action (seeded global — no UserId)
 
 **Source**: `Mapi.Domain/Entities/Action.cs`, `Mapi.Infrastructure/Persistence/Configurations/ActionConfiguration.cs`
 
 | Field | Type | Constraints | Notes |
 |-------|------|-------------|-------|
-| `Id` | `Guid` | PK, required | Inherited from `BaseEntity` |
-| `UserId` | `Guid` | FK → User, required | Per-user isolation |
-| `ActionType` | `ActionType` (enum) | Required, immutable after creation | Query, Add, Update, Remove |
-| `ResponseTemplate` | `string` | Required, max 500 chars | Editable via PUT |
-| `CreatedAt` | `DateTime` | Set on insert by `ApplicationDbContext` | Inherited from `BaseEntity` |
-| `UpdatedAt` | `DateTime` | Set on update by `ApplicationDbContext` | Inherited from `BaseEntity` |
+| `Id` | `Guid` | PK, required | Deterministic seed GUID |
+| `ActionType` | `ActionType` (enum) | Required, immutable | Query, Add, Update, Remove |
+| `ResponseTemplate` | `string` | Required, max 500 chars | Fixed seed value |
+| `CreatedAt` | `DateTime` | Set on insert | Inherited from `BaseEntity` |
+| `UpdatedAt` | `DateTime` | Set on update | Inherited from `BaseEntity` |
 
-**Immutability rule**: `ActionType` is set at creation only. The `UpdateActionCommand` no longer accepts `ActionType`.
+**No `UserId`** — actions are global, not user-owned.
 
-**Validation** (FluentValidation):
-- `CreateActionCommand`: `ResponseTemplate` required, max 500 chars (ActionType is an enum — invalid values rejected by model binding)
-- `UpdateActionCommand`: `Id` required (non-empty GUID), `ResponseTemplate` required, max 500 chars
-- `DeleteActionCommand`: `Id` required (non-empty GUID)
+**Seed data** (deterministic GUIDs, via `HasData()` in `ActionConfiguration`):
 
-### TriggerActionMap (existing — no changes)
+| ActionType | ResponseTemplate |
+|------------|-----------------|
+| Query | `"The {item} is {value}."` |
+| Add | `"I've added {item}."` |
+| Update | `"I've updated {item} to {value}."` |
+| Remove | `"I've removed {item}."` |
+
+---
+
+### Trigger (updated — direct ActionId FK)
+
+**Source**: `Mapi.Domain/Entities/Trigger.cs`, `Mapi.Infrastructure/Persistence/Configurations/TriggerConfiguration.cs`
 
 | Field | Type | Constraints | Notes |
 |-------|------|-------------|-------|
-| `TriggerId` | `Guid` | FK → Trigger, required | Composite PK part |
-| `ActionId` | `Guid` | FK → Action, required | Composite PK part |
-| `SortOrder` | `int` | Required | Determines execution order |
+| `Id` | `Guid` | PK, required | Inherited from `BaseEntity` |
+| `UserId` | `Guid` | FK → User, required | Per-user isolation (unchanged) |
+| `Phrase` | `string` | Required, max 200 chars | Unchanged |
+| `ActionId` | `Guid` | FK → Action, required | **New** — replaces TriggerActionMap |
+| `CreatedAt` | `DateTime` | Set on insert | Inherited from `BaseEntity` |
+| `UpdatedAt` | `DateTime` | Set on update | Inherited from `BaseEntity` |
 
-**Delete guard**: An `Action` with one or more `TriggerActionMap` entries cannot be deleted (HTTP 409 Conflict).
+**Delete behavior**: `DeleteBehavior.Restrict` on `Trigger.ActionId → Action.Id` — seeded actions cannot be deleted while any trigger references them.
+
+---
+
+### TriggerActionMap — REMOVED
+
+The `TriggerActionMap` join table and entity are removed entirely. The many-to-many relationship it represented is replaced by the direct `Trigger.ActionId` FK.
 
 ---
 
 ## Backend DTOs
 
-### Existing (unchanged)
+### ActionResponse (read-only, no request DTOs)
 
 ```csharp
-// Used for POST /api/v1/actions (create only)
-record ActionRequest(ActionType ActionType, string ResponseTemplate);
-
-// Used in all GET and mutation responses
 record ActionResponse(Guid Id, ActionType ActionType, string ResponseTemplate, DateTime CreatedAt, DateTime UpdatedAt);
 ```
 
-### New (fix for UpdateAction spec violation)
+No `ActionRequest` or `UpdateActionRequest` — actions cannot be created or updated by users.
+
+### TriggerRequest (updated)
 
 ```csharp
-// Used for PUT /api/v1/actions/{id} (update only — ActionType is immutable)
-record UpdateActionRequest(string ResponseTemplate);
+record TriggerRequest(string Phrase, Guid ActionId);
 ```
+
+### TriggerResponse (updated)
+
+```csharp
+record TriggerResponse(Guid Id, string Phrase, Guid ActionId, string ActionType, DateTime CreatedAt, DateTime UpdatedAt);
+```
+
+`ActionId` and `ActionType` are flat fields — no nested collection.
 
 ---
 
-## Backend Commands / Queries (after fix)
+## Backend Commands / Queries
 
 ```csharp
-// Commands
-record CreateActionCommand(ActionType ActionType, string ResponseTemplate)  → ActionResponse
-record UpdateActionCommand(Guid Id, string ResponseTemplate)                → ActionResponse   ← FIXED
-record DeleteActionCommand(Guid Id)                                         → Unit
+// Actions — read-only
+record GetActionsQuery → IReadOnlyList<ActionResponse>   // no user filter
 
-// Queries
-record GetActionsQuery                                                       → IReadOnlyList<ActionResponse>
-record GetActionByIdQuery(Guid Id)                                           → ActionResponse
+// Triggers
+record CreateTriggerCommand(Guid UserId, string Phrase, Guid ActionId) → TriggerResponse
+record UpdateTriggerCommand(Guid Id, Guid UserId, string Phrase, Guid ActionId) → TriggerResponse
+record DeleteTriggerCommand(Guid Id, Guid UserId) → Unit
+
+// Removed: LinkActionCommand, UnlinkActionCommand, GetActionByIdQuery, CreateActionCommand, UpdateActionCommand, DeleteActionCommand
 ```
 
 ---
 
 ## Frontend State Shape
 
-### ActionsState (new)
+### ActionsState (read-only)
 
 ```typescript
 interface ActionsState {
   actions: Action[];
   isLoading: boolean;
   error: string | null;
-  selectedAction: Action | null;   // null = create mode, non-null = edit mode
 }
 ```
 
-### Action model (in `actions/store/models/action.model.ts`)
+No `selectedAction` — no create/edit modal for actions.
+
+### Action model (`actions/store/models/action.model.ts`)
 
 ```typescript
 export interface Action {
@@ -98,28 +121,32 @@ export interface Action {
   updatedAt: string;
 }
 
-export interface CreateActionRequest {
-  actionType: string;
-  responseTemplate: string;
-}
-
-export interface UpdateActionRequest {
-  responseTemplate: string;    // ActionType is immutable; not sent on update
-}
+// No CreateActionRequest or UpdateActionRequest
 ```
 
-> **Note**: The existing `Action` interface in `ActionsApiService` (`shared/services/actions-api.service.ts`) is the same shape. The model file in the feature store is the canonical definition; `ActionsApiService` will reference it from there (or keep consistent by type alignment).
-
-### TriggersState (update — add selectedTrigger)
+### Trigger model (updated)
 
 ```typescript
-// Existing fields unchanged; add:
-selectedTrigger: Trigger | null;   // null = create mode, non-null = edit mode
-
-// New action interfaces (update):
-interface UpdateTriggerRequest {
+export interface Trigger {
+  id: string;
   phrase: string;
+  actionId: string;       // single FK — replaces actions: TriggerAction[]
+  actionType: string;     // denormalised for display
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface TriggerRequest {
+  phrase: string;
+  actionId: string;       // required
+}
+
+export interface UpdateTriggerRequest {
+  phrase: string;
+  actionId: string;       // required
+}
+
+// Removed: TriggerAction, ActionLinkRequest
 ```
 
 ---
@@ -129,49 +156,30 @@ interface UpdateTriggerRequest {
 ### Actions feature store (`actions/store/actions/actions.actions.ts`)
 
 ```typescript
-loadActions           → (none)
-loadActionsSuccess    → { actions: Action[] }
-loadActionsFailure    → { error: string }
+loadActions        → (none)
+loadActionsSuccess → { actions: Action[] }
+loadActionsFailure → { error: string }
 
-createAction          → { request: CreateActionRequest }
-createActionSuccess   → { action: Action }
-createActionFailure   → { error: string }
-
-updateAction          → { id: string; request: UpdateActionRequest }
-updateActionSuccess   → { action: Action }
-updateActionFailure   → { error: string }
-
-deleteAction          → { id: string }
-deleteActionSuccess   → { id: string }
-deleteActionFailure   → { error: string }
-
-selectAction          → { action: Action | null }
+// No create / update / delete NgRx actions
 ```
 
-> **Naming note**: NgRx action creators are named `createAction` (NgRx function) and the domain action name is also `createAction`. To avoid collision, the NgRx action creator for the domain "create" operation will be named `createNewAction` in the actions file, and the feature store file will prefix with the feature: `[Actions] Create Action`.
-
-### Triggers store additions (`triggers/store/actions/triggers.actions.ts`)
+### Triggers store (updated)
 
 ```typescript
-// Add to existing:
-updateTrigger         → { id: string; request: UpdateTriggerRequest }
-updateTriggerSuccess  → { trigger: Trigger }
-updateTriggerFailure  → { error: string }
+// Existing (unchanged):
+loadTriggers, loadTriggersSuccess, loadTriggersFailure
+createTrigger, createTriggerSuccess, createTriggerFailure
+deleteTrigger, deleteTriggerSuccess, deleteTriggerFailure
+selectTrigger
 
-selectTrigger         → { trigger: Trigger | null }
+// Updated (ActionId now included in payload):
+updateTrigger        → { id: string; request: UpdateTriggerRequest }
+updateTriggerSuccess → { trigger: Trigger }
+updateTriggerFailure → { error: string }
+
+// Removed: linkAction, linkActionSuccess, linkActionFailure,
+//          unlinkAction, unlinkActionSuccess, unlinkActionFailure
 ```
-
----
-
-## Component Contracts Summary
-
-| Component | Location | Pattern |
-|-----------|----------|---------|
-| `ModalComponent` | `shared/components/modal/` | Shell; `isVisible` input, `title` input, `closed` output, `<ng-content>` body |
-| `ActionFormComponent` | `actions/components/action-form/` | Presentational; `editAction` input (`Action \| null`), `isLoading` input, `saved` output (`CreateActionRequest \| UpdateActionRequest`), `cancelled` output |
-| `ActionsComponent` | `actions/` | Smart container; dispatches to store, owns modal open/close signals |
-
-Full interface details: see [contracts/ui-components.md](./contracts/ui-components.md)
 
 ---
 
@@ -188,29 +196,10 @@ Source: `Mapi.Domain/Enums/ActionType.cs` — no changes needed.
 
 ---
 
-## State Transitions
-
-### Action lifecycle
+## ERD Summary
 
 ```
-[Created] ──(PUT response template)──► [Updated]
-   │
-   └──(DELETE — only if not linked)──► [Deleted]
-              │
-              └──(DELETE — linked)──► 409 Conflict → user must unlink from Triggers page first
+User (1) ──→ (many) Trigger ──→ (1) Action [seeded, global]
 ```
 
-### Modal lifecycle (all three management pages)
-
-```
-[List visible]
-    ├── "New" button ──────────────────────────► [Create modal open]
-    │                                                 ├── Submit ──► [API call] ──► [List updated, modal closed]
-    │                                                 └── Cancel / × ──────────────► [Modal closed]
-    ├── Edit button ──► dispatch selectItem/etc ──► [Edit modal open, form pre-filled]
-    │                                                 ├── Submit ──► [API call] ──► [List updated, modal closed]
-    │                                                 └── Cancel / × ──────────────► [Modal closed]
-    └── Delete button ───────────────────────────► [Confirmation dialog open]
-                                                      ├── Confirm ──► [API call] ──► [List updated, dialog closed]
-                                                      └── Cancel ──────────────────► [Dialog closed]
-```
+`TriggerActionMap` is removed. `Action` has no `UserId`.

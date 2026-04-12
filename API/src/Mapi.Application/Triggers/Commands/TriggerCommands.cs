@@ -7,11 +7,9 @@ using MediatR;
 
 namespace Mapi.Application.Triggers.Commands;
 
-public record CreateTriggerCommand(string Phrase) : IRequest<TriggerResponse>;
-public record UpdateTriggerCommand(Guid Id, string Phrase) : IRequest<TriggerResponse>;
+public record CreateTriggerCommand(string Phrase, Guid ActionId) : IRequest<TriggerResponse>;
+public record UpdateTriggerCommand(Guid Id, string Phrase, Guid ActionId) : IRequest<TriggerResponse>;
 public record DeleteTriggerCommand(Guid Id) : IRequest;
-public record LinkActionCommand(Guid TriggerId, Guid ActionId, int SortOrder) : IRequest;
-public record UnlinkActionCommand(Guid TriggerId, Guid ActionId) : IRequest;
 
 public class CreateTriggerCommandHandler : IRequestHandler<CreateTriggerCommand, TriggerResponse>
 {
@@ -29,12 +27,22 @@ public class CreateTriggerCommandHandler : IRequestHandler<CreateTriggerCommand,
         var trigger = new Trigger
         {
             UserId = _currentUserService.UserId,
-            Phrase = request.Phrase
+            Phrase = request.Phrase,
+            ActionId = request.ActionId
         };
 
         await _triggerRepository.AddAsync(trigger, cancellationToken);
 
-        return new TriggerResponse(trigger.Id, trigger.Phrase, trigger.CreatedAt, trigger.UpdatedAt, []);
+        var created = await _triggerRepository.GetByIdWithActionAsync(trigger.Id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Trigger), trigger.Id);
+
+        return new TriggerResponse(
+            created.Id,
+            created.Phrase,
+            created.ActionId,
+            created.Action.ActionType.ToString(),
+            created.CreatedAt,
+            created.UpdatedAt);
     }
 }
 
@@ -56,9 +64,19 @@ public class UpdateTriggerCommandHandler : IRequestHandler<UpdateTriggerCommand,
         }
 
         trigger.Phrase = request.Phrase;
+        trigger.ActionId = request.ActionId;
         await _triggerRepository.UpdateAsync(trigger, cancellationToken);
 
-        return new TriggerResponse(trigger.Id, trigger.Phrase, trigger.CreatedAt, trigger.UpdatedAt, []);
+        var updated = await _triggerRepository.GetByIdWithActionAsync(trigger.Id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Trigger), trigger.Id);
+
+        return new TriggerResponse(
+            updated.Id,
+            updated.Phrase,
+            updated.ActionId,
+            updated.Action.ActionType.ToString(),
+            updated.CreatedAt,
+            updated.UpdatedAt);
     }
 }
 
@@ -80,55 +98,5 @@ public class DeleteTriggerCommandHandler : IRequestHandler<DeleteTriggerCommand>
         }
 
         await _triggerRepository.DeleteAsync(trigger, cancellationToken);
-    }
-}
-
-public class LinkActionCommandHandler : IRequestHandler<LinkActionCommand>
-{
-    private readonly ITriggerRepository _triggerRepository;
-    private readonly ITriggerActionMapRepository _triggerActionMapRepository;
-
-    public LinkActionCommandHandler(
-        ITriggerRepository triggerRepository,
-        ITriggerActionMapRepository triggerActionMapRepository)
-    {
-        _triggerRepository = triggerRepository;
-        _triggerActionMapRepository = triggerActionMapRepository;
-    }
-
-    public async Task Handle(LinkActionCommand request, CancellationToken cancellationToken)
-    {
-        var trigger = await _triggerRepository.GetByIdAsync(request.TriggerId, cancellationToken);
-        if (trigger is null)
-        {
-            throw new NotFoundException(nameof(Trigger), request.TriggerId);
-        }
-
-        var map = new TriggerActionMap
-        {
-            TriggerId = request.TriggerId,
-            ActionId = request.ActionId,
-            SortOrder = request.SortOrder
-        };
-
-        await _triggerActionMapRepository.AddAsync(map, cancellationToken);
-    }
-}
-
-public class UnlinkActionCommandHandler : IRequestHandler<UnlinkActionCommand>
-{
-    private readonly ITriggerActionMapRepository _triggerActionMapRepository;
-
-    public UnlinkActionCommandHandler(ITriggerActionMapRepository triggerActionMapRepository)
-    {
-        _triggerActionMapRepository = triggerActionMapRepository;
-    }
-
-    public async Task Handle(UnlinkActionCommand request, CancellationToken cancellationToken)
-    {
-        await _triggerActionMapRepository.DeleteByTriggerAndActionAsync(
-            request.TriggerId,
-            request.ActionId,
-            cancellationToken);
     }
 }

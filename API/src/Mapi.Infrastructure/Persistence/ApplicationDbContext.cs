@@ -16,7 +16,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Trigger> Triggers => Set<Trigger>();
     public DbSet<Domain.Entities.Action> Actions => Set<Domain.Entities.Action>();
-    public DbSet<TriggerActionMap> TriggerActionMaps => Set<TriggerActionMap>();
 
     public void SetCurrentUserId(Guid userId)
     {
@@ -33,9 +32,6 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Trigger>()
             .HasQueryFilter(t => t.UserId == _currentUserId);
-
-        modelBuilder.Entity<Domain.Entities.Action>()
-            .HasQueryFilter(a => a.UserId == _currentUserId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

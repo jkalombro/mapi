@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Action } from '../../../actions/store/models/action.model';
 import { Trigger, TriggerRequest } from '../../store/models/trigger.model';
 
 @Component({
@@ -13,6 +14,7 @@ import { Trigger, TriggerRequest } from '../../store/models/trigger.model';
 export class TriggerFormComponent implements OnInit, OnChanges {
   editTrigger = input<Trigger | null>(null);
   isLoading = input<boolean>(false);
+  actions = input<Action[]>([]);
 
   saved = output<TriggerRequest>();
   cancelled = output<void>();
@@ -24,13 +26,17 @@ export class TriggerFormComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.form = this._fb.group({
       phrase: [this.editTrigger()?.phrase ?? '', [Validators.required, Validators.minLength(2)]],
+      actionId: [this.editTrigger()?.actionId ?? '', Validators.required],
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['editTrigger'] && this.form) {
       const trigger = changes['editTrigger'].currentValue as Trigger | null;
-      this.form.patchValue({ phrase: trigger?.phrase ?? '' });
+      this.form.patchValue({
+        phrase: trigger?.phrase ?? '',
+        actionId: trigger?.actionId ?? '',
+      });
     }
   }
 

@@ -1,74 +1,108 @@
-# API Contract: Actions Endpoints
+# API Contract: Actions & Triggers Endpoints
 
-**Feature**: `002-action-crud` | **Date**: 2026-04-12  
-**Base path**: `/api/v1/actions`  
-**Auth**: All endpoints require JWT Bearer (`RequireAuthorization()`)
+**Feature**: `002-action-crud` | **Revised**: 2026-04-12
 
 ---
 
-## GET /api/v1/actions
+## Actions Endpoints
 
-Returns all actions owned by the authenticated user.
+**Base path**: `/api/v1/actions`  
+**Auth**: JWT Bearer required
 
-**Request**: None (user identity from JWT)
+### GET /api/v1/actions
+
+Returns all 4 seeded actions. No user filtering — actions are global.
+
+**Request**: None
+
+**Response 200 OK**:
+```json
+[
+  {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "actionType": "Query",
+    "responseTemplate": "The {item} is {value}.",
+    "createdAt": "2026-04-12T00:00:00Z",
+    "updatedAt": "2026-04-12T00:00:00Z"
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000002",
+    "actionType": "Add",
+    "responseTemplate": "I've added {item}.",
+    "createdAt": "2026-04-12T00:00:00Z",
+    "updatedAt": "2026-04-12T00:00:00Z"
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000003",
+    "actionType": "Update",
+    "responseTemplate": "I've updated {item} to {value}.",
+    "createdAt": "2026-04-12T00:00:00Z",
+    "updatedAt": "2026-04-12T00:00:00Z"
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000004",
+    "actionType": "Remove",
+    "responseTemplate": "I've removed {item}.",
+    "createdAt": "2026-04-12T00:00:00Z",
+    "updatedAt": "2026-04-12T00:00:00Z"
+  }
+]
+```
+
+**No POST, PUT, or DELETE endpoints for actions.**
+
+---
+
+## Triggers Endpoints
+
+**Base path**: `/api/v1/triggers`  
+**Auth**: JWT Bearer required
+
+### GET /api/v1/triggers
+
+Returns all triggers for the authenticated user.
 
 **Response 200 OK**:
 ```json
 [
   {
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "phrase": "how much is",
+    "actionId": "00000000-0000-0000-0000-000000000001",
     "actionType": "Query",
-    "responseTemplate": "{name} costs {price}.",
     "createdAt": "2026-04-12T10:00:00Z",
     "updatedAt": "2026-04-12T10:00:00Z"
   }
 ]
 ```
 
-**Empty list**: Returns `[]` (200 OK) — not 404.
+### GET /api/v1/triggers/{id}
 
----
+Returns a single trigger by ID (must belong to the authenticated user).
 
-## GET /api/v1/actions/{id}
+**Response 200 OK**: Single `TriggerResponse` (same shape as above)  
+**Response 404 Not Found**: Trigger not found or not owned by user
 
-Returns a single action by ID (must be owned by the authenticated user).
+### POST /api/v1/triggers
 
-**Path params**: `id` (GUID)
-
-**Response 200 OK**: Single `ActionResponse` object (same shape as above)
-
-**Response 404 Not Found**:
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc7807",
-  "title": "Not Found",
-  "status": 404,
-  "detail": "Action '{id}' was not found."
-}
-```
-
----
-
-## POST /api/v1/actions
-
-Creates a new action for the authenticated user.
+Creates a new trigger. `ActionId` is required.
 
 **Request body**:
 ```json
 {
-  "actionType": "Query",
-  "responseTemplate": "{name} costs {price}."
+  "phrase": "how much is",
+  "actionId": "00000000-0000-0000-0000-000000000001"
 }
 ```
 
 | Field | Type | Constraints |
 |-------|------|-------------|
-| `actionType` | string (enum) | Required; one of: `"Query"`, `"Add"`, `"Update"`, `"Remove"` |
-| `responseTemplate` | string | Required; 1–500 characters |
+| `phrase` | string | Required; 2–200 characters |
+| `actionId` | Guid | Required; must be a valid seeded action ID |
 
 **Response 201 Created**:
-- `Location` header: `/api/v1/actions/{newId}`
-- Body: `ActionResponse` object
+- `Location` header: `/api/v1/triggers/{newId}`
+- Body: `TriggerResponse`
 
 **Response 400 Bad Request** (validation failure):
 ```json
@@ -77,75 +111,47 @@ Creates a new action for the authenticated user.
   "title": "Validation Failed",
   "status": 400,
   "errors": {
-    "ResponseTemplate": ["Response template is required."]
+    "ActionId": ["Action is required."]
   }
 }
 ```
 
----
+### PUT /api/v1/triggers/{id}
 
-## PUT /api/v1/actions/{id}
-
-Updates the response template of an existing action. **ActionType is not accepted — it is immutable after creation.**
+Updates a trigger's phrase and/or action.
 
 **Path params**: `id` (GUID)
 
 **Request body**:
 ```json
 {
-  "responseTemplate": "Updated response text here."
+  "phrase": "what is the price of",
+  "actionId": "00000000-0000-0000-0000-000000000002"
 }
 ```
 
-| Field | Type | Constraints |
-|-------|------|-------------|
-| `responseTemplate` | string | Required; 1–500 characters |
+**Response 200 OK**: Updated `TriggerResponse`  
+**Response 400 Bad Request**: Validation failure  
+**Response 404 Not Found**: Trigger not found
 
-**Response 200 OK**: Updated `ActionResponse` object
+### DELETE /api/v1/triggers/{id}
 
-**Response 400 Bad Request**: Validation failure (same structure as POST)
+Deletes a trigger.
 
-**Response 404 Not Found**: Action not found
-
----
-
-## DELETE /api/v1/actions/{id}
-
-Deletes an action. Fails with 409 if the action is linked to any trigger.
-
-**Path params**: `id` (GUID)
-
-**Response 204 No Content**: Action deleted successfully
-
-**Response 404 Not Found**: Action not found
-
-**Response 409 Conflict** (action is linked to one or more triggers):
-```json
-{
-  "type": "https://tools.ietf.org/html/rfc7807",
-  "title": "Conflict",
-  "status": 409,
-  "detail": "Action '{id}' is linked to one or more triggers and cannot be deleted."
-}
-```
+**Response 204 No Content**: Deleted  
+**Response 404 Not Found**: Trigger not found
 
 ---
 
-## ActionType Enum Values
+## Removed Endpoints
 
-The API accepts and returns these string values (case-sensitive):
+The following endpoints from the original design are **removed**:
 
-| Value | Description |
-|-------|-------------|
-| `"Query"` | Returns information about an item |
-| `"Add"` | Adds an item to inventory |
-| `"Update"` | Updates an existing item |
-| `"Remove"` | Removes an item from inventory |
-
----
-
-## Notes
-
-- Per-user data isolation is enforced at the repository layer (`GetAllByUserAsync` filters by `UserId`). No other user can read, update, or delete another user's actions.
-- The `UpdateAction` endpoint intentionally omits `actionType` from the request body. Sending `actionType` in the PUT body will not fail (extra fields are ignored by the binder), but the value will not be applied.
-- Duplicate actions (same `actionType` + same `responseTemplate`) are permitted — uniqueness is not enforced.
+| Endpoint | Reason |
+|----------|--------|
+| `POST /api/v1/actions` | Actions are seeded — no user creation |
+| `PUT /api/v1/actions/{id}` | Actions are immutable |
+| `DELETE /api/v1/actions/{id}` | Actions cannot be deleted |
+| `GET /api/v1/actions/{id}` | Not needed |
+| `POST /api/v1/triggers/{triggerId}/actions` | TriggerActionMap removed |
+| `DELETE /api/v1/triggers/{triggerId}/actions/{actionId}` | TriggerActionMap removed |

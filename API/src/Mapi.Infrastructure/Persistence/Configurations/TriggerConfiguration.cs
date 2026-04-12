@@ -16,9 +16,9 @@ public class TriggerConfiguration : IEntityTypeConfiguration<Trigger>
             .IsRequired()
             .HasMaxLength(PHRASE_MAX_LENGTH);
 
-        builder.HasMany(t => t.TriggerActionMaps)
-            .WithOne(tam => tam.Trigger)
-            .HasForeignKey(tam => tam.TriggerId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(t => t.Action)
+            .WithMany()
+            .HasForeignKey(t => t.ActionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -22,21 +22,15 @@ public class GetTriggersQueryHandler : IRequestHandler<GetTriggersQuery, IReadOn
 
     public async Task<IReadOnlyList<TriggerResponse>> Handle(GetTriggersQuery request, CancellationToken cancellationToken)
     {
-        var triggers = await _triggerRepository.GetAllWithActionsAsync(_currentUserService.UserId, cancellationToken);
+        var triggers = await _triggerRepository.GetAllByUserAsync(_currentUserService.UserId, cancellationToken);
 
         return triggers.Select(t => new TriggerResponse(
             t.Id,
             t.Phrase,
+            t.ActionId,
+            t.Action.ActionType.ToString(),
             t.CreatedAt,
-            t.UpdatedAt,
-            t.TriggerActionMaps
-                .OrderBy(m => m.SortOrder)
-                .Select(m => new TriggerActionResponse(
-                    m.ActionId,
-                    m.Action.ActionType.ToString(),
-                    m.Action.ResponseTemplate,
-                    m.SortOrder))
-                .ToList()
+            t.UpdatedAt
         )).ToList();
     }
 }
@@ -52,7 +46,7 @@ public class GetTriggerByIdQueryHandler : IRequestHandler<GetTriggerByIdQuery, T
 
     public async Task<TriggerResponse> Handle(GetTriggerByIdQuery request, CancellationToken cancellationToken)
     {
-        var trigger = await _triggerRepository.GetByIdAsync(request.Id, cancellationToken);
+        var trigger = await _triggerRepository.GetByIdWithActionAsync(request.Id, cancellationToken);
         if (trigger is null)
         {
             throw new NotFoundException("Trigger", request.Id);
@@ -61,15 +55,9 @@ public class GetTriggerByIdQueryHandler : IRequestHandler<GetTriggerByIdQuery, T
         return new TriggerResponse(
             trigger.Id,
             trigger.Phrase,
+            trigger.ActionId,
+            trigger.Action.ActionType.ToString(),
             trigger.CreatedAt,
-            trigger.UpdatedAt,
-            trigger.TriggerActionMaps
-                .OrderBy(m => m.SortOrder)
-                .Select(m => new TriggerActionResponse(
-                    m.ActionId,
-                    m.Action.ActionType.ToString(),
-                    m.Action.ResponseTemplate,
-                    m.SortOrder))
-                .ToList());
+            trigger.UpdatedAt);
     }
 }

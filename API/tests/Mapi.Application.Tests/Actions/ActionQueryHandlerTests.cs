@@ -1,7 +1,5 @@
 using Mapi.Application.Actions.Queries;
-using Mapi.Application.Common.Interfaces;
 using Mapi.Domain.Enums;
-using Mapi.Domain.Exceptions;
 using Mapi.Domain.Interfaces;
 using Moq;
 
@@ -10,126 +8,95 @@ namespace Mapi.Application.Tests.Actions;
 public class ActionQueryHandlerTests
 {
     private readonly Mock<IActionRepository> _actionRepositoryMock;
-    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-    private readonly Guid _userId = Guid.NewGuid();
-
-    private readonly GetActionsQueryHandler _getAllHandler;
-    private readonly GetActionByIdQueryHandler _getByIdHandler;
+    private readonly GetActionsQueryHandler _handler;
 
     public ActionQueryHandlerTests()
     {
         _actionRepositoryMock = new Mock<IActionRepository>();
-        _currentUserServiceMock = new Mock<ICurrentUserService>();
-        _currentUserServiceMock.Setup(s => s.UserId).Returns(_userId);
-
-        _getAllHandler = new GetActionsQueryHandler(_actionRepositoryMock.Object, _currentUserServiceMock.Object);
-        _getByIdHandler = new GetActionByIdQueryHandler(_actionRepositoryMock.Object);
+        _handler = new GetActionsQueryHandler(_actionRepositoryMock.Object);
     }
 
     [Fact]
-    public async Task GetActions_WhenUserHasActions_ReturnsActionList()
+    public async Task GetActions_WhenSeededActionsExist_ReturnsAllActions()
     {
         // Arrange
-        var actions = new List<Domain.Entities.Action>
+        var seededActions = new List<Domain.Entities.Action>
         {
-            new() { Id = Guid.NewGuid(), UserId = _userId, ActionType = ActionType.Query, ResponseTemplate = "Template 1" },
-            new() { Id = Guid.NewGuid(), UserId = _userId, ActionType = ActionType.Add, ResponseTemplate = "Template 2" },
+            new() { Id = new Guid("00000000-0000-0000-0000-000000000001"), ActionType = ActionType.Query,  ResponseTemplate = "The {item} is {value}." },
+            new() { Id = new Guid("00000000-0000-0000-0000-000000000002"), ActionType = ActionType.Add,    ResponseTemplate = "I've added {item}." },
+            new() { Id = new Guid("00000000-0000-0000-0000-000000000003"), ActionType = ActionType.Update, ResponseTemplate = "I've updated {item} to {value}." },
+            new() { Id = new Guid("00000000-0000-0000-0000-000000000004"), ActionType = ActionType.Remove, ResponseTemplate = "I've removed {item}." },
         };
         _actionRepositoryMock
-            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(actions);
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(seededActions);
 
         // Act
-        var result = await _getAllHandler.Handle(new GetActionsQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetActionsQuery(), CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-        Assert.Contains(result, a => a.ResponseTemplate == "Template 1");
-        Assert.Contains(result, a => a.ResponseTemplate == "Template 2");
+        Assert.Equal(4, result.Count);
+        Assert.Contains(result, a => a.ActionType == ActionType.Query);
+        Assert.Contains(result, a => a.ActionType == ActionType.Add);
+        Assert.Contains(result, a => a.ActionType == ActionType.Update);
+        Assert.Contains(result, a => a.ActionType == ActionType.Remove);
     }
 
     [Fact]
-    public async Task GetActions_WhenUserHasNoActions_ReturnsEmptyList()
+    public async Task GetActions_MapsActionTypeAndResponseTemplate_Correctly()
+    {
+        // Arrange
+        var queryActionId = new Guid("00000000-0000-0000-0000-000000000001");
+        _actionRepositoryMock
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Domain.Entities.Action>
+            {
+                new() { Id = queryActionId, ActionType = ActionType.Query, ResponseTemplate = "The {item} is {value}." }
+            });
+
+        // Act
+        var result = await _handler.Handle(new GetActionsQuery(), CancellationToken.None);
+
+        // Assert
+        var action = result.Single();
+        Assert.Equal(queryActionId, action.Id);
+        Assert.Equal(ActionType.Query, action.ActionType);
+        Assert.Equal("The {item} is {value}.", action.ResponseTemplate);
+    }
+
+    [Fact]
+    public async Task GetActions_DoesNotFilterByUser_ReturnsGlobalActions()
+    {
+        // Arrange — repository returns actions without any user filter involved
+        _actionRepositoryMock
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Domain.Entities.Action>
+            {
+                new() { Id = Guid.NewGuid(), ActionType = ActionType.Query, ResponseTemplate = "Template" }
+            });
+
+        // Act
+        var result = await _handler.Handle(new GetActionsQuery(), CancellationToken.None);
+
+        // Assert — GetAllAsync called without any user ID argument
+        _actionRepositoryMock.Verify(r => r.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Single(result);
+    }
+
+    [Fact]
+    public async Task GetActions_WhenRepositoryReturnsEmpty_ReturnsEmptyList()
     {
         // Arrange
         _actionRepositoryMock
-            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Domain.Entities.Action>());
 
         // Act
-        var result = await _getAllHandler.Handle(new GetActionsQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetActionsQuery(), CancellationToken.None);
 
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetActions_ExcludesOtherUsersActions()
-    {
-        // Arrange
-        var otherUserId = Guid.NewGuid();
-        var myActions = new List<Domain.Entities.Action>
-        {
-            new() { Id = Guid.NewGuid(), UserId = _userId, ActionType = ActionType.Query, ResponseTemplate = "My Template" },
-        };
-        _actionRepositoryMock
-            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(myActions);
-        _actionRepositoryMock
-            .Setup(r => r.GetAllByUserAsync(otherUserId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Domain.Entities.Action>
-            {
-                new() { Id = Guid.NewGuid(), UserId = otherUserId, ActionType = ActionType.Query, ResponseTemplate = "Other Template" },
-            });
-
-        // Act
-        var result = await _getAllHandler.Handle(new GetActionsQuery(), CancellationToken.None);
-
-        // Assert
-        Assert.Single(result);
-        Assert.Equal("My Template", result[0].ResponseTemplate);
-        _actionRepositoryMock.Verify(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task GetActionById_WhenActionExists_ReturnsActionResponse()
-    {
-        // Arrange
-        var actionId = Guid.NewGuid();
-        var action = new Domain.Entities.Action
-        {
-            Id = actionId,
-            UserId = _userId,
-            ActionType = ActionType.Query,
-            ResponseTemplate = "Template content"
-        };
-        _actionRepositoryMock
-            .Setup(r => r.GetByIdAsync(actionId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(action);
-
-        // Act
-        var result = await _getByIdHandler.Handle(new GetActionByIdQuery(actionId), CancellationToken.None);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(actionId, result.Id);
-        Assert.Equal(ActionType.Query, result.ActionType);
-        Assert.Equal("Template content", result.ResponseTemplate);
-    }
-
-    [Fact]
-    public async Task GetActionById_WhenActionNotFound_ThrowsNotFoundException()
-    {
-        // Arrange
-        var actionId = Guid.NewGuid();
-        _actionRepositoryMock
-            .Setup(r => r.GetByIdAsync(actionId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Action?)null);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() =>
-            _getByIdHandler.Handle(new GetActionByIdQuery(actionId), CancellationToken.None));
     }
 }

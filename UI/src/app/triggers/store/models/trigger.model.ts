@@ -1,29 +1,20 @@
-export interface TriggerAction {
-  actionId: string;
-  actionType: string;
-  responseTemplate: string;
-  sortOrder: number;
-}
-
 export interface Trigger {
   id: string;
   phrase: string;
+  actionId: string;
+  actionType: string;
   createdAt: string;
   updatedAt: string;
-  actions: TriggerAction[];
 }
 
 export interface TriggerRequest {
   phrase: string;
+  actionId: string;
 }
 
 export interface UpdateTriggerRequest {
   phrase: string;
-}
-
-export interface ActionLinkRequest {
   actionId: string;
-  sortOrder: number;
 }
 
 export interface TriggersState {

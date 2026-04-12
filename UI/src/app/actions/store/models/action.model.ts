@@ -6,18 +6,8 @@ export interface Action {
   updatedAt: string;
 }
 
-export interface CreateActionRequest {
-  actionType: string;
-  responseTemplate: string;
-}
-
-export interface UpdateActionRequest {
-  responseTemplate: string;
-}
-
 export interface ActionsState {
   actions: Action[];
   isLoading: boolean;
   error: string | null;
-  selectedAction: Action | null;
 }

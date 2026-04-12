@@ -88,7 +88,7 @@ public partial class CommandService : ICommandService
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var triggers = await _triggerRepository.GetAllWithActionsAsync(userId, cancellationToken);
+        var triggers = await _triggerRepository.GetAllByUserAsync(userId, cancellationToken);
 
         var matchedTrigger = triggers
             .Where(t => transcript.StartsWith(t.Phrase.ToLowerInvariant(), StringComparison.OrdinalIgnoreCase))
@@ -101,15 +101,7 @@ public partial class CommandService : ICommandService
         }
 
         var suffix = transcript[matchedTrigger.Phrase.Length..].Trim();
-        var responseText = string.Empty;
-
-        foreach (var action in matchedTrigger.TriggerActionMaps
-            .OrderBy(m => m.SortOrder)
-            .ThenBy(m => m.CreatedAt)
-            .Select(m => m.Action))
-        {
-            responseText = await ExecuteActionAsync(action, suffix, userId, cancellationToken);
-        }
+        var responseText = await ExecuteActionAsync(matchedTrigger.Action, suffix, userId, cancellationToken);
 
         return new VoiceCommandResult(responseText);
     }
@@ -128,8 +120,8 @@ public partial class CommandService : ICommandService
 
         var item = items[0];
         return action.ResponseTemplate
-            .Replace("{name}", item.ItemName)
-            .Replace("{price}", FormatPrice(item.Price));
+            .Replace("{item}", item.ItemName)
+            .Replace("{value}", FormatPrice(item.Price));
     }
 
     private async Task<VoiceCommandResult> HandlePriceQueryAsync(

@@ -15,16 +15,15 @@ public class TriggerRepository : GenericRepository<Trigger>, ITriggerRepository
         return await _context.Triggers
             .IgnoreQueryFilters()
             .Where(t => t.UserId == userId)
+            .Include(t => t.Action)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Trigger>> GetAllWithActionsAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Trigger?> GetByIdWithActionAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Triggers
             .IgnoreQueryFilters()
-            .Where(t => t.UserId == userId)
-            .Include(t => t.TriggerActionMaps)
-                .ThenInclude(tam => tam.Action)
-            .ToListAsync(cancellationToken);
+            .Include(t => t.Action)
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 }

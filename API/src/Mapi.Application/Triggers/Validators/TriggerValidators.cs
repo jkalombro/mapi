@@ -12,6 +12,9 @@ public class CreateTriggerCommandValidator : AbstractValidator<CreateTriggerComm
         RuleFor(x => x.Phrase)
             .NotEmpty().WithMessage("Trigger phrase is required.")
             .MaximumLength(MAX_PHRASE_LENGTH).WithMessage($"Trigger phrase must not exceed {MAX_PHRASE_LENGTH} characters.");
+
+        RuleFor(x => x.ActionId)
+            .NotEmpty().WithMessage("Action is required.");
     }
 }
 
@@ -27,6 +30,9 @@ public class UpdateTriggerCommandValidator : AbstractValidator<UpdateTriggerComm
         RuleFor(x => x.Phrase)
             .NotEmpty().WithMessage("Trigger phrase is required.")
             .MaximumLength(MAX_PHRASE_LENGTH).WithMessage($"Trigger phrase must not exceed {MAX_PHRASE_LENGTH} characters.");
+
+        RuleFor(x => x.ActionId)
+            .NotEmpty().WithMessage("Action is required.");
     }
 }
 
@@ -36,17 +42,5 @@ public class DeleteTriggerCommandValidator : AbstractValidator<DeleteTriggerComm
     {
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Trigger ID is required.");
-    }
-}
-
-public class LinkActionCommandValidator : AbstractValidator<LinkActionCommand>
-{
-    public LinkActionCommandValidator()
-    {
-        RuleFor(x => x.TriggerId)
-            .NotEmpty().WithMessage("Trigger ID is required.");
-
-        RuleFor(x => x.ActionId)
-            .NotEmpty().WithMessage("Action ID is required.");
     }
 }
