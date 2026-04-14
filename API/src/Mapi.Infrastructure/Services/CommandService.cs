@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Mapi.Application.Common.Interfaces;
 using Mapi.Application.Voice.DTOs;
+using Mapi.Domain.Enums;
 using Mapi.Domain.Interfaces;
 
 namespace Mapi.Infrastructure.Services;
@@ -80,7 +81,7 @@ public partial class CommandService : ICommandService
         await _itemRepository.UpdateAsync(existing, cancellationToken);
 
         var priceFormatted = FormatPrice(price);
-        return new VoiceCommandResult($"Done. {existing.ItemName} is now {priceFormatted}.");
+        return new VoiceCommandResult($"Done. {existing.ItemName} is now {priceFormatted}.", ItemsModified: true);
     }
 
     private async Task<VoiceCommandResult?> TryMatchTriggerAsync(
@@ -101,12 +102,10 @@ public partial class CommandService : ICommandService
         }
 
         var suffix = transcript[matchedTrigger.Phrase.Length..].Trim();
-        var responseText = await ExecuteActionAsync(matchedTrigger.Action, suffix, userId, cancellationToken);
-
-        return new VoiceCommandResult(responseText);
+        return await ExecuteActionAsync(matchedTrigger.Action, suffix, userId, cancellationToken);
     }
 
-    private async Task<string> ExecuteActionAsync(
+    private async Task<VoiceCommandResult> ExecuteActionAsync(
         Domain.Entities.Action action,
         string suffix,
         Guid userId,
@@ -115,13 +114,21 @@ public partial class CommandService : ICommandService
         var items = await _itemRepository.FindByNameAsync(suffix, userId, cancellationToken);
         if (items.Count == 0)
         {
-            return RESPONSE_ITEM_NOT_FOUND;
+            return new VoiceCommandResult(RESPONSE_ITEM_NOT_FOUND);
         }
 
         var item = items[0];
-        return action.ResponseTemplate
+        var responseText = action.ResponseTemplate
             .Replace("{item}", item.ItemName)
             .Replace("{value}", FormatPrice(item.Price));
+
+        if (action.ActionType == ActionType.Remove)
+        {
+            await _itemRepository.DeleteAsync(item, cancellationToken);
+            return new VoiceCommandResult(responseText, ItemsModified: true);
+        }
+
+        return new VoiceCommandResult(responseText);
     }
 
     private async Task<VoiceCommandResult> HandlePriceQueryAsync(
@@ -174,7 +181,7 @@ public partial class CommandService : ICommandService
         var added = RESPONSE_ITEM_ADDED
             .Replace("{name}", name)
             .Replace("{price}", priceFormatted);
-        return new VoiceCommandResult(added);
+        return new VoiceCommandResult(added, ItemsModified: true);
     }
 
     private static string FormatPrice(decimal price)

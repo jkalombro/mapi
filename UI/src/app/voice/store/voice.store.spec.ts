@@ -12,12 +12,14 @@ import {
 } from './actions/voice.actions';
 import { initialVoiceState, voiceReducer, selectCommandResult, selectIsConfirmationRequired, selectIsListening, selectIsProcessing } from './reducers/voice.reducer';
 import { VoiceCommandResult } from './models/voice.model';
+import { loadItems } from '../../items/store/actions/items.actions';
 
 const mockResult: VoiceCommandResult = {
   responseText: 'Milk costs 50 pesos.',
   isAmbiguous: false,
   isConfirmationRequired: false,
   matchedNames: null,
+  itemsModified: false,
 };
 
 // ── Reducer Tests ─────────────────────────────────────────────────────────────
@@ -193,6 +195,41 @@ describe('VoiceEffects', () => {
     effects.confirmAdd$.subscribe((action) => {
       expect(action).toEqual(confirmAddFailure({ error: 'Confirmation failed.' }));
       done();
+    });
+  });
+
+  it('should dispatch loadItems when commandSuccess has itemsModified=true', (done) => {
+    const mutatingResult: VoiceCommandResult = { ...mockResult, itemsModified: true };
+
+    actions$ = of(commandSuccess({ result: mutatingResult }));
+
+    effects.refetchItemsAfterMutation$.subscribe((action) => {
+      expect(action).toEqual(loadItems());
+      done();
+    });
+  });
+
+  it('should dispatch loadItems when confirmAddSuccess has itemsModified=true', (done) => {
+    const mutatingResult: VoiceCommandResult = { ...mockResult, itemsModified: true };
+
+    actions$ = of(confirmAddSuccess({ result: mutatingResult }));
+
+    effects.refetchItemsAfterMutation$.subscribe((action) => {
+      expect(action).toEqual(loadItems());
+      done();
+    });
+  });
+
+  it('should not dispatch loadItems when commandSuccess has itemsModified=false', (done) => {
+    const dispatched: unknown[] = [];
+    actions$ = of(commandSuccess({ result: mockResult }));
+
+    effects.refetchItemsAfterMutation$.subscribe({
+      next: (action) => dispatched.push(action),
+      complete: () => {
+        expect(dispatched).toHaveLength(0);
+        done();
+      },
     });
   });
 });

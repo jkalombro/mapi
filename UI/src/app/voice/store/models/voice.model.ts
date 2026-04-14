@@ -3,6 +3,7 @@ export interface VoiceCommandResult {
   isAmbiguous: boolean;
   isConfirmationRequired: boolean;
   matchedNames: string[] | null;
+  itemsModified: boolean;
 }
 
 export interface VoiceState {

@@ -42,6 +42,12 @@ public class TriggersStepDefinitions
         await CreateTriggerAsync(phrase, QUERY_ACTION_ID);
     }
 
+    [Given(@"I have a trigger with phrase ""(.*)"" and the Remove action")]
+    public async Task GivenIHaveATriggerWithRemoveAction(string phrase)
+    {
+        await CreateTriggerAsync(phrase, REMOVE_ACTION_ID);
+    }
+
     [When(@"I update the trigger phrase to ""(.*)"" and assign the Add action")]
     public async Task WhenIUpdateTheTriggerPhraseAndAssignAddAction(string phrase)
     {

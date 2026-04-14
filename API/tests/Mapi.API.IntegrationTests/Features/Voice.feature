@@ -44,3 +44,18 @@ Feature: Voice Commands
     When I send a confirm-add request for "Milk" with price 60
     Then the response status should be 200
     And the voice response should contain "60"
+
+  Scenario: Remove trigger deletes the matched item
+    Given I have a trigger with phrase "remove" and the Remove action
+    When I send a voice command "remove Milk"
+    Then the response status should be 200
+    And the voice response should contain "Milk"
+    When I request GET "/api/v1/items"
+    Then the response status should be 200
+    And the items list should not contain "Milk"
+
+  Scenario: Remove trigger with unknown item returns not found
+    Given I have a trigger with phrase "remove" and the Remove action
+    When I send a voice command "remove Unknown"
+    Then the response status should be 200
+    And the voice response should contain "couldn't find"

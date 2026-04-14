@@ -105,6 +105,75 @@ public class CommandServiceTriggerTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_WhenTriggerWithRemoveActionMatchesItem_CallsDeleteAndReturnsTemplate()
+    {
+        // Arrange
+        var item = new Item { ItemName = "Milk", BisayaName = "Gatas", Price = 50m };
+        var action = new Domain.Entities.Action
+        {
+            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+            ActionType = ActionType.Remove,
+            ResponseTemplate = "I've removed {item}."
+        };
+        var trigger = new Trigger
+        {
+            UserId = _userId,
+            Phrase = "remove",
+            ActionId = action.Id,
+            Action = action
+        };
+
+        _triggerRepositoryMock
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Trigger> { trigger });
+        _itemRepositoryMock
+            .Setup(r => r.FindByNameAsync("milk", _userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Item> { item });
+
+        // Act
+        var result = await _service.ExecuteAsync("remove milk", _userId);
+
+        // Assert
+        _itemRepositoryMock.Verify(r => r.DeleteAsync(item, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Contains("Milk", result.ResponseText);
+        Assert.True(result.ItemsModified);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenTriggerWithRemoveActionButItemNotFound_DoesNotDeleteAndReturnsNotFound()
+    {
+        // Arrange
+        var action = new Domain.Entities.Action
+        {
+            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+            ActionType = ActionType.Remove,
+            ResponseTemplate = "I've removed {item}."
+        };
+        var trigger = new Trigger
+        {
+            UserId = _userId,
+            Phrase = "remove",
+            ActionId = action.Id,
+            Action = action
+        };
+
+        _triggerRepositoryMock
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Trigger> { trigger });
+        _itemRepositoryMock
+            .Setup(r => r.FindByNameAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Item>());
+
+        // Act
+        var result = await _service.ExecuteAsync("remove unknown", _userId);
+
+        // Assert
+        _itemRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Item>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Contains("couldn't find", result.ResponseText);
+        Assert.False(result.ItemsModified);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_WhenLongerTriggerPhraseMatches_UsesMostSpecificTrigger()
     {
         // Arrange

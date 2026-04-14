@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { SpeechSynthesisService } from '../../../shared/services/speech-synthesis.service';
 import { VoiceApiService } from '../api/voice.service';
 import { commandFailure, commandSuccess, confirmAdd, confirmAddFailure, confirmAddSuccess, sendCommand } from '../actions/voice.actions';
+import { loadItems } from '../../../items/store/actions/items.actions';
 
 @Injectable()
 export class VoiceEffects {
@@ -46,6 +47,14 @@ export class VoiceEffects {
         tap(({ result }) => this.speechSynthesis.speak(result.responseText))
       ),
     { dispatch: false }
+  );
+
+  readonly refetchItemsAfterMutation$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commandSuccess, confirmAddSuccess),
+      filter(({ result }) => result.itemsModified),
+      map(() => loadItems())
+    )
   );
 
 }
