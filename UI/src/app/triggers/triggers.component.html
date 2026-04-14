@@ -1,52 +1,114 @@
 <section class="triggers">
   <div class="triggers__header">
-    <h1 class="triggers__title">Triggers</h1>
+    <div class="triggers__heading">
+      <h1 class="triggers__title">Triggers</h1>
+      <span class="triggers__count" aria-live="polite">
+        {{ triggers().length }} {{ triggers().length === 1 ? 'trigger' : 'triggers' }}
+      </span>
+    </div>
     <button
       type="button"
-      class="btn btn--primary"
+      class="triggers__add-btn"
       (click)="onAddTriggerClick()"
       aria-label="Add new trigger"
     >
-      + Add Trigger
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      Add Trigger
     </button>
   </div>
 
   @if (isLoading() && triggers().length === 0) {
-    <p class="triggers__loading" aria-live="polite">Loading triggers…</p>
+    <div class="triggers__loading" aria-live="polite" aria-busy="true">
+      @for (_ of [1, 2, 3]; track $index) {
+        <div class="triggers__skeleton"></div>
+      }
+    </div>
   }
 
   @if (!isLoading() && triggers().length === 0) {
-    <p class="triggers__empty">No triggers yet. Add one to get started.</p>
+    <div class="triggers__empty">
+      <div class="triggers__empty-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>
+      </div>
+      <p class="triggers__empty-title">No triggers yet</p>
+      <p class="triggers__empty-body">Create a voice trigger to automate your store actions.</p>
+    </div>
   }
 
-  <ul class="trigger-list" role="list">
-    @for (trigger of triggers(); track trigger.id) {
-      <li class="trigger-card">
-        <div class="trigger-card__header">
-          <span class="trigger-card__phrase" aria-label="Trigger phrase">{{ trigger.phrase }}</span>
-          <span class="trigger-card__action-type" aria-label="Action type">{{ trigger.actionType }}</span>
+  @if (triggers().length > 0) {
+    <ul class="trigger-list" role="list">
+      @for (trigger of triggers(); track trigger.id) {
+        <li class="trigger-card">
+          <div
+            class="trigger-card__icon"
+            [class]="'trigger-card__icon--' + getActionTypeClass(trigger.actionType)"
+            aria-hidden="true"
+          >
+            @switch (trigger.actionType.toLowerCase()) {
+              @case ('add') {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+              }
+              @case ('query') {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+              }
+              @case ('update') {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              }
+              @case ('delete') {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              }
+              @default {
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/>
+                </svg>
+              }
+            }
+          </div>
+          <div class="trigger-card__body">
+            <span class="trigger-card__phrase">"{{ trigger.phrase }}"</span>
+            <span
+              class="trigger-card__action-badge"
+              [class]="'trigger-card__action-badge--' + getActionTypeClass(trigger.actionType)"
+            >{{ trigger.actionType }}</span>
+          </div>
           <div class="trigger-card__controls">
             <button
               type="button"
-              class="btn btn--secondary btn--sm"
-              (click)="onEditTriggerClick(trigger)"
+              class="trigger-card__btn trigger-card__btn--edit"
+              title="Edit trigger"
               [attr.aria-label]="'Edit trigger: ' + trigger.phrase"
+              (click)="onEditTriggerClick(trigger)"
             >
-              Edit
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
             </button>
             <button
               type="button"
-              class="btn btn--danger btn--sm"
-              (click)="onDeleteTrigger(trigger.id)"
+              class="trigger-card__btn trigger-card__btn--delete"
+              title="Delete trigger"
               [attr.aria-label]="'Delete trigger: ' + trigger.phrase"
+              (click)="onDeleteTrigger(trigger.id)"
             >
-              Delete
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg>
             </button>
           </div>
-        </div>
-      </li>
-    }
-  </ul>
+        </li>
+      }
+    </ul>
+  }
 
   <app-modal
     [isVisible]="showCreateModal()"

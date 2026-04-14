@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MicIconComponent } from './shared/components/mic-icon/mic-icon.component';
@@ -19,11 +19,12 @@ import {
   selectIsListening,
 } from './voice/store/reducers/voice.reducer';
 import { selectIsAuthenticated } from './store/reducers/auth.reducer';
+import { logout } from './store/actions/auth.actions';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, MicIconComponent, ConfirmationDialogComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MicIconComponent, ConfirmationDialogComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit {
   isConfirmationRequired = toSignal(this._store.select(selectIsConfirmationRequired), { initialValue: false });
   commandResult = toSignal(this._store.select(selectCommandResult), { initialValue: null });
   isSupported = this._speechService.isSupported;
+  interimTranscript = this._speechService.interimTranscript;
 
   ngOnInit(): void {
     this._speechService.transcript$.subscribe((transcript) => {
@@ -72,5 +74,9 @@ export class AppComponent implements OnInit {
 
   onDismissConfirmation(): void {
     this._store.dispatch(dismissConfirmation());
+  }
+
+  onLogout(): void {
+    this._store.dispatch(logout());
   }
 }

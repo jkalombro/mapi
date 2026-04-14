@@ -2,131 +2,245 @@
 @use '../../../../assets/styles/variables' as *;
 @use '../../../../assets/styles/mixins' as *;
 
+// ============================================================
+// Item List
+// ============================================================
+
 .item-list {
-  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  @include flex-column;
+  gap: $spacing-sm;
+}
+
+// ============================================================
+// Row
+// ============================================================
+
+.item-list__row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: $spacing-md;
+  background-color: $color-surface;
   border: 1px solid $color-border;
   border-radius: $border-radius-md;
-  overflow: hidden;
+  padding: $spacing-md $spacing-lg;
+  transition:
+    box-shadow $transition-fast,
+    transform $transition-fast,
+    border-color $transition-fast;
 
-  &__header {
-    display: grid;
-    grid-template-columns: 2fr 2fr 1fr auto;
-    background-color: $color-background;
-    padding: $spacing-sm $spacing-md;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: $color-text-secondary;
-    border-bottom: 1px solid $color-border;
-
-    @include mobile {
-      display: none;
-    }
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+    border-color: color.adjust($color-primary, $lightness: 28%);
   }
 
-  &__row {
-    display: grid;
-    grid-template-columns: 2fr 2fr 1fr auto;
-    padding: $spacing-md;
-    border-bottom: 1px solid $color-border;
-    align-items: center;
-    transition: background-color $transition-fast;
+  @media (max-width: 540px) {
+    grid-template-columns: 40px 1fr auto;
+    grid-template-rows: auto auto;
 
-    &:last-child {
-      border-bottom: none;
+    .item-list__price-wrap {
+      grid-column: 3;
+      grid-row: 1;
     }
 
-    &:hover {
-      background-color: $color-background;
-    }
-
-    @include mobile {
-      grid-template-columns: 1fr;
-      gap: $spacing-xs;
-    }
-  }
-
-  &__col {
-    font-size: $font-size-base;
-    color: $color-text-primary;
-
-    &--price {
-      font-weight: $font-weight-medium;
-      color: $color-primary;
-    }
-
-    &--actions {
-      display: flex;
-      gap: $spacing-sm;
+    .item-list__actions {
+      grid-column: 2 / 4;
+      grid-row: 2;
       justify-content: flex-end;
     }
   }
+}
 
-  &__btn {
-    padding: $spacing-xs $spacing-md;
-    border: none;
-    border-radius: $border-radius-sm;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    cursor: pointer;
-    transition: background-color $transition-fast;
+// ============================================================
+// Avatar
+// ============================================================
 
-    &:focus-visible {
-      @include focus-visible;
-    }
+.item-list__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: $border-radius-full;
+  @include flex-center;
+  color: $color-text-on-primary;
+  flex-shrink: 0;
 
-    &--edit {
-      background-color: $color-info;
-      color: $color-text-on-primary;
+  svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
 
-      &:hover {
-        background-color: color.adjust($color-info, $lightness: -10%);
-      }
-    }
+  &--indigo  { background-color: #4f46e5; }
+  &--teal    { background-color: #0d9488; }
+  &--rose    { background-color: #e11d48; }
+  &--amber   { background-color: #d97706; }
+  &--violet  { background-color: #7c3aed; }
+  &--emerald { background-color: #059669; }
+}
 
-    &--delete {
-      background-color: $color-danger;
-      color: $color-text-on-primary;
+// ============================================================
+// Info
+// ============================================================
 
-      &:hover {
-        background-color: color.adjust($color-danger, $lightness: -10%);
-      }
+.item-list__info {
+  @include flex-column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-list__name {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include truncate;
+}
+
+.item-list__bisaya {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  @include truncate;
+}
+
+// ============================================================
+// Price
+// ============================================================
+
+.item-list__price-wrap {
+  flex-shrink: 0;
+}
+
+.item-list__price {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  white-space: nowrap;
+  text-align: right;
+}
+
+// ============================================================
+// Action Buttons
+// ============================================================
+
+.item-list__actions {
+  display: flex;
+  gap: $spacing-xs;
+  flex-shrink: 0;
+}
+
+.item-list__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: $border-radius-sm;
+  border: 1px solid transparent;
+  cursor: pointer;
+  @include flex-center;
+  transition:
+    background-color $transition-fast,
+    border-color $transition-fast,
+    color $transition-fast;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    @include focus-visible;
+  }
+
+  &--edit {
+    background-color: color.adjust($color-info, $lightness: 42%);
+    color: $color-info;
+    border-color: color.adjust($color-info, $lightness: 30%);
+
+    &:hover {
+      background-color: color.adjust($color-info, $lightness: 34%);
+      border-color: $color-info;
     }
   }
 
-  &__empty {
-    padding: $spacing-xxl $spacing-md;
-    text-align: center;
-    color: $color-text-secondary;
-    font-size: $font-size-base;
-    border: 1px solid $color-border;
-    border-radius: $border-radius-md;
-  }
+  &--delete {
+    background-color: color.adjust($color-danger, $lightness: 42%);
+    color: $color-danger;
+    border-color: color.adjust($color-danger, $lightness: 30%);
 
-  &__loading {
-    @include flex-column;
-    gap: $spacing-sm;
-  }
-
-  &__skeleton {
-    height: 56px;
-    background: linear-gradient(
-      90deg,
-      $color-border 25%,
-      color.adjust($color-border, $lightness: 10%) 50%,
-      $color-border 75%
-    );
-    background-size: 200% 100%;
-    border-radius: $border-radius-sm;
-    animation: shimmer 1.5s infinite;
+    &:hover {
+      background-color: color.adjust($color-danger, $lightness: 34%);
+      border-color: $color-danger;
+    }
   }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
+// ============================================================
+// Empty State
+// ============================================================
 
-  100% {
-    background-position: -200% 0;
+.item-list__empty {
+  @include flex-column;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-xxl $spacing-md;
+  text-align: center;
+  border: 2px dashed $color-border;
+  border-radius: $border-radius-lg;
+}
+
+.item-list__empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: $border-radius-full;
+  background-color: $color-surface-alt;
+  @include flex-center;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    fill: $color-text-disabled;
   }
+}
+
+.item-list__empty-title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin: 0;
+}
+
+.item-list__empty-body {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+// ============================================================
+// Loading Skeleton
+// ============================================================
+
+.item-list__loading {
+  @include flex-column;
+  gap: $spacing-sm;
+}
+
+.item-list__skeleton {
+  height: 72px;
+  background: linear-gradient(
+    90deg,
+    $color-border 25%,
+    color.adjust($color-border, $lightness: 6%) 50%,
+    $color-border 75%
+  );
+  background-size: 200% 100%;
+  border-radius: $border-radius-md;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

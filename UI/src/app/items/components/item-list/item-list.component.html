@@ -1,45 +1,65 @@
 @if (isLoading()) {
   <div class="item-list__loading" aria-label="Loading items" aria-busy="true">
-    @for (_ of [1, 2, 3]; track $index) {
+    @for (_ of [1, 2, 3, 4, 5]; track $index) {
       <div class="item-list__skeleton"></div>
     }
   </div>
 } @else if (items().length === 0) {
   <div class="item-list__empty">
-    <p>No items yet. Add your first item to get started.</p>
+    <div class="item-list__empty-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.01 15.99 0 13.34 0c-1.3 0-2.43.52-3.27 1.35L9 2.46 7.93 1.35C7.09.52 5.96 0 4.66 0 2.01 0 0 2.01 0 4.66c0 .46.11.9.18 1.34H0v2h20v-2zM9 20H7v2h10v-2h-2V9H9v11z"/></svg>
+    </div>
+    <p class="item-list__empty-title">No items yet</p>
+    <p class="item-list__empty-body">Add your first product to get started.</p>
   </div>
 } @else {
-  <div class="item-list" role="list" aria-label="Item list">
-    <div class="item-list__header" role="row" aria-hidden="true">
-      <span class="item-list__col item-list__col--name">Item Name</span>
-      <span class="item-list__col item-list__col--bisaya">Bisaya Name</span>
-      <span class="item-list__col item-list__col--price">Price</span>
-      <span class="item-list__col item-list__col--actions">Actions</span>
-    </div>
+  <ul class="item-list" role="list" aria-label="Item list">
     @for (item of items(); track item.id) {
-      <div class="item-list__row" role="listitem">
-        <span class="item-list__col item-list__col--name">{{ item.itemName }}</span>
-        <span class="item-list__col item-list__col--bisaya">{{ item.bisayaName }}</span>
-        <span class="item-list__col item-list__col--price">₱{{ item.price }}</span>
-        <span class="item-list__col item-list__col--actions">
+      <li class="item-list__row" role="listitem">
+        <div
+          class="item-list__avatar"
+          [class]="'item-list__avatar--' + getAvatarColor(item.itemName)"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+          </svg>
+        </div>
+
+        <div class="item-list__info">
+          <span class="item-list__name">{{ item.itemName }}</span>
+          <span class="item-list__bisaya">{{ item.bisayaName }}</span>
+        </div>
+
+        <div class="item-list__price-wrap">
+          <span class="item-list__price">₱{{ item.price }}</span>
+        </div>
+
+        <div class="item-list__actions">
           <button
             type="button"
             class="item-list__btn item-list__btn--edit"
+            title="Edit {{ item.itemName }}"
             [attr.aria-label]="'Edit ' + item.itemName"
             (click)="onEdit(item)"
           >
-            Edit
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
           </button>
           <button
             type="button"
             class="item-list__btn item-list__btn--delete"
+            title="Delete {{ item.itemName }}"
             [attr.aria-label]="'Delete ' + item.itemName"
             (click)="onDelete(item.id)"
           >
-            Delete
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
           </button>
-        </span>
-      </div>
+        </div>
+      </li>
     }
-  </div>
+  </ul>
 }

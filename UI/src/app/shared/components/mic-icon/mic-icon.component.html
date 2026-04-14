@@ -1,23 +1,32 @@
 @if (isSupported()) {
-  <button
-    type="button"
-    class="mic-icon"
-    [class.mic-icon--active]="isActive()"
-    [disabled]="isDisabled()"
-    [attr.aria-label]="isActive() ? 'Stop listening' : 'Start listening'"
-    [attr.aria-pressed]="isActive()"
-    (click)="onClick()"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      class="mic-icon__svg"
-      aria-hidden="true"
-      focusable="false"
+  <div class="mic-wrapper">
+    <button
+      type="button"
+      class="mic-icon"
+      [class.mic-icon--active]="isActive()"
+      [disabled]="isDisabled()"
+      [attr.aria-label]="isActive() ? 'Stop listening' : 'Start listening'"
+      [attr.aria-pressed]="isActive()"
+      (click)="onClick()"
     >
-      <path
-        d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V20H9v2h6v-2h-2v-2.07A7 7 0 0 0 19 11h-2z"
-      />
-    </svg>
-  </button>
+      @if (isActive()) {
+        <span class="mic-icon__ring mic-icon__ring--1" aria-hidden="true"></span>
+        <span class="mic-icon__ring mic-icon__ring--2" aria-hidden="true"></span>
+      }
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="mic-icon__svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V20H9v2h6v-2h-2v-2.07A7 7 0 0 0 19 11h-2z"
+        />
+      </svg>
+    </button>
+    <span class="mic-wrapper__label" aria-live="polite">
+      {{ isActive() ? 'Listening…' : 'Tap to speak' }}
+    </span>
+  </div>
 }

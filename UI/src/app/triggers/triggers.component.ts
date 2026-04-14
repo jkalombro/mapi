@@ -88,4 +88,8 @@ export class TriggersComponent implements OnInit {
   trackById(_index: number, item: Trigger): string {
     return item.id;
   }
+
+  getActionTypeClass(actionType: string): string {
+    return actionType.toLowerCase();
+  }
 }

@@ -1,11 +1,35 @@
 @use '../../../../assets/styles/variables' as *;
 @use '../../../../assets/styles/mixins' as *;
 
-.mic-icon {
+.mic-wrapper {
   position: fixed;
   bottom: $mic-icon-bottom;
-  right: $mic-icon-right;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: $mic-icon-z-index;
+  @include flex-column;
+  align-items: center;
+  gap: $spacing-sm;
+  pointer-events: none;
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $color-text-secondary;
+    background-color: $color-surface;
+    padding: 2px $spacing-sm;
+    border-radius: $border-radius-full;
+    box-shadow: $shadow-sm;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.mic-icon {
+  position: relative;
   width: $mic-icon-size;
   height: $mic-icon-size;
   min-width: $mic-icon-size-min;
@@ -15,17 +39,23 @@
   background-color: $color-primary;
   color: $color-text-on-primary;
   cursor: pointer;
-  box-shadow: $shadow-md;
+  box-shadow: $shadow-lg;
   transition:
     background-color $transition-fast,
     transform $transition-fast,
     box-shadow $transition-fast;
+  pointer-events: all;
 
   @include flex-center;
 
   &:hover:not(:disabled) {
     background-color: $color-primary-dark;
-    box-shadow: $shadow-lg;
+    transform: scale(1.05);
+    box-shadow: $shadow-xl;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   &:focus-visible {
@@ -40,7 +70,6 @@
 
   &--active {
     background-color: $color-accent;
-    animation: pulse 1.5s ease-in-out infinite;
 
     &:hover:not(:disabled) {
       background-color: $color-accent-dark;
@@ -48,19 +77,38 @@
   }
 
   &__svg {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     fill: currentColor;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: $border-radius-full;
+    background-color: $color-accent;
+    opacity: 0;
+  }
+
+  &__ring--1 {
+    animation: mic-ring 2s ease-out infinite;
+  }
+
+  &__ring--2 {
+    animation: mic-ring 2s ease-out 0.6s infinite;
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba($color-accent, 0.4);
+@keyframes mic-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
   }
 
-  50% {
-    box-shadow: 0 0 0 10px rgba($color-accent, 0);
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
   }
 }
