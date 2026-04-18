@@ -6,6 +6,7 @@ using Mapi.Application.Voice.Commands;
 using Mapi.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Mapi.API.Controllers;
 
@@ -31,20 +32,27 @@ public class AlexaController : ControllerBase
     }
 
     [HttpPost("skill")]
-    public async Task<IActionResult> HandleSkillRequest(
-        [FromBody] SkillRequest skillRequest,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> HandleSkillRequest(CancellationToken cancellationToken)
     {
+        using var reader = new StreamReader(Request.Body);
+        var json = await reader.ReadToEndAsync(cancellationToken);
+        var skillRequest = JsonConvert.DeserializeObject<SkillRequest>(json);
+
+        if (skillRequest is null)
+        {
+            return BuildSpeechResult(RESPONSE_UNLINKED_USER);
+        }
+
         var alexaUserId = skillRequest.Session?.User?.UserId;
         if (string.IsNullOrEmpty(alexaUserId))
         {
-            return Ok(BuildSpeechResponse(RESPONSE_UNLINKED_USER));
+            return BuildSpeechResult(RESPONSE_UNLINKED_USER);
         }
 
         var user = await _userRepository.FindByAlexaUserIdAsync(alexaUserId, cancellationToken);
         if (user is null)
         {
-            return Ok(BuildSpeechResponse(RESPONSE_UNLINKED_USER));
+            return BuildSpeechResult(RESPONSE_UNLINKED_USER);
         }
 
         var requestType = skillRequest.Request;
@@ -54,7 +62,7 @@ public class AlexaController : ControllerBase
             return await HandleIntentAsync(intentRequest, cancellationToken);
         }
 
-        return Ok(BuildSpeechResponse(RESPONSE_UNRECOGNIZED_INTENT));
+        return BuildSpeechResult(RESPONSE_UNRECOGNIZED_INTENT);
     }
 
     private async Task<IActionResult> HandleIntentAsync(IntentRequest intentRequest, CancellationToken cancellationToken)
@@ -76,23 +84,25 @@ public class AlexaController : ControllerBase
                 transcript = $"add {slotValue} price {priceSlot}";
                 break;
             default:
-                return Ok(BuildSpeechResponse(RESPONSE_UNRECOGNIZED_INTENT));
+                return BuildSpeechResult(RESPONSE_UNRECOGNIZED_INTENT);
         }
 
         try
         {
-            var result = await _mediator.Send(new ProcessVoiceCommand(transcript), cancellationToken);
-            return Ok(BuildSpeechResponse(result.ResponseText));
+            var result = await _mediator.Send(new ProcessVoiceCommand(transcript, null, null), cancellationToken);
+            return BuildSpeechResult(result.ResponseText);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing Alexa intent {IntentName}", intentName);
-            return Ok(BuildSpeechResponse("Mapi is currently unavailable. Please try again later."));
+            return BuildSpeechResult("Mapi is currently unavailable. Please try again later.");
         }
     }
 
-    private static SkillResponse BuildSpeechResponse(string text)
+    private IActionResult BuildSpeechResult(string text)
     {
-        return ResponseBuilder.Tell(new PlainTextOutputSpeech { Text = text });
+        var response = ResponseBuilder.Tell(new PlainTextOutputSpeech { Text = text });
+        var json = JsonConvert.SerializeObject(response);
+        return Content(json, "application/json");
     }
 }

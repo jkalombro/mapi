@@ -17,7 +17,9 @@ public class GenericRepository<T> : IRepository<T> where T : BaseEntity
 
     public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync([id], cancellationToken);
+        return await _dbSet
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)

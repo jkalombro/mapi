@@ -24,8 +24,8 @@ namespace Mapi.API.IntegrationTests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Voice Commands", "  As a store owner\r\n  I want to query prices via voice\r\n  So that I can quickly l" +
-                "ook up item prices hands-free", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Voice Commands", "  As a store owner\r\n  I want to query and manage prices via voice\r\n  So that I ca" +
+                "n quickly look up and update item prices hands-free", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
@@ -119,7 +119,7 @@ namespace Mapi.API.IntegrationTests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Voice.feature.ndjson", 9);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Voice.feature.ndjson", 15);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -301,15 +301,15 @@ namespace Mapi.API.IntegrationTests.Features
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Add new item via voice")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Add trigger asks for price when item does not exist")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
-        [global::Xunit.TraitAttribute("Description", "Add new item via voice")]
-        public async global::System.Threading.Tasks.Task AddNewItemViaVoice()
+        [global::Xunit.TraitAttribute("Description", "Add trigger asks for price when item does not exist")]
+        public async global::System.Threading.Tasks.Task AddTriggerAsksForPriceWhenItemDoesNotExist()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "4";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add new item via voice", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add trigger asks for price when item does not exist", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 32
@@ -326,30 +326,36 @@ namespace Mapi.API.IntegrationTests.Features
   await this.FeatureBackgroundAsync();
 #line hidden
 #line 33
-    await testRunner.WhenAsync("I send a voice command \"Add Sugar price 75\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.GivenAsync("I have a trigger with phrase \"add\" and the Add action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 34
-    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("I send a voice command \"add Sugar\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 35
-    await testRunner.AndAsync("the voice response should contain \"added\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 36
+    await testRunner.AndAsync("the voice response should contain \"price\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 37
+    await testRunner.AndAsync("the voice result should have pending intent \"Add\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Duplicate add triggers confirmation")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Add trigger with existing item asks to confirm update")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
-        [global::Xunit.TraitAttribute("Description", "Duplicate add triggers confirmation")]
-        public async global::System.Threading.Tasks.Task DuplicateAddTriggersConfirmation()
+        [global::Xunit.TraitAttribute("Description", "Add trigger with existing item asks to confirm update")]
+        public async global::System.Threading.Tasks.Task AddTriggerWithExistingItemAsksToConfirmUpdate()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "5";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Duplicate add triggers confirmation", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add trigger with existing item asks to confirm update", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 37
+#line 39
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -362,31 +368,37 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 38
-    await testRunner.WhenAsync("I send a voice command \"Add Milk price 60\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 40
+    await testRunner.GivenAsync("I have a trigger with phrase \"add\" and the Add action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 39
+#line 41
+    await testRunner.WhenAsync("I send a voice command \"add Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 42
     await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 40
+#line 43
     await testRunner.AndAsync("the voice result should require confirmation", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 44
+    await testRunner.AndAsync("the voice result should have pending intent \"ConfirmUpdate\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Confirm add updates item price")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Confirm update with yes transitions to asking for new price")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
-        [global::Xunit.TraitAttribute("Description", "Confirm add updates item price")]
-        public async global::System.Threading.Tasks.Task ConfirmAddUpdatesItemPrice()
+        [global::Xunit.TraitAttribute("Description", "Confirm update with yes transitions to asking for new price")]
+        public async global::System.Threading.Tasks.Task ConfirmUpdateWithYesTransitionsToAskingForNewPrice()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "6";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Confirm add updates item price", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Confirm update with yes transitions to asking for new price", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 42
+#line 46
   this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -399,17 +411,287 @@ namespace Mapi.API.IntegrationTests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 43
-    await testRunner.GivenAsync("I send a voice command \"Add Milk price 60\" to trigger a confirmation", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line 47
+    await testRunner.GivenAsync("I have a trigger with phrase \"add\" and the Add action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 44
-    await testRunner.WhenAsync("I send a confirm-add request for \"Milk\" with price 60", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 48
+    await testRunner.AndAsync("I send a voice command \"add Milk\" to start a pending flow", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 45
+#line 49
+    await testRunner.WhenAsync("I send a voice command with pending intent \"ConfirmUpdate\" and pending item \"Milk" +
+                        "\" and transcript \"yes\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 50
     await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 46
-    await testRunner.AndAsync("the voice response should contain \"60\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 51
+    await testRunner.AndAsync("the voice result should have pending intent \"Update\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Add item via two-step flow")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Add item via two-step flow")]
+        public async global::System.Threading.Tasks.Task AddItemViaTwo_StepFlow()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "7";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Add item via two-step flow", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 53
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 54
+    await testRunner.GivenAsync("I have a trigger with phrase \"add\" and the Add action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 55
+    await testRunner.AndAsync("I send a voice command \"add Sugar\" to start a pending flow", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 56
+    await testRunner.WhenAsync("I send a voice command with pending intent \"Add\" and pending item \"Sugar\" and tra" +
+                        "nscript \"75\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 57
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 58
+    await testRunner.AndAsync("the voice response should contain \"added\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 59
+    await testRunner.AndAsync("the voice result should have items modified", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update trigger asks for new price when item exists")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Update trigger asks for new price when item exists")]
+        public async global::System.Threading.Tasks.Task UpdateTriggerAsksForNewPriceWhenItemExists()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "8";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update trigger asks for new price when item exists", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 61
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 62
+    await testRunner.GivenAsync("I have a trigger with phrase \"update\" and the Update action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 63
+    await testRunner.WhenAsync("I send a voice command \"update Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 64
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 65
+    await testRunner.AndAsync("the voice response should contain \"new price\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 66
+    await testRunner.AndAsync("the voice result should have pending intent \"Update\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update item price via two-step flow")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Update item price via two-step flow")]
+        public async global::System.Threading.Tasks.Task UpdateItemPriceViaTwo_StepFlow()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "9";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update item price via two-step flow", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 68
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 69
+    await testRunner.GivenAsync("I have a trigger with phrase \"update\" and the Update action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 70
+    await testRunner.AndAsync("I send a voice command \"update Milk\" to start a pending flow", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 71
+    await testRunner.WhenAsync("I send a voice command with pending intent \"Update\" and pending item \"Milk\" and t" +
+                        "ranscript \"80\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 72
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 73
+    await testRunner.AndAsync("the voice response should contain \"80\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 74
+    await testRunner.AndAsync("the voice result should have items modified", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Update trigger with unknown item returns not found")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Update trigger with unknown item returns not found")]
+        public async global::System.Threading.Tasks.Task UpdateTriggerWithUnknownItemReturnsNotFound()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "10";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Update trigger with unknown item returns not found", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 76
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 77
+    await testRunner.GivenAsync("I have a trigger with phrase \"update\" and the Update action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 78
+    await testRunner.WhenAsync("I send a voice command \"update Unknown\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 79
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 80
+    await testRunner.AndAsync("the voice response should contain \"couldn\'t find\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Remove trigger deletes the matched item")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Remove trigger deletes the matched item")]
+        public async global::System.Threading.Tasks.Task RemoveTriggerDeletesTheMatchedItem()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "11";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Remove trigger deletes the matched item", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 82
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 83
+    await testRunner.GivenAsync("I have a trigger with phrase \"remove\" and the Remove action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 84
+    await testRunner.WhenAsync("I send a voice command \"remove Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 85
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 86
+    await testRunner.AndAsync("the voice response should contain \"Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 87
+    await testRunner.WhenAsync("I request GET \"/api/v1/items\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 88
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 89
+    await testRunner.AndAsync("the items list should not contain \"Milk\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Remove trigger with unknown item returns not found")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "Voice Commands")]
+        [global::Xunit.TraitAttribute("Description", "Remove trigger with unknown item returns not found")]
+        public async global::System.Threading.Tasks.Task RemoveTriggerWithUnknownItemReturnsNotFound()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "12";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Remove trigger with unknown item returns not found", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 91
+  this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 92
+    await testRunner.GivenAsync("I have a trigger with phrase \"remove\" and the Remove action", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 93
+    await testRunner.WhenAsync("I send a voice command \"remove Unknown\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 94
+    await testRunner.ThenAsync("the response status should be 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 95
+    await testRunner.AndAsync("the voice response should contain \"couldn\'t find\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

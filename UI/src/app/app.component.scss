@@ -1,18 +1,20 @@
 @use '../assets/styles/variables' as *;
 @use '../assets/styles/mixins' as *;
 
+$toolbar-height: 64px;
+
 .toolbar {
   position: sticky;
   top: 0;
   z-index: 100;
   background-color: $color-primary;
   color: $color-text-on-primary;
-  box-shadow: $shadow-sm;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), $shadow-md;
 
   &__inner {
     @include container;
     @include flex-between;
-    height: 56px;
+    height: $toolbar-height;
   }
 
   &__brand {
@@ -27,27 +29,38 @@
     }
   }
 
+  &__brand-icon {
+    width: 28px;
+    height: 28px;
+    fill: $color-text-on-primary;
+    opacity: 0.9;
+    flex-shrink: 0;
+  }
+
   &__name {
-    font-size: $font-size-lg;
+    font-size: $font-size-xl;
     font-weight: $font-weight-bold;
-    letter-spacing: 0.5px;
+    letter-spacing: -0.3px;
   }
 
   &__nav {
     display: flex;
-    gap: $spacing-md;
+    gap: $spacing-xs;
+    flex: 1;
+    margin-left: $spacing-xl;
   }
 
   &__link {
-    color: rgba($color-text-on-primary, 0.85);
+    color: rgba($color-text-on-primary, 0.75);
     text-decoration: none;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    padding: $spacing-xs $spacing-sm;
+    padding: $spacing-xs $spacing-md;
     border-radius: $border-radius-sm;
     transition:
       color $transition-fast,
       background-color $transition-fast;
+    position: relative;
 
     &:hover {
       color: $color-text-on-primary;
@@ -57,14 +70,104 @@
     &:focus-visible {
       @include focus-visible;
     }
+
+    &--active {
+      color: $color-text-on-primary;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  &__logout {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    background: transparent;
+    border: 1px solid rgba($color-text-on-primary, 0.3);
+    color: rgba($color-text-on-primary, 0.8);
+    padding: $spacing-xs $spacing-md;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition:
+      background-color $transition-fast,
+      color $transition-fast,
+      border-color $transition-fast;
+    white-space: nowrap;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background-color: rgba($color-text-on-primary, 0.1);
+      color: $color-text-on-primary;
+      border-color: rgba($color-text-on-primary, 0.6);
+    }
+
+    &:focus-visible {
+      @include focus-visible;
+    }
+  }
+
+  &__logout-label {
+    @media (max-width: 480px) {
+      display: none;
+    }
   }
 }
 
 .main-content {
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - #{$toolbar-height});
   background-color: $color-background;
 
   &--full {
     min-height: 100vh;
+  }
+}
+
+// ============================================================
+// Voice Transcript Overlay
+// ============================================================
+
+.transcript-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 900;
+  max-width: 80%;
+  width: max-content;
+  pointer-events: none;
+  animation: transcript-fade-in $transition-base both;
+
+  &__text {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(8px);
+    color: $color-text-on-primary;
+    padding: $spacing-md $spacing-xl;
+    border-radius: $border-radius-xl;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    text-align: center;
+    box-shadow: $shadow-xl;
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes transcript-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }

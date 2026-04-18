@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Alexa.NET" Version="1.22.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.*" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*">

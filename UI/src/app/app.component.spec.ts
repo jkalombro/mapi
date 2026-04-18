@@ -2,30 +2,44 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { Subject } from 'rxjs';
 import { AppComponent } from './app.component';
 import { SpeechRecognitionService } from './shared/services/speech-recognition.service';
 import { signal } from '@angular/core';
-import { selectIsListening, selectIsConfirmationRequired, selectCommandResult } from './voice/store/reducers/voice.reducer';
+import { selectIsListening } from './voice/store/reducers/voice.reducer';
 import { selectIsAuthenticated } from './store/reducers/auth.reducer';
+import { sendCommand, transcriptReceived } from './voice/store/actions/voice.actions';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
   let store: MockStore;
   let speechService: jest.Mocked<SpeechRecognitionService>;
+  let transcript$: Subject<string>;
 
   const initialState = {
     auth: { user: null, token: null, isLoading: false, error: null },
-    voice: { isListening: false, transcript: null, commandResult: null, isProcessing: false, error: null },
+    voice: {
+      isListening: false,
+      transcript: null,
+      commandResult: null,
+      isProcessing: false,
+      error: null,
+      pendingIntent: null,
+      pendingItemName: null,
+    },
   };
 
   beforeEach(async () => {
+    transcript$ = new Subject<string>();
+
     const speechMock = {
       isListening: signal(false),
       isSupported: signal(true),
+      interimTranscript: signal(''),
       startListening: jest.fn(),
       stopListening: jest.fn(),
-      transcript$: { subscribe: jest.fn() },
+      transcript$,
     };
 
     await TestBed.configureTestingModule({
@@ -97,18 +111,12 @@ describe('AppComponent', () => {
     expect(speechService.stopListening).toHaveBeenCalled();
   });
 
-  it('should show confirmation dialog when authenticated and confirmation is required', () => {
-    store.overrideSelector(selectIsAuthenticated, true);
-    store.overrideSelector(selectIsConfirmationRequired, true);
-    store.overrideSelector(selectCommandResult, {
-      responseText: 'Add rice for 50?',
-      isAmbiguous: false,
-      isConfirmationRequired: true,
-      matchedNames: null,
-    });
-    store.refreshState();
-    fixture.detectChanges();
-    const dialog = fixture.debugElement.query(By.css('app-confirmation-dialog'));
-    expect(dialog).toBeTruthy();
+  it('should dispatch transcriptReceived and sendCommand when transcript$ emits', () => {
+    jest.spyOn(store, 'dispatch');
+    transcript$.next('how much is Milk?');
+    expect(store.dispatch).toHaveBeenCalledWith(transcriptReceived({ transcript: 'how much is Milk?' }));
+    expect(store.dispatch).toHaveBeenCalledWith(sendCommand({ transcript: 'how much is Milk?' }));
   });
+
 });
+

@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Mapi.Application.Common.Interfaces;
 using Mapi.Application.Voice.DTOs;
+using Mapi.Domain.Enums;
 using Mapi.Domain.Interfaces;
 
 namespace Mapi.Infrastructure.Services;
@@ -8,13 +9,16 @@ namespace Mapi.Infrastructure.Services;
 public partial class CommandService : ICommandService
 {
     private const string PRICE_QUERY_PATTERN = @"^how much is (?<name>.+?)\??$";
-    private const string ADD_ITEM_PATTERN = @"^add (?<name>.+) price (?<price>\d+(\.\d+)?)$";
+    private const string PENDING_INTENT_ADD = "Add";
+    private const string PENDING_INTENT_UPDATE = "Update";
+    private const string PENDING_INTENT_CONFIRM_UPDATE = "ConfirmUpdate";
     private const string RESPONSE_ITEM_NOT_FOUND = "I couldn't find that item.";
     private const string RESPONSE_DIDNT_CATCH = "Didn't catch that. Please try again.";
     private const string RESPONSE_MALFORMED_COMMAND = "I didn't understand that command. Please try again.";
-    private const string RESPONSE_ITEM_ADDED = "Got it. {name} has been added at {price} pesos.";
+    private const string RESPONSE_INVALID_PRICE = "That doesn't look like a valid price. Please say a number.";
     private const string RESPONSE_AMBIGUOUS = "I found multiple matches: {names}. Which one did you mean?";
-    private const string RESPONSE_CONFIRM_ADD = "An item called {name} already exists. Do you want to update it?";
+    private const string RESPONSE_ADD_CANCELLED = "Add command has been cancelled.";
+    private const string RESPONSE_CONFIRM_UPDATE_INVALID = "Yes or no is the only acceptable answer, please start over the command again.";
     private const string PRICE_FORMAT = "{0} pesos";
     private const int DECIMAL_PLACES = 2;
 
@@ -30,6 +34,8 @@ public partial class CommandService : ICommandService
     public async Task<VoiceCommandResult> ExecuteAsync(
         string transcript,
         Guid userId,
+        string? pendingIntent = null,
+        string? pendingItemName = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(transcript))
@@ -38,6 +44,21 @@ public partial class CommandService : ICommandService
         }
 
         var normalizedTranscript = transcript.Trim().ToLowerInvariant();
+
+        if (pendingIntent == PENDING_INTENT_ADD && pendingItemName is not null)
+        {
+            return await HandlePendingAddAsync(normalizedTranscript, pendingItemName, userId, cancellationToken);
+        }
+
+        if (pendingIntent == PENDING_INTENT_UPDATE && pendingItemName is not null)
+        {
+            return await HandlePendingUpdateAsync(normalizedTranscript, pendingItemName, userId, cancellationToken);
+        }
+
+        if (pendingIntent == PENDING_INTENT_CONFIRM_UPDATE && pendingItemName is not null)
+        {
+            return HandleConfirmUpdate(normalizedTranscript, pendingItemName);
+        }
 
         var triggerResult = await TryMatchTriggerAsync(normalizedTranscript, userId, cancellationToken);
         if (triggerResult is not null)
@@ -51,23 +72,52 @@ public partial class CommandService : ICommandService
             return await HandlePriceQueryAsync(priceQueryMatch.Groups["name"].Value, userId, cancellationToken);
         }
 
-        var addMatch = AddItemRegex().Match(normalizedTranscript);
-        if (addMatch.Success)
-        {
-            var name = addMatch.Groups["name"].Value.Trim();
-            var price = decimal.Parse(addMatch.Groups["price"].Value);
-            return await HandleAddItemAsync(name, price, userId, cancellationToken);
-        }
-
         return new VoiceCommandResult(RESPONSE_MALFORMED_COMMAND);
     }
 
-    public async Task<VoiceCommandResult> ConfirmAddAsync(
+    private async Task<VoiceCommandResult> HandlePendingAddAsync(
+        string transcript,
         string itemName,
-        decimal price,
         Guid userId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
+        if (!TryParsePrice(transcript, out var price))
+        {
+            return new VoiceCommandResult(
+                RESPONSE_INVALID_PRICE,
+                PendingIntent: PENDING_INTENT_ADD,
+                PendingItemName: itemName);
+        }
+
+        var newItem = new Domain.Entities.Item
+        {
+            UserId = userId,
+            ItemName = itemName,
+            BisayaName = itemName,
+            Price = price,
+        };
+
+        await _itemRepository.AddAsync(newItem, cancellationToken);
+        var priceFormatted = FormatPrice(price);
+        return new VoiceCommandResult(
+            $"Got it. {itemName} has been added at {priceFormatted}.",
+            ItemsModified: true);
+    }
+
+    private async Task<VoiceCommandResult> HandlePendingUpdateAsync(
+        string transcript,
+        string itemName,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        if (!TryParsePrice(transcript, out var price))
+        {
+            return new VoiceCommandResult(
+                RESPONSE_INVALID_PRICE,
+                PendingIntent: PENDING_INTENT_UPDATE,
+                PendingItemName: itemName);
+        }
+
         var matches = await _itemRepository.FindByNameAsync(itemName, userId, cancellationToken);
         var existing = matches.FirstOrDefault();
 
@@ -78,9 +128,28 @@ public partial class CommandService : ICommandService
 
         existing.Price = price;
         await _itemRepository.UpdateAsync(existing, cancellationToken);
-
         var priceFormatted = FormatPrice(price);
-        return new VoiceCommandResult($"Done. {existing.ItemName} is now {priceFormatted}.");
+        return new VoiceCommandResult(
+            $"Done. {existing.ItemName} is now {priceFormatted}.",
+            ItemsModified: true);
+    }
+
+    private static VoiceCommandResult HandleConfirmUpdate(string transcript, string itemName)
+    {
+        if (transcript is "yes" or "y")
+        {
+            return new VoiceCommandResult(
+                $"What is the new price of {itemName}?",
+                PendingIntent: PENDING_INTENT_UPDATE,
+                PendingItemName: itemName);
+        }
+
+        if (transcript is "no" or "n")
+        {
+            return new VoiceCommandResult(RESPONSE_ADD_CANCELLED);
+        }
+
+        return new VoiceCommandResult(RESPONSE_CONFIRM_UPDATE_INVALID);
     }
 
     private async Task<VoiceCommandResult?> TryMatchTriggerAsync(
@@ -88,7 +157,7 @@ public partial class CommandService : ICommandService
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var triggers = await _triggerRepository.GetAllWithActionsAsync(userId, cancellationToken);
+        var triggers = await _triggerRepository.GetAllByUserAsync(userId, cancellationToken);
 
         var matchedTrigger = triggers
             .Where(t => transcript.StartsWith(t.Phrase.ToLowerInvariant(), StringComparison.OrdinalIgnoreCase))
@@ -101,35 +170,83 @@ public partial class CommandService : ICommandService
         }
 
         var suffix = transcript[matchedTrigger.Phrase.Length..].Trim();
-        var responseText = string.Empty;
-
-        foreach (var action in matchedTrigger.TriggerActionMaps
-            .OrderBy(m => m.SortOrder)
-            .ThenBy(m => m.CreatedAt)
-            .Select(m => m.Action))
-        {
-            responseText = await ExecuteActionAsync(action, suffix, userId, cancellationToken);
-        }
-
-        return new VoiceCommandResult(responseText);
+        return await ExecuteActionAsync(matchedTrigger.Action, suffix, userId, cancellationToken);
     }
 
-    private async Task<string> ExecuteActionAsync(
+    private async Task<VoiceCommandResult> ExecuteActionAsync(
         Domain.Entities.Action action,
         string suffix,
         Guid userId,
         CancellationToken cancellationToken)
     {
+        if (action.ActionType == ActionType.Add)
+        {
+            return await HandleAddTriggerAsync(suffix, userId, cancellationToken);
+        }
+
+        if (action.ActionType == ActionType.Update)
+        {
+            return await HandleUpdateTriggerAsync(suffix, userId, cancellationToken);
+        }
+
         var items = await _itemRepository.FindByNameAsync(suffix, userId, cancellationToken);
         if (items.Count == 0)
         {
-            return RESPONSE_ITEM_NOT_FOUND;
+            return new VoiceCommandResult(RESPONSE_ITEM_NOT_FOUND);
         }
 
         var item = items[0];
-        return action.ResponseTemplate
-            .Replace("{name}", item.ItemName)
-            .Replace("{price}", FormatPrice(item.Price));
+        var responseText = action.ResponseTemplate
+            .Replace("{item}", item.ItemName)
+            .Replace("{value}", FormatPrice(item.Price));
+
+        if (action.ActionType == ActionType.Remove)
+        {
+            await _itemRepository.DeleteAsync(item, cancellationToken);
+            return new VoiceCommandResult(responseText, ItemsModified: true);
+        }
+
+        return new VoiceCommandResult(responseText);
+    }
+
+    private async Task<VoiceCommandResult> HandleAddTriggerAsync(
+        string itemName,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _itemRepository.FindByNameAsync(itemName, userId, cancellationToken);
+
+        if (existing.Count > 0)
+        {
+            return new VoiceCommandResult(
+                $"{existing[0].ItemName} already exists. Do you want to update it?",
+                IsConfirmationRequired: true,
+                PendingIntent: PENDING_INTENT_CONFIRM_UPDATE,
+                PendingItemName: existing[0].ItemName);
+        }
+
+        return new VoiceCommandResult(
+            $"What is the price of {itemName}?",
+            PendingIntent: PENDING_INTENT_ADD,
+            PendingItemName: itemName);
+    }
+
+    private async Task<VoiceCommandResult> HandleUpdateTriggerAsync(
+        string itemName,
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _itemRepository.FindByNameAsync(itemName, userId, cancellationToken);
+
+        if (existing.Count == 0)
+        {
+            return new VoiceCommandResult(RESPONSE_ITEM_NOT_FOUND);
+        }
+
+        return new VoiceCommandResult(
+            $"What is the new price of {existing[0].ItemName}?",
+            PendingIntent: PENDING_INTENT_UPDATE,
+            PendingItemName: existing[0].ItemName);
     }
 
     private async Task<VoiceCommandResult> HandlePriceQueryAsync(
@@ -156,33 +273,9 @@ public partial class CommandService : ICommandService
         return new VoiceCommandResult($"{item.ItemName} costs {price}.");
     }
 
-    private async Task<VoiceCommandResult> HandleAddItemAsync(
-        string name,
-        decimal price,
-        Guid userId,
-        CancellationToken cancellationToken)
+    private static bool TryParsePrice(string transcript, out decimal price)
     {
-        var existing = await _itemRepository.FindByNameAsync(name, userId, cancellationToken);
-        if (existing.Count > 0)
-        {
-            var responseText = RESPONSE_CONFIRM_ADD.Replace("{name}", existing[0].ItemName);
-            return new VoiceCommandResult(responseText, IsConfirmationRequired: true);
-        }
-
-        var newItem = new Domain.Entities.Item
-        {
-            UserId = userId,
-            ItemName = name,
-            BisayaName = name,
-            Price = price
-        };
-
-        await _itemRepository.AddAsync(newItem, cancellationToken);
-        var priceFormatted = FormatPrice(price);
-        var added = RESPONSE_ITEM_ADDED
-            .Replace("{name}", name)
-            .Replace("{price}", priceFormatted);
-        return new VoiceCommandResult(added);
+        return decimal.TryParse(transcript, out price) && price >= 0;
     }
 
     private static string FormatPrice(decimal price)
@@ -195,7 +288,4 @@ public partial class CommandService : ICommandService
 
     [GeneratedRegex(PRICE_QUERY_PATTERN, RegexOptions.IgnoreCase)]
     private static partial Regex PriceQueryRegex();
-
-    [GeneratedRegex(ADD_ITEM_PATTERN, RegexOptions.IgnoreCase)]
-    private static partial Regex AddItemRegex();
 }

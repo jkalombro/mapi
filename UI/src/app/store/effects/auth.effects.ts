@@ -4,6 +4,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { AuthApiService } from '../api/auth.service';
 import { login, loginFailure, loginSuccess, logout, register, registerFailure, registerSuccess } from '../actions/auth.actions';
+import { AUTH_TOKEN_KEY } from '../reducers/auth.reducer';
 
 const ITEMS_ROUTE = '/items';
 const LOGIN_ROUTE = '/auth/login';
@@ -46,7 +47,10 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(loginSuccess, registerSuccess),
-        tap(() => this.router.navigate([ITEMS_ROUTE]))
+        tap(({ response }) => {
+          localStorage.setItem(AUTH_TOKEN_KEY, response.accessToken);
+          this.router.navigate([ITEMS_ROUTE]);
+        })
       ),
     { dispatch: false }
   );
@@ -55,7 +59,10 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(logout),
-        tap(() => this.router.navigate([LOGIN_ROUTE]))
+        tap(() => {
+          localStorage.removeItem(AUTH_TOKEN_KEY);
+          this.router.navigate([LOGIN_ROUTE]);
+        })
       ),
     { dispatch: false }
   );

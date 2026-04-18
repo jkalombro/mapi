@@ -24,7 +24,8 @@ public class ItemRepository : GenericRepository<Item>, IItemRepository
         return await _context.Items
             .IgnoreQueryFilters()
             .Where(i => i.UserId == userId &&
-                (i.ItemName.ToLower() == lowerName || i.BisayaName.ToLower() == lowerName))
+                (i.ItemName.ToLower().StartsWith(lowerName) ||
+                 i.BisayaName.ToLower().StartsWith(lowerName)))
             .ToListAsync(cancellationToken);
     }
 }

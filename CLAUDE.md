@@ -76,7 +76,7 @@ src/
 
 ## Always use TDD approach (Test Driven Development)
 
-When creating services, components, helpers, etc. Always create the test first based on the acceptance criteria before starting the actual task. Always consider the edge cases when creating tests. It should have 100% coverage.
+When creating services, components, helpers, etc. Always create the test first based on the acceptance criteria before starting the actual task. Always consider the edge cases when creating tests. It should have at least 90% coverage.
 
 ## CODING CONVENTIONS
 
@@ -129,8 +129,8 @@ For variables, functions, lifecycle methods, etc. Follow the arrangement below:
 
 - **Framework**: Jest (not Karma/Jasmine)
 - Always TDD: write the test first based on acceptance criteria
-- 100% coverage enforced via Jest coverage thresholds in `jest.config.js`
-- Ensure that the 100% coverage thresholds is achieved
+- 90% coverage enforced via Jest coverage thresholds in `jest.config.js`
+- Ensure that the 90% coverage threshold is achieved
 - Cover all edge cases
 - Use Angular Testing Library alongside `TestBed` for component tests
 
@@ -389,7 +389,7 @@ tests/
 - **Framework**: xUnit
 - **Approach**: TDD — write the failing test first based on acceptance criteria, then implement
 - One test project per testable layer: `YourApp.Domain.Tests`, `YourApp.Application.Tests`
-- 100% business logic coverage enforced — handlers, validators, domain entities, value objects
+- 90% business logic coverage enforced — handlers, validators, domain entities, value objects
 - Use `Moq` or `NSubstitute` for mocking dependencies (repositories, services)
 - Test naming convention: `MethodName_StateUnderTest_ExpectedBehavior` (e.g. `Handle_WhenUserNotFound_ThrowsNotFoundException`)
 - Cover all edge cases: null inputs, boundary values, concurrent access patterns

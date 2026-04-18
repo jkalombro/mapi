@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../assets/styles/variables' as *;
 @use '../../assets/styles/mixins' as *;
 
@@ -15,14 +16,16 @@
 // ============================================================
 
 .hero {
-  background: linear-gradient(135deg, $color-primary 0%, darken($color-primary, 12%) 100%);
+  position: relative;
+  background: linear-gradient(145deg, $color-primary 0%, color.adjust($color-primary, $lightness: -8%) 60%, color.adjust($color-primary, $lightness: -18%) 100%);
   color: $color-text-on-primary;
   padding: $spacing-xxl $spacing-md;
   text-align: center;
   flex: 1;
+  overflow: hidden;
 
   @include tablet {
-    padding: 80px $spacing-md;
+    padding: 96px $spacing-md;
   }
 
   &__inner {
@@ -30,51 +33,68 @@
     align-items: center;
     max-width: 640px;
     margin: 0 auto;
-    gap: $spacing-md;
+    gap: $spacing-lg;
+    position: relative;
+    z-index: 1;
   }
 
-  &__brand {
-    margin-bottom: $spacing-sm;
-  }
-
-  &__mic-icon {
-    font-size: 56px;
-    display: block;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  &__badge {
+    width: 80px;
+    height: 80px;
+    border-radius: $border-radius-full;
+    background-color: rgba($color-text-on-primary, 0.12);
+    border: 2px solid rgba($color-text-on-primary, 0.2);
+    @include flex-center;
+    backdrop-filter: blur(4px);
 
     @include tablet {
-      font-size: 72px;
+      width: 96px;
+      height: 96px;
+    }
+  }
+
+  &__mic-svg {
+    width: 40px;
+    height: 40px;
+    fill: $color-text-on-primary;
+
+    @include tablet {
+      width: 48px;
+      height: 48px;
     }
   }
 
   &__title {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: $font-weight-bold;
-    letter-spacing: -0.5px;
+    letter-spacing: -1.5px;
     margin: 0;
-    line-height: 1.1;
+    line-height: 1;
 
     @include tablet {
-      font-size: 4rem;
+      font-size: 5rem;
     }
   }
 
   &__tagline {
-    font-size: $font-size-xl;
+    font-size: $font-size-lg;
     font-weight: $font-weight-medium;
-    color: rgba($color-text-on-primary, 0.9);
+    color: rgba($color-text-on-primary, 0.85);
+    letter-spacing: 0.02em;
     margin: 0;
+    text-transform: uppercase;
+    font-size: $font-size-sm;
 
     @include tablet {
-      font-size: $font-size-xxl;
+      font-size: $font-size-base;
     }
   }
 
   &__description {
     font-size: $font-size-base;
-    color: rgba($color-text-on-primary, 0.8);
-    line-height: 1.7;
-    max-width: 520px;
+    color: rgba($color-text-on-primary, 0.78);
+    line-height: 1.75;
+    max-width: 500px;
     margin: 0;
 
     @include tablet {
@@ -87,7 +107,7 @@
     flex-direction: column;
     gap: $spacing-md;
     width: 100%;
-    max-width: 340px;
+    max-width: 320px;
     margin-top: $spacing-sm;
 
     @include mobile {
@@ -95,6 +115,18 @@
       max-width: none;
       justify-content: center;
     }
+  }
+
+  &__glow {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    border-radius: $border-radius-full;
+    background: radial-gradient(circle, rgba($color-text-on-primary, 0.06) 0%, transparent 70%);
+    pointer-events: none;
   }
 }
 
@@ -107,14 +139,25 @@
   padding: $spacing-xxl $spacing-md;
 
   @include tablet {
-    padding: 72px $spacing-md;
+    padding: 88px $spacing-md;
   }
 
   &__inner {
     @include container;
     @include flex-column;
     align-items: center;
-    gap: $spacing-xxl;
+    gap: $spacing-xl;
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $color-primary;
+    background-color: color.adjust($color-primary, $lightness: 48%);
+    padding: $spacing-xs $spacing-md;
+    border-radius: $border-radius-full;
   }
 
   &__heading {
@@ -123,6 +166,24 @@
     color: $color-text-primary;
     text-align: center;
     margin: 0;
+    letter-spacing: -0.5px;
+
+    @include tablet {
+      font-size: 2.25rem;
+    }
+  }
+
+  &__subheading {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    text-align: center;
+    max-width: 520px;
+    line-height: 1.7;
+    margin: 0;
+
+    @include tablet {
+      font-size: $font-size-lg;
+    }
   }
 
   &__grid {
@@ -130,6 +191,7 @@
     grid-template-columns: 1fr;
     gap: $spacing-lg;
     width: 100%;
+    margin-top: $spacing-sm;
 
     @include tablet {
       grid-template-columns: repeat(2, 1fr);
@@ -147,32 +209,48 @@
 
 .feature-card {
   @include flex-column;
-  gap: $spacing-sm;
+  gap: $spacing-md;
   background-color: $color-surface;
   border: 1px solid $color-border;
-  border-radius: $border-radius-md;
+  border-radius: $border-radius-lg;
   padding: $spacing-xl;
-  transition: box-shadow $transition-base;
+  transition:
+    box-shadow $transition-base,
+    transform $transition-base,
+    border-color $transition-base;
 
   &:hover {
-    box-shadow: $shadow-md;
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+    border-color: color.adjust($color-primary, $lightness: 30%);
   }
 
   &__icon {
-    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+    border-radius: $border-radius-md;
+    background-color: color.adjust($color-primary, $lightness: 48%);
+    @include flex-center;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      fill: $color-primary;
+    }
   }
 
   &__title {
-    font-size: $font-size-lg;
+    font-size: $font-size-base;
     font-weight: $font-weight-semibold;
     color: $color-text-primary;
     margin: 0;
+    letter-spacing: -0.2px;
   }
 
   &__body {
     font-size: $font-size-sm;
     color: $color-text-secondary;
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 0;
   }
 }
@@ -182,15 +260,19 @@
 // ============================================================
 
 .cta {
-  background-color: $color-surface-alt;
+  background: linear-gradient(135deg, $color-surface-alt 0%, $color-background 100%);
   border-top: 1px solid $color-border;
   padding: $spacing-xxl $spacing-md;
   text-align: center;
 
+  @include tablet {
+    padding: 80px $spacing-md;
+  }
+
   &__inner {
     @include flex-column;
     align-items: center;
-    gap: $spacing-md;
+    gap: $spacing-lg;
     max-width: 480px;
     margin: 0 auto;
   }
@@ -200,6 +282,7 @@
     font-weight: $font-weight-bold;
     color: $color-text-primary;
     margin: 0;
+    letter-spacing: -0.3px;
   }
 
   &__body {
@@ -224,26 +307,31 @@
   align-items: center;
   justify-content: center;
   padding: $spacing-sm $spacing-xl;
-  border-radius: $border-radius-sm;
+  border-radius: $border-radius-md;
   font-size: $font-size-base;
-  font-weight: $font-weight-medium;
+  font-weight: $font-weight-semibold;
   text-decoration: none;
   cursor: pointer;
   transition:
     background-color $transition-fast,
     border-color $transition-fast,
     color $transition-fast,
-    box-shadow $transition-fast;
+    box-shadow $transition-fast,
+    transform $transition-fast;
   border: 2px solid transparent;
 
   &:focus-visible {
     @include focus-visible;
   }
 
+  &:active {
+    transform: scale(0.98);
+  }
+
   &--lg {
-    padding: $spacing-md $spacing-xl;
+    padding: 14px $spacing-xxl;
     font-size: $font-size-lg;
-    border-radius: $border-radius-md;
+    border-radius: $border-radius-lg;
   }
 
   &--primary {
@@ -252,11 +340,10 @@
     border-color: $color-text-on-primary;
 
     &:hover {
-      background-color: rgba($color-text-on-primary, 0.9);
-      box-shadow: $shadow-sm;
+      background-color: rgba($color-text-on-primary, 0.92);
+      box-shadow: $shadow-md;
     }
 
-    // Inside .cta section the background is light, so flip colors
     .cta & {
       background-color: $color-primary;
       color: $color-text-on-primary;
@@ -265,18 +352,19 @@
       &:hover {
         background-color: $color-primary-dark;
         border-color: $color-primary-dark;
+        box-shadow: $shadow-md;
       }
     }
   }
 
-  &--outline {
+  &--ghost {
     background-color: transparent;
     color: $color-text-on-primary;
-    border-color: rgba($color-text-on-primary, 0.6);
+    border-color: rgba($color-text-on-primary, 0.4);
 
     &:hover {
       background-color: rgba($color-text-on-primary, 0.1);
-      border-color: $color-text-on-primary;
+      border-color: rgba($color-text-on-primary, 0.7);
     }
   }
 }
@@ -288,7 +376,7 @@
 .link {
   color: $color-primary;
   text-decoration: none;
-  font-weight: $font-weight-medium;
+  font-weight: $font-weight-semibold;
 
   &:hover {
     text-decoration: underline;

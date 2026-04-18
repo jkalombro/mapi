@@ -42,14 +42,43 @@ namespace Mapi.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Actions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ActionType = 0,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ResponseTemplate = "The {item} is {value}.",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            ActionType = 1,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ResponseTemplate = "I've added {item}.",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            ActionType = 2,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ResponseTemplate = "I've updated {item} to {value}.",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            ActionType = 3,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ResponseTemplate = "I've removed {item}.",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("Mapi.Domain.Entities.Item", b =>
@@ -96,6 +125,9 @@ namespace Mapi.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -112,40 +144,11 @@ namespace Mapi.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActionId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Triggers");
-                });
-
-            modelBuilder.Entity("Mapi.Domain.Entities.TriggerActionMap", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ActionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TriggerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActionId");
-
-                    b.HasIndex("TriggerId", "ActionId")
-                        .IsUnique();
-
-                    b.ToTable("TriggerActionMaps");
                 });
 
             modelBuilder.Entity("Mapi.Domain.Entities.User", b =>
@@ -186,17 +189,6 @@ namespace Mapi.Infrastructure.Persistence.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Mapi.Domain.Entities.Action", b =>
-                {
-                    b.HasOne("Mapi.Domain.Entities.User", "User")
-                        .WithMany("Actions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Mapi.Domain.Entities.Item", b =>
                 {
                     b.HasOne("Mapi.Domain.Entities.User", "User")
@@ -210,48 +202,25 @@ namespace Mapi.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Mapi.Domain.Entities.Trigger", b =>
                 {
+                    b.HasOne("Mapi.Domain.Entities.Action", "Action")
+                        .WithMany()
+                        .HasForeignKey("ActionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Mapi.Domain.Entities.User", "User")
                         .WithMany("Triggers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Mapi.Domain.Entities.TriggerActionMap", b =>
-                {
-                    b.HasOne("Mapi.Domain.Entities.Action", "Action")
-                        .WithMany("TriggerActionMaps")
-                        .HasForeignKey("ActionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Mapi.Domain.Entities.Trigger", "Trigger")
-                        .WithMany("TriggerActionMaps")
-                        .HasForeignKey("TriggerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Action");
 
-                    b.Navigation("Trigger");
-                });
-
-            modelBuilder.Entity("Mapi.Domain.Entities.Action", b =>
-                {
-                    b.Navigation("TriggerActionMaps");
-                });
-
-            modelBuilder.Entity("Mapi.Domain.Entities.Trigger", b =>
-                {
-                    b.Navigation("TriggerActionMaps");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Mapi.Domain.Entities.User", b =>
                 {
-                    b.Navigation("Actions");
-
                     b.Navigation("Items");
 
                     b.Navigation("Triggers");

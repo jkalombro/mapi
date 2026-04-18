@@ -23,4 +23,10 @@ export class ItemListComponent {
   onDelete(id: string): void {
     this.deleteClicked.emit(id);
   }
+
+  getAvatarColor(name: string): string {
+    const AVATAR_COLORS = ['indigo', 'teal', 'rose', 'amber', 'violet', 'emerald'];
+    const index = name.charCodeAt(0) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[index];
+  }
 }

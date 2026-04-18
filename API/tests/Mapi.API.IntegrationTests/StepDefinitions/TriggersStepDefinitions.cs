@@ -7,6 +7,13 @@ namespace Mapi.API.IntegrationTests.StepDefinitions;
 [Binding]
 public class TriggersStepDefinitions
 {
+    private static readonly Guid QUERY_ACTION_ID  = new("00000000-0000-0000-0000-000000000001");
+    private static readonly Guid ADD_ACTION_ID    = new("00000000-0000-0000-0000-000000000002");
+    private static readonly Guid UPDATE_ACTION_ID = new("00000000-0000-0000-0000-000000000003");
+    private static readonly Guid REMOVE_ACTION_ID = new("00000000-0000-0000-0000-000000000004");
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
     private readonly TestContext _ctx;
     private readonly ScenarioContext _scenarioContext;
 
@@ -16,88 +23,44 @@ public class TriggersStepDefinitions
         _scenarioContext = scenarioContext;
     }
 
-    [When(@"I create a trigger with phrase ""(.*)""")]
-    public async Task WhenICreateATrigger(string phrase)
+    [When(@"I create a trigger with phrase ""(.*)"" and the Query action")]
+    public async Task WhenICreateATriggerWithQueryAction(string phrase)
+    {
+        await CreateTriggerAsync(phrase, QUERY_ACTION_ID);
+    }
+
+    [When(@"I try to create a trigger with phrase ""(.*)"" and no action")]
+    public async Task WhenITryToCreateATriggerWithNoAction(string phrase)
     {
         var body = TestContext.JsonContent(new { phrase });
         _ctx.LastResponse = await _ctx.Client.PostAsync("/api/v1/triggers", body);
-        if (_ctx.LastResponse.IsSuccessStatusCode)
-        {
-            var json = JsonSerializer.Deserialize<JsonElement>(
-                await _ctx.LastResponse.Content.ReadAsStringAsync(),
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            _scenarioContext["lastTriggerId"] = json.GetProperty("id").GetGuid();
-        }
     }
 
-    [Given(@"I have a trigger with phrase ""(.*)""")]
-    public async Task GivenIHaveATrigger(string phrase)
+    [Given(@"I have a trigger with phrase ""(.*)"" and the Query action")]
+    public async Task GivenIHaveATriggerWithQueryAction(string phrase)
     {
-        var body = TestContext.JsonContent(new { phrase });
-        var response = await _ctx.Client.PostAsync("/api/v1/triggers", body);
-        var json = JsonSerializer.Deserialize<JsonElement>(
-            await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        _scenarioContext["lastTriggerId"] = json.GetProperty("id").GetGuid();
+        await CreateTriggerAsync(phrase, QUERY_ACTION_ID);
     }
 
-    [When(@"I create an action with type ""(.*)"" and template ""(.*)""")]
-    public async Task WhenICreateAnAction(string actionType, string template)
+    [Given(@"I have a trigger with phrase ""(.*)"" and the Remove action")]
+    public async Task GivenIHaveATriggerWithRemoveAction(string phrase)
     {
-        var body = TestContext.JsonContent(new { actionType, responseTemplate = template });
-        _ctx.LastResponse = await _ctx.Client.PostAsync("/api/v1/actions", body);
-        if (_ctx.LastResponse.IsSuccessStatusCode)
-        {
-            var json = JsonSerializer.Deserialize<JsonElement>(
-                await _ctx.LastResponse.Content.ReadAsStringAsync(),
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            _scenarioContext["lastActionId"] = json.GetProperty("id").GetGuid();
-        }
+        await CreateTriggerAsync(phrase, REMOVE_ACTION_ID);
     }
 
-    [Given(@"I have an action with type ""(.*)"" and template ""(.*)""")]
-    public async Task GivenIHaveAnAction(string actionType, string template)
-    {
-        var body = TestContext.JsonContent(new { actionType, responseTemplate = template });
-        var response = await _ctx.Client.PostAsync("/api/v1/actions", body);
-        var json = JsonSerializer.Deserialize<JsonElement>(
-            await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        _scenarioContext["lastActionId"] = json.GetProperty("id").GetGuid();
-    }
-
-    [When(@"I link the action to the trigger with sort order (\d+)")]
-    public async Task WhenILinkTheActionToTrigger(int sortOrder)
+    [When(@"I update the trigger phrase to ""(.*)"" and assign the Add action")]
+    public async Task WhenIUpdateTheTriggerPhraseAndAssignAddAction(string phrase)
     {
         var triggerId = (Guid)_scenarioContext["lastTriggerId"];
-        var actionId = (Guid)_scenarioContext["lastActionId"];
-        var body = TestContext.JsonContent(new { actionId, sortOrder });
-        _ctx.LastResponse = await _ctx.Client.PostAsync($"/api/v1/triggers/{triggerId}/actions", body);
+        var body = TestContext.JsonContent(new { phrase, actionId = ADD_ACTION_ID });
+        _ctx.LastResponse = await _ctx.Client.PutAsync($"/api/v1/triggers/{triggerId}", body);
     }
 
-    [Given(@"the action is linked to the trigger")]
-    public async Task GivenTheActionIsLinkedToTheTrigger()
+    [When(@"I delete the trigger")]
+    public async Task WhenIDeleteTheTrigger()
     {
         var triggerId = (Guid)_scenarioContext["lastTriggerId"];
-        var actionId = (Guid)_scenarioContext["lastActionId"];
-        var body = TestContext.JsonContent(new { actionId, sortOrder = 1 });
-        await _ctx.Client.PostAsync($"/api/v1/triggers/{triggerId}/actions", body);
-    }
-
-    [Given(@"the action is linked to the trigger with sort order (\d+)")]
-    public async Task GivenTheActionIsLinkedToTriggerWithSortOrder(int sortOrder)
-    {
-        var triggerId = (Guid)_scenarioContext["lastTriggerId"];
-        var actionId = (Guid)_scenarioContext["lastActionId"];
-        var body = TestContext.JsonContent(new { actionId, sortOrder });
-        await _ctx.Client.PostAsync($"/api/v1/triggers/{triggerId}/actions", body);
-    }
-
-    [When(@"I try to delete the action")]
-    public async Task WhenITryToDeleteTheAction()
-    {
-        var actionId = (Guid)_scenarioContext["lastActionId"];
-        _ctx.LastResponse = await _ctx.Client.DeleteAsync($"/api/v1/actions/{actionId}");
+        _ctx.LastResponse = await _ctx.Client.DeleteAsync($"/api/v1/triggers/{triggerId}");
     }
 
     [Then(@"the trigger response should contain phrase ""(.*)""")]
@@ -108,11 +71,29 @@ public class TriggersStepDefinitions
         Assert.Equal(expectedPhrase, phrase);
     }
 
-    [Then(@"the action response should contain template ""(.*)""")]
-    public async Task ThenTheActionResponseShouldContainTemplate(string expectedTemplate)
+    [Then(@"the trigger response should have an action type of ""(.*)""")]
+    public async Task ThenTheTriggerResponseShouldHaveActionType(string expectedActionType)
     {
         var json = await _ctx.GetResponseJson();
-        var template = json.GetProperty("responseTemplate").GetString();
-        Assert.Equal(expectedTemplate, template);
+        var actionType = json.GetProperty("actionType").GetString();
+        Assert.Equal(expectedActionType, actionType);
+    }
+
+    // =========================================================
+    // Shared helper
+    // =========================================================
+
+    private async Task CreateTriggerAsync(string phrase, Guid actionId)
+    {
+        var body = TestContext.JsonContent(new { phrase, actionId });
+        var response = await _ctx.Client.PostAsync("/api/v1/triggers", body);
+        _ctx.LastResponse = response;
+        if (response.IsSuccessStatusCode)
+        {
+            var json = JsonSerializer.Deserialize<JsonElement>(
+                await response.Content.ReadAsStringAsync(),
+                JsonOptions);
+            _scenarioContext["lastTriggerId"] = json.GetProperty("id").GetGuid();
+        }
     }
 }

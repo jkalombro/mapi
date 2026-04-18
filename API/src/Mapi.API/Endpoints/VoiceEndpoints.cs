@@ -14,16 +14,9 @@ public static class VoiceEndpoints
         group.MapPost("/command", ProcessCommandAsync)
             .WithName("ProcessVoiceCommand")
             .WithSummary("Process a voice transcript")
-            .WithDescription("Dispatches a spoken transcript through the command engine and returns a spoken response.")
+            .WithDescription("Dispatches a spoken transcript through the command engine and returns a spoken response. Include pendingIntent and pendingItemName from a prior response to continue a multi-turn flow.")
             .Produces<VoiceCommandResult>()
             .ProducesProblem(StatusCodes.Status400BadRequest);
-
-        group.MapPost("/confirm-add", ConfirmAddAsync)
-            .WithName("ConfirmVoiceAdd")
-            .WithSummary("Confirm voice item addition / price update")
-            .Produces<VoiceCommandResult>()
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
@@ -33,18 +26,9 @@ public static class VoiceEndpoints
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ProcessVoiceCommand(request.Transcript), cancellationToken);
-        return TypedResults.Ok(result);
-    }
-
-    private static async Task<IResult> ConfirmAddAsync(
-        [FromBody] ConfirmVoiceAddRequest request,
-        IMediator mediator,
-        CancellationToken cancellationToken)
-    {
-        var result = await mediator.Send(new ConfirmVoiceAddCommand(request.ItemName, request.Price), cancellationToken);
+        var result = await mediator.Send(
+            new ProcessVoiceCommand(request.Transcript, request.PendingIntent, request.PendingItemName),
+            cancellationToken);
         return TypedResults.Ok(result);
     }
 }
-
-public record ConfirmVoiceAddRequest(string ItemName, decimal Price);

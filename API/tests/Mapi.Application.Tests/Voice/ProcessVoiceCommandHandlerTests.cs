@@ -25,10 +25,10 @@ public class ProcessVoiceCommandHandlerTests
     {
         // Arrange
         var transcript = "How much is Gatas?";
-        var command = new ProcessVoiceCommand(transcript);
+        var command = new ProcessVoiceCommand(transcript, null, null);
         var expectedResult = new VoiceCommandResult("Gatas costs 50 pesos.");
         _commandServiceMock
-            .Setup(s => s.ExecuteAsync(transcript, _userId, It.IsAny<CancellationToken>()))
+            .Setup(s => s.ExecuteAsync(transcript, _userId, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
 
         // Act
@@ -36,20 +36,45 @@ public class ProcessVoiceCommandHandlerTests
 
         // Assert
         Assert.Equal(expectedResult, result);
-        _commandServiceMock.Verify(s => s.ExecuteAsync(transcript, _userId, It.IsAny<CancellationToken>()), Times.Once);
+        _commandServiceMock.Verify(
+            s => s.ExecuteAsync(transcript, _userId, null, null, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenPendingContextProvided_ForwardsPendingContextToCommandService()
+    {
+        // Arrange
+        var transcript = "50";
+        var pendingIntent = "Add";
+        var pendingItemName = "Gatas";
+        var command = new ProcessVoiceCommand(transcript, pendingIntent, pendingItemName);
+        var expectedResult = new VoiceCommandResult("Got it. Gatas has been added at 50 pesos.", ItemsModified: true);
+        _commandServiceMock
+            .Setup(s => s.ExecuteAsync(transcript, _userId, pendingIntent, pendingItemName, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResult);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(expectedResult, result);
+        _commandServiceMock.Verify(
+            s => s.ExecuteAsync(transcript, _userId, pendingIntent, pendingItemName, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
     public async Task Handle_WhenCommandServiceReturnsAmbiguousResult_ReturnsAmbiguousResult()
     {
         // Arrange
-        var command = new ProcessVoiceCommand("How much is G?");
+        var command = new ProcessVoiceCommand("How much is G?", null, null);
         var ambiguousResult = new VoiceCommandResult(
             "Multiple matches found.",
             IsAmbiguous: true,
             MatchedNames: new List<string> { "Gatas", "Gabi" });
         _commandServiceMock
-            .Setup(s => s.ExecuteAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
+            .Setup(s => s.ExecuteAsync(It.IsAny<string>(), _userId, It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(ambiguousResult);
 
         // Act

@@ -25,13 +25,13 @@ public static class TriggersEndpoints
 
         group.MapPost("/", CreateTriggerAsync)
             .WithName("CreateTrigger")
-            .WithSummary("Create a new trigger phrase")
+            .WithSummary("Create a new trigger with an assigned action")
             .Produces<TriggerResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:guid}", UpdateTriggerAsync)
             .WithName("UpdateTrigger")
-            .WithSummary("Update a trigger phrase")
+            .WithSummary("Update a trigger's phrase and/or action")
             .Produces<TriggerResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
@@ -41,18 +41,6 @@ public static class TriggersEndpoints
             .WithSummary("Delete a trigger")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
-
-        group.MapPost("/{triggerId:guid}/actions", LinkActionAsync)
-            .WithName("LinkActionToTrigger")
-            .WithSummary("Link an action to a trigger")
-            .Produces(StatusCodes.Status204NoContent)
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status404NotFound);
-
-        group.MapDelete("/{triggerId:guid}/actions/{actionId:guid}", UnlinkActionAsync)
-            .WithName("UnlinkActionFromTrigger")
-            .WithSummary("Unlink an action from a trigger")
-            .Produces(StatusCodes.Status204NoContent);
 
         return app;
     }
@@ -74,7 +62,7 @@ public static class TriggersEndpoints
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateTriggerCommand(request.Phrase), cancellationToken);
+        var result = await mediator.Send(new CreateTriggerCommand(request.Phrase, request.ActionId), cancellationToken);
         return TypedResults.Created($"/api/v1/triggers/{result.Id}", result);
     }
 
@@ -84,33 +72,13 @@ public static class TriggersEndpoints
         IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateTriggerCommand(id, request.Phrase), cancellationToken);
+        var result = await mediator.Send(new UpdateTriggerCommand(id, request.Phrase, request.ActionId), cancellationToken);
         return TypedResults.Ok(result);
     }
 
     private static async Task<IResult> DeleteTriggerAsync(Guid id, IMediator mediator, CancellationToken cancellationToken)
     {
         await mediator.Send(new DeleteTriggerCommand(id), cancellationToken);
-        return TypedResults.NoContent();
-    }
-
-    private static async Task<IResult> LinkActionAsync(
-        Guid triggerId,
-        [FromBody] TriggerActionLinkRequest request,
-        IMediator mediator,
-        CancellationToken cancellationToken)
-    {
-        await mediator.Send(new LinkActionCommand(triggerId, request.ActionId, request.SortOrder), cancellationToken);
-        return TypedResults.NoContent();
-    }
-
-    private static async Task<IResult> UnlinkActionAsync(
-        Guid triggerId,
-        Guid actionId,
-        IMediator mediator,
-        CancellationToken cancellationToken)
-    {
-        await mediator.Send(new UnlinkActionCommand(triggerId, actionId), cancellationToken);
         return TypedResults.NoContent();
     }
 }

@@ -87,6 +87,15 @@ describe('ItemFormComponent', () => {
     expect(savedSpy).toHaveBeenCalledWith(expected);
   });
 
+  it('should reset the form after a successful submit', () => {
+    component.form.setValue({ itemName: 'Salt', bisayaName: 'Asin', price: 10 });
+    component.onSubmit();
+
+    expect(component.form.get('itemName')?.value).toBeNull();
+    expect(component.form.get('bisayaName')?.value).toBeNull();
+    expect(component.form.get('price')?.value).toBeNull();
+  });
+
   it('should not emit if form is invalid', () => {
     const savedSpy = jest.fn();
     component.saved.subscribe(savedSpy);
@@ -113,6 +122,24 @@ describe('ItemFormComponent', () => {
   it('should show "Add Item" title when no editItem', () => {
     const title = fixture.debugElement.query(By.css('.item-form__title'));
     expect(title.nativeElement.textContent.trim()).toBe('Add Item');
+  });
+
+  it('should clear form fields when editItem changes to null via ngOnChanges', () => {
+    fixture.componentRef.setInput('editItem', MOCK_ITEM);
+    fixture.detectChanges();
+
+    component.ngOnChanges({
+      editItem: {
+        currentValue: null,
+        previousValue: MOCK_ITEM,
+        firstChange: false,
+        isFirstChange: () => false,
+      },
+    });
+
+    expect(component.form.get('itemName')?.value).toBe('');
+    expect(component.form.get('bisayaName')?.value).toBe('');
+    expect(component.form.get('price')?.value).toBeNull();
   });
 
   it('should show loading state on submit button when isLoading', () => {

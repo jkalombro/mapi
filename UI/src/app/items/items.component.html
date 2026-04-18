@@ -1,37 +1,62 @@
 <section class="items">
   <div class="items__header">
-    <h1 class="items__title">Items</h1>
-    @if (!showForm()) {
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="onAddClick()"
-        aria-label="Add new item"
-      >
-        + Add Item
-      </button>
-    }
+    <div class="items__heading">
+      <h1 class="items__title">Items</h1>
+      <span class="items__count" aria-live="polite">
+        {{ items().length }} {{ items().length === 1 ? 'product' : 'products' }}
+      </span>
+    </div>
+    <button
+      type="button"
+      class="items__add-btn"
+      (click)="onAddClick()"
+      aria-label="Add new item"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      Add Item
+    </button>
   </div>
 
   @if (error()) {
-    <div class="items__error" role="alert">{{ error() }}</div>
-  }
-
-  @if (showForm()) {
-    <app-item-form
-      [editItem]="selectedItem()"
-      [isLoading]="isLoading()"
-      (saved)="onSave($event)"
-      (cancelled)="onCancelForm()"
-    />
+    <div class="items__error" role="alert">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      {{ error() }}
+    </div>
   }
 
   <app-item-list
     [items]="items()"
-    [isLoading]="isLoading() && !showForm()"
+    [isLoading]="isLoading()"
     (editClicked)="onEdit($event)"
     (deleteClicked)="onDelete($event)"
   />
+
+  <app-modal
+    [isVisible]="showCreateModal()"
+    title="Add Item"
+    (closed)="onCreateCancel()"
+  >
+    <app-item-form
+      [isLoading]="isLoading()"
+      (saved)="onCreateSave($event)"
+      (cancelled)="onCreateCancel()"
+    />
+  </app-modal>
+
+  <app-modal
+    [isVisible]="showEditModal()"
+    title="Edit Item"
+    (closed)="onEditCancel()"
+  >
+    <app-item-form
+      [editItem]="selectedItem()"
+      [isLoading]="isLoading()"
+      (saved)="onEditSave($event)"
+      (cancelled)="onEditCancel()"
+    />
+  </app-modal>
 
   <app-confirmation-dialog
     [isVisible]="pendingDeleteId() !== null"

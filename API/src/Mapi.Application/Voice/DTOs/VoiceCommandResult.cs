@@ -4,5 +4,8 @@ public record VoiceCommandResult(
     string ResponseText,
     bool IsAmbiguous = false,
     bool IsConfirmationRequired = false,
-    IReadOnlyList<string>? MatchedNames = null
+    IReadOnlyList<string>? MatchedNames = null,
+    bool ItemsModified = false,
+    string? PendingIntent = null,
+    string? PendingItemName = null
 );

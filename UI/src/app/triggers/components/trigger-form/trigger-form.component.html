@@ -1,5 +1,5 @@
 <form class="trigger-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-  <h3 class="trigger-form__title">New Trigger</h3>
+  <h3 class="trigger-form__title">{{ editTrigger() ? 'Edit Trigger' : 'New Trigger' }}</h3>
 
   <div class="trigger-form__field">
     <label for="phrase" class="trigger-form__label">Trigger Phrase</label>
@@ -14,6 +14,26 @@
     @if (form.get('phrase')?.invalid && form.get('phrase')?.touched) {
       <span id="phrase-error" class="trigger-form__error" role="alert">
         Phrase is required and must be at least 2 characters.
+      </span>
+    }
+  </div>
+
+  <div class="trigger-form__field">
+    <label for="actionId" class="trigger-form__label">Action</label>
+    <select
+      id="actionId"
+      class="trigger-form__select"
+      formControlName="actionId"
+      aria-describedby="actionId-error"
+    >
+      <option value="" disabled>Select an action</option>
+      @for (action of actions(); track action.id) {
+        <option [value]="action.id">{{ action.actionType }}</option>
+      }
+    </select>
+    @if (form.get('actionId')?.invalid && form.get('actionId')?.touched) {
+      <span id="actionId-error" class="trigger-form__error" role="alert">
+        Action is required.
       </span>
     }
   </div>

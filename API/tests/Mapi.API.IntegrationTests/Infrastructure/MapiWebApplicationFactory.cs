@@ -22,15 +22,24 @@ public class MapiWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-            if (descriptor is not null)
-            {
-                services.Remove(descriptor);
-            }
+            var descriptorsToRemove = services
+                .Where(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)
+                         || d.ServiceType == typeof(DbContextOptions)
+                         || d.ServiceType == typeof(ApplicationDbContext))
+                .ToList();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase(DatabaseName));
+            foreach (var descriptor in descriptorsToRemove)
+                services.Remove(descriptor);
+
+            // Register options directly to avoid AddDbContext calling UseApplicationServiceProvider,
+            // which causes EF Core to resolve from the outer DI container and detect both
+            // SqlServer and InMemory providers as conflicting IDatabaseProvider registrations.
+            var inMemoryOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(DatabaseName)
+                .Options;
+
+            services.AddSingleton(inMemoryOptions);
+            services.AddScoped<ApplicationDbContext>();
         });
 
         builder.UseEnvironment("Testing");

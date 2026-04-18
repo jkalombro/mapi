@@ -21,26 +21,26 @@ public class CommandServiceTriggerTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenTriggerPhraseMatches_ExecutesLinkedActions()
+    public async Task ExecuteAsync_WhenTriggerPhraseMatches_ExecutesAssignedAction()
     {
         // Arrange
         var item = new Item { ItemName = "Milk", BisayaName = "Gatas", Price = 50m };
         var action = new Domain.Entities.Action
         {
-            Id = Guid.NewGuid(),
+            Id = new Guid("00000000-0000-0000-0000-000000000001"),
             ActionType = ActionType.Query,
-            ResponseTemplate = "{name} is {price}"
+            ResponseTemplate = "{item} is {value}"
         };
-        var map = new TriggerActionMap { ActionId = action.Id, SortOrder = 1, Action = action };
         var trigger = new Trigger
         {
             UserId = _userId,
             Phrase = "What's the price of",
-            TriggerActionMaps = new List<TriggerActionMap> { map }
+            ActionId = action.Id,
+            Action = action
         };
 
         _triggerRepositoryMock
-            .Setup(r => r.GetAllWithActionsAsync(_userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Trigger> { trigger });
         _itemRepositoryMock
             .Setup(r => r.FindByNameAsync("milk", _userId, It.IsAny<CancellationToken>()))
@@ -55,51 +55,11 @@ public class CommandServiceTriggerTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenMultipleActionsLinked_ExecutesInSortOrder()
-    {
-        // Arrange
-        var firstAction = new Domain.Entities.Action
-        {
-            Id = Guid.NewGuid(),
-            ActionType = ActionType.Query,
-            ResponseTemplate = "First: {name}"
-        };
-        var secondAction = new Domain.Entities.Action
-        {
-            Id = Guid.NewGuid(),
-            ActionType = ActionType.Query,
-            ResponseTemplate = "Second: {price}"
-        };
-        var map1 = new TriggerActionMap { ActionId = firstAction.Id, SortOrder = 2, Action = firstAction };
-        var map2 = new TriggerActionMap { ActionId = secondAction.Id, SortOrder = 1, Action = secondAction };
-        var trigger = new Trigger
-        {
-            UserId = _userId,
-            Phrase = "check",
-            TriggerActionMaps = new List<TriggerActionMap> { map1, map2 }
-        };
-
-        _triggerRepositoryMock
-            .Setup(r => r.GetAllWithActionsAsync(_userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Trigger> { trigger });
-        var item = new Item { ItemName = "Sugar", BisayaName = "Asukal", Price = 75m };
-        _itemRepositoryMock
-            .Setup(r => r.FindByNameAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Item> { item });
-
-        // Act
-        var result = await _service.ExecuteAsync("check something", _userId);
-
-        // Assert: The last action in sort order wins (Second: {price})
-        Assert.Contains("75", result.ResponseText);
-    }
-
-    [Fact]
     public async Task ExecuteAsync_WhenNoTriggerMatches_FallsBackToBuiltInPatterns()
     {
         // Arrange
         _triggerRepositoryMock
-            .Setup(r => r.GetAllWithActionsAsync(_userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Trigger>());
         _itemRepositoryMock
             .Setup(r => r.FindByNameAsync("milk", _userId, It.IsAny<CancellationToken>()))
@@ -118,20 +78,20 @@ public class CommandServiceTriggerTests
         // Arrange
         var action = new Domain.Entities.Action
         {
-            Id = Guid.NewGuid(),
+            Id = new Guid("00000000-0000-0000-0000-000000000001"),
             ActionType = ActionType.Query,
-            ResponseTemplate = "{name} costs {price}"
+            ResponseTemplate = "{item} costs {value}"
         };
-        var map = new TriggerActionMap { ActionId = action.Id, SortOrder = 1, Action = action };
         var trigger = new Trigger
         {
             UserId = _userId,
             Phrase = "price of",
-            TriggerActionMaps = new List<TriggerActionMap> { map }
+            ActionId = action.Id,
+            Action = action
         };
 
         _triggerRepositoryMock
-            .Setup(r => r.GetAllWithActionsAsync(_userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Trigger> { trigger });
         _itemRepositoryMock
             .Setup(r => r.FindByNameAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
@@ -142,5 +102,102 @@ public class CommandServiceTriggerTests
 
         // Assert
         Assert.Contains("couldn't find", result.ResponseText);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenTriggerWithRemoveActionMatchesItem_CallsDeleteAndReturnsTemplate()
+    {
+        // Arrange
+        var item = new Item { ItemName = "Milk", BisayaName = "Gatas", Price = 50m };
+        var action = new Domain.Entities.Action
+        {
+            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+            ActionType = ActionType.Remove,
+            ResponseTemplate = "I've removed {item}."
+        };
+        var trigger = new Trigger
+        {
+            UserId = _userId,
+            Phrase = "remove",
+            ActionId = action.Id,
+            Action = action
+        };
+
+        _triggerRepositoryMock
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Trigger> { trigger });
+        _itemRepositoryMock
+            .Setup(r => r.FindByNameAsync("milk", _userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Item> { item });
+
+        // Act
+        var result = await _service.ExecuteAsync("remove milk", _userId);
+
+        // Assert
+        _itemRepositoryMock.Verify(r => r.DeleteAsync(item, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Contains("Milk", result.ResponseText);
+        Assert.True(result.ItemsModified);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenTriggerWithRemoveActionButItemNotFound_DoesNotDeleteAndReturnsNotFound()
+    {
+        // Arrange
+        var action = new Domain.Entities.Action
+        {
+            Id = new Guid("00000000-0000-0000-0000-000000000004"),
+            ActionType = ActionType.Remove,
+            ResponseTemplate = "I've removed {item}."
+        };
+        var trigger = new Trigger
+        {
+            UserId = _userId,
+            Phrase = "remove",
+            ActionId = action.Id,
+            Action = action
+        };
+
+        _triggerRepositoryMock
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Trigger> { trigger });
+        _itemRepositoryMock
+            .Setup(r => r.FindByNameAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Item>());
+
+        // Act
+        var result = await _service.ExecuteAsync("remove unknown", _userId);
+
+        // Assert
+        _itemRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Item>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Contains("couldn't find", result.ResponseText);
+        Assert.False(result.ItemsModified);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenLongerTriggerPhraseMatches_UsesMostSpecificTrigger()
+    {
+        // Arrange
+        var action = new Domain.Entities.Action
+        {
+            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+            ActionType = ActionType.Query,
+            ResponseTemplate = "{item} is {value}"
+        };
+        var shortTrigger = new Trigger { UserId = _userId, Phrase = "price", ActionId = action.Id, Action = action };
+        var longTrigger = new Trigger { UserId = _userId, Phrase = "price of", ActionId = action.Id, Action = action };
+        var item = new Item { ItemName = "Rice", BisayaName = "Bugas", Price = 60m };
+
+        _triggerRepositoryMock
+            .Setup(r => r.GetAllByUserAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Trigger> { shortTrigger, longTrigger });
+        _itemRepositoryMock
+            .Setup(r => r.FindByNameAsync(It.IsAny<string>(), _userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Item> { item });
+
+        // Act
+        var result = await _service.ExecuteAsync("price of rice", _userId);
+
+        // Assert — longest matching phrase wins
+        Assert.Contains("Rice", result.ResponseText);
     }
 }

@@ -3,12 +3,21 @@ import { login, loginFailure, loginSuccess, logout, register, registerFailure, r
 import { AuthState } from '../models/auth.model';
 
 const AUTH_FEATURE_KEY = 'auth';
+export const AUTH_TOKEN_KEY = 'auth_token';
 
-export const initialAuthState: AuthState = {
+const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
+
+const UNAUTHENTICATED_STATE: AuthState = {
   user: null,
   token: null,
   isLoading: false,
   error: null,
+};
+
+export const initialAuthState: AuthState = {
+  ...UNAUTHENTICATED_STATE,
+  user: storedToken ? { email: '' } : null,
+  token: storedToken,
 };
 
 export const authReducer = createReducer(
@@ -26,7 +35,7 @@ export const authReducer = createReducer(
     isLoading: false,
     error,
   })),
-  on(logout, () => initialAuthState)
+  on(logout, () => UNAUTHENTICATED_STATE)
 );
 
 export const selectAuthState = createFeatureSelector<AuthState>(AUTH_FEATURE_KEY);

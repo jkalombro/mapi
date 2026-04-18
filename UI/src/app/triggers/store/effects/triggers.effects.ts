@@ -2,7 +2,20 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { TriggersApiService } from '../api/triggers.service';
-import { createTrigger, createTriggerFailure, createTriggerSuccess, deleteTrigger, deleteTriggerFailure, deleteTriggerSuccess, linkAction, linkActionFailure, linkActionSuccess, loadTriggers, loadTriggersFailure, loadTriggersSuccess, unlinkAction, unlinkActionFailure, unlinkActionSuccess } from '../actions/triggers.actions';
+import {
+  createTrigger,
+  createTriggerFailure,
+  createTriggerSuccess,
+  deleteTrigger,
+  deleteTriggerFailure,
+  deleteTriggerSuccess,
+  loadTriggers,
+  loadTriggersFailure,
+  loadTriggersSuccess,
+  updateTrigger,
+  updateTriggerFailure,
+  updateTriggerSuccess,
+} from '../actions/triggers.actions';
 
 @Injectable()
 export class TriggersEffects {
@@ -37,6 +50,20 @@ export class TriggersEffects {
     )
   );
 
+  readonly updateTrigger$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateTrigger),
+      switchMap(({ id, request }) =>
+        this.triggersService.update(id, request).pipe(
+          map((trigger) => updateTriggerSuccess({ trigger })),
+          catchError((error: unknown) =>
+            of(updateTriggerFailure({ error: error instanceof Error ? error.message : 'Failed to update trigger.' }))
+          )
+        )
+      )
+    )
+  );
+
   readonly deleteTrigger$ = createEffect(() =>
     this.actions$.pipe(
       ofType(deleteTrigger),
@@ -50,33 +77,4 @@ export class TriggersEffects {
       )
     )
   );
-
-  readonly linkAction$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(linkAction),
-      switchMap(({ triggerId, request }) =>
-        this.triggersService.linkAction(triggerId, request).pipe(
-          map(() => linkActionSuccess()),
-          catchError((error: unknown) =>
-            of(linkActionFailure({ error: error instanceof Error ? error.message : 'Failed to link action.' }))
-          )
-        )
-      )
-    )
-  );
-
-  readonly unlinkAction$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(unlinkAction),
-      switchMap(({ triggerId, actionId }) =>
-        this.triggersService.unlinkAction(triggerId, actionId).pipe(
-          map(() => unlinkActionSuccess()),
-          catchError((error: unknown) =>
-            of(unlinkActionFailure({ error: error instanceof Error ? error.message : 'Failed to unlink action.' }))
-          )
-        )
-      )
-    )
-  );
-
 }

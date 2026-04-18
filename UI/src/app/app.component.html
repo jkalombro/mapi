@@ -2,12 +2,29 @@
   <header class="toolbar">
     <div class="toolbar__inner">
       <a routerLink="/items" class="toolbar__brand" aria-label="Mapi home">
+        <svg class="toolbar__brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V20H9v2h6v-2h-2v-2.07A7 7 0 0 0 19 11h-2z"/>
+        </svg>
         <span class="toolbar__name">Mapi</span>
       </a>
+
       <nav class="toolbar__nav" aria-label="Main navigation">
-        <a routerLink="/items" class="toolbar__link">Items</a>
-        <a routerLink="/triggers" class="toolbar__link">Triggers</a>
+        <a routerLink="/items" routerLinkActive="toolbar__link--active" class="toolbar__link">Items</a>
+        <a routerLink="/triggers" routerLinkActive="toolbar__link--active" class="toolbar__link">Triggers</a>
       </nav>
+
+      <button
+        type="button"
+        class="toolbar__logout"
+        aria-label="Sign out"
+        title="Sign out"
+        (click)="onLogout()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+        </svg>
+        <span class="toolbar__logout-label">Sign out</span>
+      </button>
     </div>
   </header>
 }
@@ -17,18 +34,18 @@
 </main>
 
 @if (isAuthenticated()) {
+  @if (isListening()) {
+    <div class="transcript-overlay" aria-live="polite" aria-label="Voice command listener">
+      <p class="transcript-overlay__text">
+        {{ interimTranscript() || 'Listening...' }}
+      </p>
+    </div>
+  }
+
   <app-mic-icon
     [isActive]="isListening()"
     [isSupported]="isSupported()"
     (clicked)="onMicClick()"
   />
 
-  <app-confirmation-dialog
-    [isVisible]="isConfirmationRequired()"
-    [message]="commandResult()?.responseText ?? ''"
-    confirmLabel="Yes, add it"
-    cancelLabel="No, cancel"
-    (confirmed)="onConfirmAdd()"
-    (cancelled)="onDismissConfirmation()"
-  />
 }

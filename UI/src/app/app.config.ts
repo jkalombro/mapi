@@ -14,6 +14,8 @@ import { itemsReducer } from './items/store/reducers/items.reducer';
 import { ItemsEffects } from './items/store/effects/items.effects';
 import { triggersReducer } from './triggers/store/reducers/triggers.reducer';
 import { TriggersEffects } from './triggers/store/effects/triggers.effects';
+import { actionsReducer } from './actions/store/reducers/actions.reducer';
+import { ActionsEffects } from './actions/store/effects/actions.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,7 +27,8 @@ export const appConfig: ApplicationConfig = {
       voice: voiceReducer,
       items: itemsReducer,
       triggers: triggersReducer,
+      actions: actionsReducer,
     }),
-    provideEffects([AuthEffects, VoiceEffects, ItemsEffects, TriggersEffects]),
+    provideEffects([AuthEffects, VoiceEffects, ItemsEffects, TriggersEffects, ActionsEffects]),
   ],
 };
