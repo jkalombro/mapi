@@ -48,12 +48,4 @@
     (clicked)="onMicClick()"
   />
 
-  <app-confirmation-dialog
-    [isVisible]="isConfirmationRequired()"
-    [message]="commandResult()?.responseText ?? ''"
-    confirmLabel="Yes, add it"
-    cancelLabel="No, cancel"
-    (confirmed)="onConfirmAdd()"
-    (cancelled)="onDismissConfirmation()"
-  />
 }

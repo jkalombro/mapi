@@ -160,7 +160,19 @@ public class CommandServiceAddTests
         // Assert
         Assert.Null(result.PendingIntent);
         Assert.Null(result.PendingItemName);
-        Assert.Contains("cancelled", result.ResponseText, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Add command has been cancelled.", result.ResponseText);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenPendingConfirmUpdateAndNeitherYesNorNo_ReturnsInvalidAnswerMessageAndClearsPending()
+    {
+        // Act
+        var result = await _service.ExecuteAsync("maybe", _userId, pendingIntent: "ConfirmUpdate", pendingItemName: "gatas");
+
+        // Assert
+        Assert.Null(result.PendingIntent);
+        Assert.Null(result.PendingItemName);
+        Assert.Equal("Yes or no is the only acceptable answer, please start over the command again.", result.ResponseText);
     }
 
     // ── Update trigger → ask for price ────────────────────────────────────────

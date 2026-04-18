@@ -282,12 +282,17 @@ describe('VoiceEffects', () => {
       });
     });
 
-    it('should call speechSynthesis.speak when pendingIntent is ConfirmUpdate', (done) => {
+    it('should NOT call speechSynthesis.speak when pendingIntent is ConfirmUpdate', (done) => {
+      const dispatched: unknown[] = [];
       actions$ = of(commandSuccess({ result: mockConfirmUpdateResult }));
 
-      effects.speakResponse$.subscribe(() => {
-        expect(speechSynthesisMock.speak).toHaveBeenCalledWith(mockConfirmUpdateResult.responseText);
-        done();
+      effects.speakResponse$.subscribe({
+        next: (v) => dispatched.push(v),
+        complete: () => {
+          expect(dispatched).toHaveLength(0);
+          expect(speechSynthesisMock.speak).not.toHaveBeenCalled();
+          done();
+        },
       });
     });
 
@@ -355,17 +360,13 @@ describe('VoiceEffects', () => {
       });
     });
 
-    it('should NOT trigger auto-listen when pendingIntent is ConfirmUpdate', (done) => {
-      const dispatched: unknown[] = [];
+    it('should speak and then auto-start mic when pendingIntent is ConfirmUpdate', (done) => {
       actions$ = of(commandSuccess({ result: mockConfirmUpdateResult }));
 
-      effects.autoListenAfterPending$.subscribe({
-        next: (v) => dispatched.push(v),
-        complete: () => {
-          expect(dispatched).toHaveLength(0);
-          expect(speechRecognitionMock.startListening).not.toHaveBeenCalled();
-          done();
-        },
+      effects.autoListenAfterPending$.subscribe(() => {
+        expect(speechSynthesisMock.speak).toHaveBeenCalledWith(mockConfirmUpdateResult.responseText);
+        expect(speechRecognitionMock.startListening).toHaveBeenCalled();
+        done();
       });
     });
   });

@@ -17,7 +17,8 @@ public partial class CommandService : ICommandService
     private const string RESPONSE_MALFORMED_COMMAND = "I didn't understand that command. Please try again.";
     private const string RESPONSE_INVALID_PRICE = "That doesn't look like a valid price. Please say a number.";
     private const string RESPONSE_AMBIGUOUS = "I found multiple matches: {names}. Which one did you mean?";
-    private const string RESPONSE_UPDATE_CANCELLED = "Okay, update cancelled.";
+    private const string RESPONSE_ADD_CANCELLED = "Add command has been cancelled.";
+    private const string RESPONSE_CONFIRM_UPDATE_INVALID = "Yes or no is the only acceptable answer, please start over the command again.";
     private const string PRICE_FORMAT = "{0} pesos";
     private const int DECIMAL_PLACES = 2;
 
@@ -143,7 +144,12 @@ public partial class CommandService : ICommandService
                 PendingItemName: itemName);
         }
 
-        return new VoiceCommandResult(RESPONSE_UPDATE_CANCELLED);
+        if (transcript is "no" or "n")
+        {
+            return new VoiceCommandResult(RESPONSE_ADD_CANCELLED);
+        }
+
+        return new VoiceCommandResult(RESPONSE_CONFIRM_UPDATE_INVALID);
     }
 
     private async Task<VoiceCommandResult?> TryMatchTriggerAsync(

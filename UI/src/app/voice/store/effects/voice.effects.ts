@@ -9,7 +9,7 @@ import { commandFailure, commandSuccess, sendCommand, startListening } from '../
 import { loadItems } from '../../../items/store/actions/items.actions';
 import { selectPendingState } from '../reducers/voice.reducer';
 
-const PENDING_INTENTS_REQUIRING_VOICE = ['Add', 'Update'];
+const PENDING_INTENTS_REQUIRING_VOICE = ['Add', 'Update', 'ConfirmUpdate'];
 
 @Injectable()
 export class VoiceEffects {

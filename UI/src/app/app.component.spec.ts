@@ -6,9 +6,9 @@ import { Subject } from 'rxjs';
 import { AppComponent } from './app.component';
 import { SpeechRecognitionService } from './shared/services/speech-recognition.service';
 import { signal } from '@angular/core';
-import { selectIsListening, selectIsConfirmationRequired, selectCommandResult } from './voice/store/reducers/voice.reducer';
+import { selectIsListening } from './voice/store/reducers/voice.reducer';
 import { selectIsAuthenticated } from './store/reducers/auth.reducer';
-import { dismissConfirmation, sendCommand, transcriptReceived } from './voice/store/actions/voice.actions';
+import { sendCommand, transcriptReceived } from './voice/store/actions/voice.actions';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -111,24 +111,6 @@ describe('AppComponent', () => {
     expect(speechService.stopListening).toHaveBeenCalled();
   });
 
-  it('should show confirmation dialog when authenticated and confirmation is required', () => {
-    store.overrideSelector(selectIsAuthenticated, true);
-    store.overrideSelector(selectIsConfirmationRequired, true);
-    store.overrideSelector(selectCommandResult, {
-      responseText: 'Milk already exists. Do you want to update it?',
-      isAmbiguous: false,
-      isConfirmationRequired: true,
-      matchedNames: null,
-      itemsModified: false,
-      pendingIntent: 'ConfirmUpdate',
-      pendingItemName: 'Milk',
-    });
-    store.refreshState();
-    fixture.detectChanges();
-    const dialog = fixture.debugElement.query(By.css('app-confirmation-dialog'));
-    expect(dialog).toBeTruthy();
-  });
-
   it('should dispatch transcriptReceived and sendCommand when transcript$ emits', () => {
     jest.spyOn(store, 'dispatch');
     transcript$.next('how much is Milk?');
@@ -136,15 +118,5 @@ describe('AppComponent', () => {
     expect(store.dispatch).toHaveBeenCalledWith(sendCommand({ transcript: 'how much is Milk?' }));
   });
 
-  it('onConfirmAdd should dispatch sendCommand with transcript "yes"', () => {
-    jest.spyOn(store, 'dispatch');
-    component.onConfirmAdd();
-    expect(store.dispatch).toHaveBeenCalledWith(sendCommand({ transcript: 'yes' }));
-  });
-
-  it('onDismissConfirmation should dispatch dismissConfirmation', () => {
-    jest.spyOn(store, 'dispatch');
-    component.onDismissConfirmation();
-    expect(store.dispatch).toHaveBeenCalledWith(dismissConfirmation());
-  });
 });
+
