@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Mapi.Application.Voice.Commands;
 
-public record ProcessVoiceCommand(string Transcript) : IRequest<VoiceCommandResult>;
+public record ProcessVoiceCommand(string Transcript, string? PendingIntent, string? PendingItemName) : IRequest<VoiceCommandResult>;
 
 public class ProcessVoiceCommandHandler : IRequestHandler<ProcessVoiceCommand, VoiceCommandResult>
 {
@@ -19,6 +19,11 @@ public class ProcessVoiceCommandHandler : IRequestHandler<ProcessVoiceCommand, V
 
     public async Task<VoiceCommandResult> Handle(ProcessVoiceCommand request, CancellationToken cancellationToken)
     {
-        return await _commandService.ExecuteAsync(request.Transcript, _currentUserService.UserId, cancellationToken);
+        return await _commandService.ExecuteAsync(
+            request.Transcript,
+            _currentUserService.UserId,
+            request.PendingIntent,
+            request.PendingItemName,
+            cancellationToken);
     }
 }

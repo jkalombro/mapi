@@ -4,6 +4,8 @@ export interface VoiceCommandResult {
   isConfirmationRequired: boolean;
   matchedNames: string[] | null;
   itemsModified: boolean;
+  pendingIntent: string | null;
+  pendingItemName: string | null;
 }
 
 export interface VoiceState {
@@ -12,9 +14,6 @@ export interface VoiceState {
   commandResult: VoiceCommandResult | null;
   isProcessing: boolean;
   error: string | null;
-}
-
-export interface ConfirmAddRequest {
-  itemName: string;
-  price: number;
+  pendingIntent: string | null;
+  pendingItemName: string | null;
 }

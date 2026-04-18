@@ -8,7 +8,7 @@ import { SpeechRecognitionService } from './shared/services/speech-recognition.s
 import { signal } from '@angular/core';
 import { selectIsListening, selectIsConfirmationRequired, selectCommandResult } from './voice/store/reducers/voice.reducer';
 import { selectIsAuthenticated } from './store/reducers/auth.reducer';
-import { confirmAdd, dismissConfirmation, sendCommand, transcriptReceived } from './voice/store/actions/voice.actions';
+import { dismissConfirmation, sendCommand, transcriptReceived } from './voice/store/actions/voice.actions';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -19,7 +19,15 @@ describe('AppComponent', () => {
 
   const initialState = {
     auth: { user: null, token: null, isLoading: false, error: null },
-    voice: { isListening: false, transcript: null, commandResult: null, isProcessing: false, error: null },
+    voice: {
+      isListening: false,
+      transcript: null,
+      commandResult: null,
+      isProcessing: false,
+      error: null,
+      pendingIntent: null,
+      pendingItemName: null,
+    },
   };
 
   beforeEach(async () => {
@@ -28,6 +36,7 @@ describe('AppComponent', () => {
     const speechMock = {
       isListening: signal(false),
       isSupported: signal(true),
+      interimTranscript: signal(''),
       startListening: jest.fn(),
       stopListening: jest.fn(),
       transcript$,
@@ -106,10 +115,13 @@ describe('AppComponent', () => {
     store.overrideSelector(selectIsAuthenticated, true);
     store.overrideSelector(selectIsConfirmationRequired, true);
     store.overrideSelector(selectCommandResult, {
-      responseText: 'Add rice for 50?',
+      responseText: 'Milk already exists. Do you want to update it?',
       isAmbiguous: false,
       isConfirmationRequired: true,
       matchedNames: null,
+      itemsModified: false,
+      pendingIntent: 'ConfirmUpdate',
+      pendingItemName: 'Milk',
     });
     store.refreshState();
     fixture.detectChanges();
@@ -124,49 +136,10 @@ describe('AppComponent', () => {
     expect(store.dispatch).toHaveBeenCalledWith(sendCommand({ transcript: 'how much is Milk?' }));
   });
 
-  it('onConfirmAdd should dispatch confirmAdd when commandResult has matchedNames', () => {
+  it('onConfirmAdd should dispatch sendCommand with transcript "yes"', () => {
     jest.spyOn(store, 'dispatch');
-    store.overrideSelector(selectCommandResult, {
-      responseText: 'Add Milk?',
-      isAmbiguous: false,
-      isConfirmationRequired: true,
-      matchedNames: ['Milk'],
-    });
-    store.refreshState();
-    fixture.detectChanges();
-
     component.onConfirmAdd();
-
-    expect(store.dispatch).toHaveBeenCalledWith(
-      confirmAdd({ request: { itemName: 'Milk', price: 0 } })
-    );
-  });
-
-  it('onConfirmAdd should not dispatch when commandResult is null', () => {
-    jest.spyOn(store, 'dispatch');
-    store.overrideSelector(selectCommandResult, null);
-    store.refreshState();
-    fixture.detectChanges();
-
-    component.onConfirmAdd();
-
-    expect(store.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: confirmAdd.type }));
-  });
-
-  it('onConfirmAdd should not dispatch when matchedNames is empty', () => {
-    jest.spyOn(store, 'dispatch');
-    store.overrideSelector(selectCommandResult, {
-      responseText: 'Ambiguous?',
-      isAmbiguous: true,
-      isConfirmationRequired: false,
-      matchedNames: [],
-    });
-    store.refreshState();
-    fixture.detectChanges();
-
-    component.onConfirmAdd();
-
-    expect(store.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: confirmAdd.type }));
+    expect(store.dispatch).toHaveBeenCalledWith(sendCommand({ transcript: 'yes' }));
   });
 
   it('onDismissConfirmation should dispatch dismissConfirmation', () => {

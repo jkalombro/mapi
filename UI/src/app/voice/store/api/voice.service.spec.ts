@@ -2,7 +2,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { VoiceApiService } from './voice.service';
-import { ConfirmAddRequest, VoiceCommandResult } from '../models/voice.model';
+import { VoiceCommandResult } from '../models/voice.model';
 
 const BASE_URL = 'http://localhost:5000/api/v1/voice';
 
@@ -11,6 +11,9 @@ const mockResult: VoiceCommandResult = {
   isAmbiguous: false,
   isConfirmationRequired: false,
   matchedNames: null,
+  itemsModified: false,
+  pendingIntent: null,
+  pendingItemName: null,
 };
 
 describe('VoiceApiService', () => {
@@ -33,26 +36,36 @@ describe('VoiceApiService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('sendCommand should POST /voice/command with transcript', () => {
+  it('sendCommand should POST /voice/command with transcript only when no pending context', () => {
     let result: VoiceCommandResult | undefined;
     service.sendCommand('How much is Milk?').subscribe((r) => (result = r));
 
     const req = http.expectOne(`${BASE_URL}/command`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ transcript: 'How much is Milk?' });
+    expect(req.request.body).toEqual({ transcript: 'How much is Milk?', pendingIntent: null, pendingItemName: null });
     req.flush(mockResult);
 
     expect(result).toEqual(mockResult);
   });
 
-  it('confirmAdd should POST /voice/confirm-add with request body', () => {
-    const request: ConfirmAddRequest = { itemName: 'Milk', price: 50 };
+  it('sendCommand should POST /voice/command with pending context when provided', () => {
     let result: VoiceCommandResult | undefined;
-    service.confirmAdd(request).subscribe((r) => (result = r));
+    service.sendCommand('50', 'Add', 'Sugar').subscribe((r) => (result = r));
 
-    const req = http.expectOne(`${BASE_URL}/confirm-add`);
+    const req = http.expectOne(`${BASE_URL}/command`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(request);
+    expect(req.request.body).toEqual({ transcript: '50', pendingIntent: 'Add', pendingItemName: 'Sugar' });
+    req.flush(mockResult);
+
+    expect(result).toEqual(mockResult);
+  });
+
+  it('sendCommand should normalize null/undefined pending context to null', () => {
+    let result: VoiceCommandResult | undefined;
+    service.sendCommand('yes', null, undefined).subscribe((r) => (result = r));
+
+    const req = http.expectOne(`${BASE_URL}/command`);
+    expect(req.request.body).toEqual({ transcript: 'yes', pendingIntent: null, pendingItemName: null });
     req.flush(mockResult);
 
     expect(result).toEqual(mockResult);

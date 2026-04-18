@@ -116,7 +116,8 @@
       "Bash(powershell.exe -Command \"& { cd 'D:\\\\Repository\\\\mapi\\\\UI'; npx jest 'src/app/shared/components/confirmation-dialog' --no-coverage 2>&1 }\")",
       "Bash(grep -vE \"^\\\\s*$|Test Suites|Tests:|Snapshots|Time:\")",
       "Bash(dotnet list:*)",
-      "Bash(dir \"d:\\\\Repository\\\\mapi\" /b)"
+      "Bash(dir \"d:\\\\Repository\\\\mapi\" /b)",
+      "Bash(node -e \"const m = require\\('@ngrx/effects'\\); console.log\\(Object.keys\\(m\\).filter\\(k => k.toLowerCase\\(\\).includes\\('concat'\\)\\)\\)\")"
     ]
   }
 }

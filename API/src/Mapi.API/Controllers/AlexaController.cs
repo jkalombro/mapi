@@ -89,7 +89,7 @@ public class AlexaController : ControllerBase
 
         try
         {
-            var result = await _mediator.Send(new ProcessVoiceCommand(transcript), cancellationToken);
+            var result = await _mediator.Send(new ProcessVoiceCommand(transcript, null, null), cancellationToken);
             return BuildSpeechResult(result.ResponseText);
         }
         catch (Exception ex)
