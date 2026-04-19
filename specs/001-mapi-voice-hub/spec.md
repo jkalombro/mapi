@@ -61,32 +61,36 @@ A logged-in user can speak a query (e.g., "How much is Gatas?") using the persis
 
 ### User Story 3 – Voice Item Addition (Priority: P3)
 
-A logged-in user can add a new item by speaking a command (e.g., "Add Gatas price 50"). The system stores the spoken product name as both the ItemName and the BisayaName, allowing users to query it by that name in either language field.
+A logged-in user can add a new item through a two-turn voice conversation: first speaking a trigger phrase + item name (e.g., "Add Gatas"), then speaking the price when prompted. If the item already exists, the system prompts for voice confirmation before updating the price.
 
 **Why this priority**: Voice-driven addition extends the voice interface beyond read-only use, reducing friction for users who prefer hands-free data entry.
 
-**Independent Test**: Can be fully tested by speaking an "Add" command and then querying the newly added item by name.
+**Independent Test**: Can be fully tested by speaking "Add Gatas", waiting for the price prompt, speaking "50", then querying the newly added item by name.
 
 **Acceptance Scenarios**:
 
-1. **Given** a logged-in user speaks "Add Gatas price 50", **When** the command is processed, **Then** a new item is created with both ItemName and BisayaName set to "Gatas" and Price set to 50.
-2. **Given** the same item was added via voice, **When** the user opens the manual item list, **Then** the item appears in the list with the correct values.
-3. **Given** a malformed voice command (e.g., "Add price"), **When** the command is processed, **Then** the system responds with a helpful error message without creating a record.
+1. **Given** a logged-in user speaks "Add Gatas", **When** the command is processed and the item does not exist, **Then** the system responds "What is the price of Gatas?" and the mic auto-activates.
+2. **Given** the system is waiting for a price (pendingIntent = "Add"), **When** the user speaks "50", **Then** a new item is created with both ItemName and BisayaName set to "Gatas" and Price set to 50.
+3. **Given** "Gatas" already exists, **When** the user speaks "Add Gatas", **Then** the system responds "Gatas already exists at {price} pesos. Do you want to update it?" and the mic auto-activates (pendingIntent = "ConfirmUpdate").
+4. **Given** the system is awaiting yes/no confirmation, **When** the user says "yes", **Then** the system transitions to pendingIntent = "Update" and asks for the new price.
+5. **Given** the system is awaiting yes/no confirmation, **When** the user says "no", **Then** the system responds "Add command has been cancelled." and resets.
+6. **Given** the same item was added via voice, **When** the user opens the manual item list, **Then** the item appears in the list with the correct values.
+7. **Given** a malformed voice command (e.g., "Add price"), **When** the command is processed, **Then** the system responds with a helpful error message without creating a record.
 
 ---
 
 ### User Story 4 – Trigger & Action Logic Management (Priority: P4)
 
-A logged-in user can define custom voice trigger phrases and link them to one or more actions (Query, Add, Update, Remove) with configurable response templates. A trigger can map to multiple actions (many-to-many).
+A logged-in user can define custom voice trigger phrases, each linked to exactly one of the 4 globally seeded actions (Query, Add, Update, Remove). Actions are not user-created — they are fixed system operations.
 
 **Why this priority**: This enables extensibility beyond hardcoded commands, allowing users to define personalized voice workflows.
 
-**Independent Test**: Can be fully tested by creating a trigger phrase, linking it to an action, and verifying that speaking that phrase executes the linked action.
+**Independent Test**: Can be fully tested by creating a trigger phrase linked to a Query action and verifying that speaking that phrase executes a price lookup.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user creates a trigger phrase "What's the price of", **When** they link it to a "Query" action with a response template, **Then** speaking that phrase triggers a price lookup.
-2. **Given** a trigger is linked to multiple actions, **When** the trigger phrase is spoken, **Then** all linked actions are executed in sequence.
+1. **Given** a user creates a trigger phrase "What's the price of" linked to the seeded Query action, **When** they speak that phrase, **Then** the system executes a price lookup.
+2. **Given** a user updates a trigger's phrase or linked action, **When** they speak the new phrase, **Then** the updated action is executed.
 3. **Given** a user deletes a trigger, **When** that phrase is spoken, **Then** the system does not recognize it as a command.
 
 ---
@@ -117,7 +121,7 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - When an Action is deleted, all associated `TriggerActionMap` entries are cascade-deleted. The linked Trigger remains intact with its remaining actions.
 - When `ItemName` and `BisayaName` are identical and a voice query matches that name, the system returns a single result. The ambiguity flow is only triggered when multiple distinct items match the spoken name.
 - User-defined trigger phrases always take precedence over built-in command patterns. Built-in patterns are used as fallback only when no user-defined trigger matches the spoken input.
-- When a voice-add command names an item that already exists in the user's account, the system responds with a spoken and visual confirmation prompt using the template: *"{name} already exists at {price} pesos. Do you want to update it?"* The visual prompt displays "Yes" and "No" buttons. If the user confirms, the existing item's price is updated. If the user declines or does not respond within 10 seconds, the prompt is dismissed, no change is made, and the mic resets to idle.
+- When a voice-add command names an item that already exists, the system responds with *"{name} already exists at {price} pesos. Do you want to update it?"* and sets `pendingIntent = "ConfirmUpdate"`. The mic auto-activates. If the user says "yes", the flow transitions to `pendingIntent = "Update"` (waiting for new price). If the user says "no", the command is cancelled. Any other response clears pending state with an error message. There is no visual confirmation dialog — confirmation is entirely voice-driven.
 - What happens when an Alexa request is received for an unlinked or unknown Alexa user identity?
 - When an incoming Alexa request matches multiple Mapi accounts sharing the same `AlexaUserId`, the system resolves to the most recently created account.
 - Alexa session management: `shouldEndSession` is set to `true` after any completed response (successful query, add, update, or error). `shouldEndSession` is set to `false` only when the session is awaiting user confirmation (duplicate add flow).
@@ -137,8 +141,11 @@ A registered user with a linked Alexa account can speak Mapi commands through an
   - Item found: *"{name} costs {price} pesos."*
   - Item not found: *"I couldn't find {name}."*
   - Ambiguous match: *"Found {count} items matching {name}: {list of matched names}. Please specify which one."*
-  - Add success: *"{name} has been added at {price} pesos."*
-  - Add duplicate: *"{name} already exists at {price} pesos. Do you want to update it?"*
+  - Add step 1 (item not found): *"What is the price of {name}?"*
+  - Add step 1 (item exists): *"{name} already exists at {price} pesos. Do you want to update it?"*
+  - Add confirmed (price received): *"Got it. {name} has been added at {price} pesos."*
+  - Add cancelled: *"Add command has been cancelled."*
+  - Invalid yes/no answer: *"Yes or no is the only acceptable answer, please start over the command again."*
   - Malformed command: *"Sorry, I didn't understand that. Please try again."*
 - **FR-008**: System MUST allow users to define custom trigger phrases and link them to one or more actions (many-to-many relationship).
 - **FR-009**: System MUST support action types: Query, Add, Update, and Remove.
@@ -156,8 +163,8 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - **User**: Represents a registered account stored in a custom `User` table. Fields: `Id` (unique identifier), `Email` (unique, required), `PasswordHash` (required), `AlexaUserId` (nullable, for Alexa account linking), `StoreName` (required, the name of the user's store). Authentication is email/password with JWT tokens. All other entities belong to a User.
 - **Item**: A product or good tracked by the user. Has an English name (ItemName), a Bisaya name (BisayaName), and a price. Both name fields are searchable by voice commands.
 - **Trigger**: A voice phrase defined by the user that the system listens for (e.g., "How much is", "Add"). The `Phrase` field has a maximum length of 200 characters.
-- **Action**: A system operation (Query, Add, Update, Remove) with a configurable response template. Belongs to a user. The `ResponseTemplate` field has a maximum length of 500 characters.
-- **TriggerActionMap**: A many-to-many relationship linking one Trigger to one or more Actions, defining what the system does when a trigger phrase is spoken.
+- **Action**: A system operation (Query, Add, Update, Remove) with a configurable response template. **Globally seeded — not user-owned.** There are exactly 4 actions shared across all users. The `ResponseTemplate` field has a maximum length of 500 characters.
+- **TriggerActionMap**: ~~Removed.~~ Triggers now hold a direct `ActionId` FK referencing one of the 4 seeded Actions. The many-to-many join table has been eliminated.
 - **ResponseTemplate placeholder rules**: Supported placeholders are `{name}` and `{price}`. Unrecognized placeholders (e.g., `{foo}`) are left as-is in the spoken response. If a supported placeholder's value is missing at runtime, it is replaced with "unknown". No errors are thrown in either case.
 
 ## Success Criteria *(mandatory)*
@@ -207,4 +214,4 @@ A registered user with a linked Alexa account can speak Mapi commands through an
 - Q: Should the backend use traditional MVC controllers or Minimal API feature endpoints? → A: Minimal API for web voice endpoints; MVC controller (`AlexaController`) for the Alexa interface; both share the same application/domain layer.
 - Q: Should `ICommandService` replace MediatR as the dispatch mechanism, or live inside MediatR handlers? → A: `ICommandService` is an Application layer service invoked inside MediatR command handlers; endpoints only dispatch MediatR commands.
 - Q: What should the system do when a voice query matches multiple items by name? → A: Respond with an ambiguity message listing matched item names and prompt the user to clarify.
-- Q: What should happen when a voice-add command names an item that already exists? → A: Prompt the user to confirm if they want to update the existing item's price; update on confirmation, no change on decline.
+- Q: What should happen when a voice-add command names an item that already exists? → A: Return `pendingIntent = "ConfirmUpdate"` with a spoken prompt; mic auto-activates. "yes" → transition to Update flow (ask for new price). "no" → cancel. Any other response → clear pending state with invalid-answer message. No visual dialog — confirmation is voice-only.

@@ -167,70 +167,72 @@ Submit a voice transcript for processing.
 **Request**
 ```json
 {
-  "transcript": "How much is Gatas?"
+  "transcript": "How much is Gatas?",
+  "pendingIntent": null,
+  "pendingItemName": null
 }
 ```
+
+`pendingIntent` and `pendingItemName` are optional — pass values from the previous `VoiceCommandResult` when continuing a multi-turn voice flow.
 
 **Responses**
 
 | Status | Body | When |
 |--------|------|------|
-| `200 OK` | `VoiceCommandResult` | Command processed (includes ambiguous and confirmation states) |
+| `200 OK` | `VoiceCommandResult` | Command processed |
 | `400 Bad Request` | ProblemDetails | Empty transcript |
 | `401 Unauthorized` | ProblemDetails | |
 
 **VoiceCommandResult**
+
+Single-turn query (no pending state):
 ```json
 {
-  "responseText": "Price of Gatas is 50.00",
-  "isAmbiguous": false,
-  "isConfirmationRequired": false,
-  "matchedNames": []
+  "responseText": "Rice costs 50 pesos.",
+  "pendingIntent": null,
+  "pendingItemName": null,
+  "itemsModified": false
 }
 ```
 
-Ambiguous example:
+Add step 1 — item not found, waiting for price:
 ```json
 {
-  "responseText": "Found 2 items named Gatas. Please specify which one.",
-  "isAmbiguous": true,
-  "isConfirmationRequired": false,
-  "matchedNames": ["Gatas (50.00)", "Gatas (75.00)"]
+  "responseText": "What is the price of rice?",
+  "pendingIntent": "Add",
+  "pendingItemName": "rice",
+  "itemsModified": false
 }
 ```
 
-Duplicate add example:
+Add — item already exists, waiting for yes/no confirmation:
 ```json
 {
-  "responseText": "Gatas already exists with price 50.00. Do you want to update it?",
-  "isAmbiguous": false,
-  "isConfirmationRequired": true,
-  "matchedNames": ["Gatas"]
+  "responseText": "Rice already exists at 50 pesos. Do you want to update it?",
+  "pendingIntent": "ConfirmUpdate",
+  "pendingItemName": "rice",
+  "itemsModified": false
 }
 ```
 
----
-
-### POST /api/v1/voice/confirm-add
-
-Confirm a duplicate voice-add to update the existing item's price.
-
-**Request**
+Completed mutating command:
 ```json
 {
-  "itemName": "Gatas",
-  "newPrice": 60.00
+  "responseText": "Got it. Rice has been added at 50 pesos.",
+  "pendingIntent": null,
+  "pendingItemName": null,
+  "itemsModified": true
 }
 ```
 
-**Responses**
+**PendingIntent values**
 
-| Status | Body | When |
-|--------|------|------|
-| `200 OK` | `VoiceCommandResult` | Item updated; `responseText` confirms the update |
-| `404 Not Found` | ProblemDetails | Item no longer exists |
-| `400 Bad Request` | ProblemDetails | Validation failure |
-| `401 Unauthorized` | ProblemDetails | |
+| Value | Meaning | Auto-listen? |
+|-------|---------|-------------|
+| `"Add"` | Item not found; waiting for price | Yes |
+| `"Update"` | Item found; waiting for new price | Yes |
+| `"ConfirmUpdate"` | Item exists on Add; waiting for "yes"/"no" | Yes |
+| `null` | No pending state — command completed | No |
 
 ---
 
@@ -252,15 +254,10 @@ Get all triggers for the authenticated user (includes linked actions).
 {
   "id": "guid",
   "phrase": "What's the price of",
-  "actions": [
-    {
-      "id": "guid",
-      "actionType": "Query",
-      "responseTemplate": "The price of {name} is {price}",
-      "sortOrder": 0
-    }
-  ],
-  "createdAt": "2026-04-11T00:00:00Z"
+  "actionId": "00000000-0000-0000-0000-000000000001",
+  "actionType": "Query",
+  "createdAt": "2026-04-11T00:00:00Z",
+  "updatedAt": "2026-04-11T00:00:00Z"
 }
 ```
 
@@ -280,31 +277,33 @@ Get a single trigger with linked actions.
 
 ### POST /api/v1/triggers
 
-Create a new trigger.
+Create a new trigger. `actionId` must be one of the 4 seeded action IDs.
 
 **Request**
 ```json
 {
-  "phrase": "What's the price of"
+  "phrase": "What's the price of",
+  "actionId": "00000000-0000-0000-0000-000000000001"
 }
 ```
 
 | Status | Body | When |
 |--------|------|------|
-| `201 Created` | `TriggerResponse` | Created |
-| `400 Bad Request` | ProblemDetails | |
+| `201 Created` | `TriggerResponse` | Created; `Location` header set to `/api/v1/triggers/{id}` |
+| `400 Bad Request` | ProblemDetails | Validation failure or invalid actionId |
 | `401 Unauthorized` | ProblemDetails | |
 
 ---
 
 ### PUT /api/v1/triggers/{id}
 
-Update a trigger's phrase.
+Update a trigger's phrase and/or linked action.
 
 **Request**
 ```json
 {
-  "phrase": "How much does"
+  "phrase": "How much does",
+  "actionId": "00000000-0000-0000-0000-000000000001"
 }
 ```
 
@@ -319,7 +318,7 @@ Update a trigger's phrase.
 
 ### DELETE /api/v1/triggers/{id}
 
-Delete a trigger and all its TriggerActionMap links.
+Delete a trigger.
 
 | Status | Body | When |
 |--------|------|------|
@@ -329,44 +328,13 @@ Delete a trigger and all its TriggerActionMap links.
 
 ---
 
-### POST /api/v1/triggers/{triggerId}/actions
-
-Link an existing Action to a Trigger.
-
-**Request**
-```json
-{
-  "actionId": "guid",
-  "sortOrder": 0
-}
-```
-
-| Status | Body | When |
-|--------|------|------|
-| `201 Created` | `TriggerResponse` | Linked; returns updated trigger |
-| `400 Bad Request` | ProblemDetails | Duplicate link |
-| `404 Not Found` | ProblemDetails | Trigger or Action not found |
-| `401 Unauthorized` | ProblemDetails | |
-
----
-
-### DELETE /api/v1/triggers/{triggerId}/actions/{actionId}
-
-Unlink an Action from a Trigger.
-
-| Status | Body | When |
-|--------|------|------|
-| `204 No Content` | — | Unlinked |
-| `404 Not Found` | ProblemDetails | |
-| `401 Unauthorized` | ProblemDetails | |
-
----
-
 ## Actions
+
+Actions are **globally seeded** — there are exactly 4 actions (Query, Add, Update, Remove) shared across all users. They cannot be created, modified, or deleted via the API.
 
 ### GET /api/v1/actions
 
-Get all actions for the authenticated user.
+Returns all 4 seeded actions. No user filtering.
 
 | Status | Body | When |
 |--------|------|------|
@@ -376,63 +344,34 @@ Get all actions for the authenticated user.
 **ActionResponse**
 ```json
 {
-  "id": "guid",
+  "id": "00000000-0000-0000-0000-000000000001",
   "actionType": "Query",
-  "responseTemplate": "The price of {name} is {price}",
-  "createdAt": "2026-04-11T00:00:00Z"
+  "responseTemplate": "The {item} is {value}.",
+  "createdAt": "2026-04-12T00:00:00Z",
+  "updatedAt": "2026-04-12T00:00:00Z"
 }
 ```
 
----
+**Seeded action IDs**
 
-### POST /api/v1/actions
-
-Create a new action.
-
-**Request**
-```json
-{
-  "actionType": "Query",
-  "responseTemplate": "The price of {name} is {price}"
-}
-```
-
-| Status | Body | When |
-|--------|------|------|
-| `201 Created` | `ActionResponse` | Created |
-| `400 Bad Request` | ProblemDetails | Invalid `actionType` or empty template |
-| `401 Unauthorized` | ProblemDetails | |
+| ID | ActionType |
+|----|-----------|
+| `00000000-0000-0000-0000-000000000001` | Query |
+| `00000000-0000-0000-0000-000000000002` | Add |
+| `00000000-0000-0000-0000-000000000003` | Update |
+| `00000000-0000-0000-0000-000000000004` | Remove |
 
 ---
 
-### PUT /api/v1/actions/{id}
+## Removed Endpoints
 
-Update an action.
+The following endpoints from the original design have been removed:
 
-**Request**
-```json
-{
-  "actionType": "Query",
-  "responseTemplate": "{name} costs {price} pesos"
-}
-```
-
-| Status | Body | When |
-|--------|------|------|
-| `200 OK` | `ActionResponse` | Updated |
-| `400 Bad Request` | ProblemDetails | |
-| `404 Not Found` | ProblemDetails | |
-| `401 Unauthorized` | ProblemDetails | |
-
----
-
-### DELETE /api/v1/actions/{id}
-
-Delete an action. Will fail if linked to any trigger (restrict delete).
-
-| Status | Body | When |
-|--------|------|------|
-| `204 No Content` | — | Deleted |
-| `409 Conflict` | ProblemDetails | Action is still linked to one or more triggers |
-| `404 Not Found` | ProblemDetails | |
-| `401 Unauthorized` | ProblemDetails | |
+| Endpoint | Reason |
+|----------|--------|
+| `POST /api/v1/voice/confirm-add` | Replaced by multi-turn `pendingIntent` flow on `POST /api/v1/voice/command` |
+| `POST /api/v1/actions` | Actions are seeded — no user creation |
+| `PUT /api/v1/actions/{id}` | Actions are immutable |
+| `DELETE /api/v1/actions/{id}` | Actions cannot be deleted |
+| `POST /api/v1/triggers/{triggerId}/actions` | TriggerActionMap removed; trigger holds a direct `actionId` |
+| `DELETE /api/v1/triggers/{triggerId}/actions/{actionId}` | TriggerActionMap removed |

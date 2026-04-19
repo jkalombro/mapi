@@ -47,7 +47,7 @@
 - [ ] T015 [P] Create `IPasswordHasher` interface (Hash, Verify) in `backend/src/Mapi.Application/Common/Interfaces/IPasswordHasher.cs`
 - [ ] T016 [P] Create `ITokenService` interface (GenerateToken) in `backend/src/Mapi.Application/Common/Interfaces/ITokenService.cs`
 - [ ] T017 [P] Create `ICurrentUserService` interface (UserId: Guid) in `backend/src/Mapi.Application/Common/Interfaces/ICurrentUserService.cs`
-- [ ] T018 [P] Create `ICommandService` interface (ExecuteAsync, ConfirmAddAsync) in `backend/src/Mapi.Application/Common/Interfaces/ICommandService.cs`
+- [ ] T018 [P] Create `ICommandService` interface (`ExecuteAsync(transcript, userId, pendingIntent?, pendingItemName?)`) in `backend/src/Mapi.Application/Common/Interfaces/ICommandService.cs` — `ConfirmAddAsync` removed; pending context passed as parameters instead
 - [ ] T019 Create `ValidationBehavior<TRequest, TResponse>` MediatR pipeline behavior in `backend/src/Mapi.Application/Common/Behaviors/ValidationBehavior.cs`
 - [ ] T020 Create `LoggingBehavior<TRequest, TResponse>` MediatR pipeline behavior in `backend/src/Mapi.Application/Common/Behaviors/LoggingBehavior.cs`
 - [ ] T021 Create `Application/DependencyInjection.cs` — `AddApplication()` registering MediatR, FluentValidation validators, pipeline behaviors in `backend/src/Mapi.Application/DependencyInjection.cs`
@@ -170,7 +170,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T087 [P] [US2] Create `VoiceCommandRequest` and `VoiceCommandResult` DTOs (ResponseText, IsAmbiguous, IsConfirmationRequired, MatchedNames) in `backend/src/Mapi.Application/Voice/DTOs/`
+- [ ] T087 [P] [US2] Create `VoiceCommandRequest` (`Transcript`, `PendingIntent?`, `PendingItemName?`) and `VoiceCommandResult` (`ResponseText`, `PendingIntent?`, `PendingItemName?`, `ItemsModified`) DTOs in `backend/src/Mapi.Application/Voice/DTOs/`
 - [ ] T088 [US2] Implement `CommandService` (implements `ICommandService`) — query pattern `^how much is (?<name>.+)\??$`, case-insensitive ItemName/BisayaName search, ambiguity detection — in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
 - [ ] T089 [US2] Implement `ProcessVoiceCommand` + handler (invokes `ICommandService.ExecuteAsync`, never calls repos directly) in `backend/src/Mapi.Application/Voice/Commands/ProcessVoiceCommand.cs`
 - [ ] T090 [US2] Create `ProcessVoiceCommandValidator` (transcript not empty) in `backend/src/Mapi.Application/Voice/Validators/ProcessVoiceCommandValidator.cs`
@@ -194,19 +194,19 @@
 
 ### Tests for User Story 3 (write first — must FAIL before implementation)
 
-- [X] T098 [P] [US3] Write xUnit tests for `CommandService` add logic (new item, duplicate triggers confirmation, malformed command returns error) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceAddTests.cs`
-- [X] T099 [P] [US3] Write xUnit tests for `ConfirmVoiceAddCommandHandler` (item updated, not-found) in `backend/tests/Mapi.Application.Tests/Voice/ConfirmVoiceAddCommandHandlerTests.cs`
-- [ ] T100 [P] [US3] Write Jest tests for `confirmation-dialog` component (displays message, confirm/cancel events) in `frontend/src/app/shared/components/confirmation-dialog/confirmation-dialog.component.spec.ts`
+- [X] T098 [P] [US3] Write xUnit tests for `CommandService` add logic (new item, duplicate triggers ConfirmUpdate, "yes"/"no"/invalid responses, malformed command) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceAddTests.cs`
+- [~~X~~] ~~T099 [P] [US3] Write xUnit tests for `ConfirmVoiceAddCommandHandler`~~ — **Deleted**. `ConfirmVoiceAddCommand` removed; confirmation handled via `pendingIntent` in `CommandService`.
+- [~~] ~~T100 [P] [US3] Write Jest tests for `confirmation-dialog` component~~ — **Deleted**. `ConfirmationDialogComponent` removed; confirmation is voice-driven via `pendingIntent`.
 
 ### Implementation for User Story 3
 
-- [ ] T101 [US3] Extend `CommandService` with Add pattern (`^add (?<name>.+) price (?<price>\d+(\.\d+)?)$`) — new item path calls `CreateItemCommand`, duplicate path returns `IsConfirmationRequired = true` — in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
-- [ ] T102 [US3] Implement `ConfirmVoiceAddCommand` + handler (updates existing item's price) + `ConfirmVoiceAddCommandValidator` in `backend/src/Mapi.Application/Voice/Commands/ConfirmVoiceAddCommand.cs`
-- [ ] T103 [US3] Add POST `/api/v1/voice/confirm-add` endpoint to `VoiceEndpoints` in `backend/src/Mapi.API/Endpoints/VoiceEndpoints.cs`
-- [X] T104 [US3] Add voice add + confirmation Gherkin scenarios to `Voice.feature` and implement step definitions in `backend/tests/Mapi.API.IntegrationTests/`
-- [ ] T105 [US3] Create `confirmation-dialog` shared component (displays message string, emits confirm/cancel; OnPush) in `frontend/src/app/shared/components/confirmation-dialog/confirmation-dialog.component.{ts,html,scss}`
-- [ ] T106 [US3] Extend voice NgRx store with add-confirmation state (`isConfirmationRequired`, `pendingItem`, `confirmAdd` action + effect calling `/api/v1/voice/confirm-add`) in `frontend/src/app/voice/store/`
-- [ ] T107 [US3] Wire `confirmation-dialog` into `app.component.html` — show when `isConfirmationRequired` is true; dispatch `confirmAdd` or dismiss on user choice — in `frontend/src/app/app.component.ts`
+- [ ] T101 [US3] Extend `CommandService` with Add pattern (`^add (?<name>.+)$`) — two-step flow: step 1 returns `pendingIntent="Add"`, step 2 (pending="Add") parses price and calls `CreateItemCommand`; duplicate returns `pendingIntent="ConfirmUpdate"`; `ConfirmUpdate` turn handles "yes"→`pendingIntent="Update"`, "no"→cancelled message, other→invalid answer message — in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
+- [~~] ~~T102 [US3] Implement `ConfirmVoiceAddCommand`~~ — **Deleted**. Flow handled by `CommandService` via `pendingIntent`.
+- [~~] ~~T103 [US3] Add POST `/api/v1/voice/confirm-add` endpoint~~ — **Deleted**. Endpoint removed; all turns use `POST /api/v1/voice/command`.
+- [X] T104 [US3] Add voice add + confirmation Gherkin scenarios to `Voice.feature` (two-step Add, ConfirmUpdate yes/no/invalid flows) and implement step definitions in `backend/tests/Mapi.API.IntegrationTests/`
+- [~~] ~~T105 [US3] Create `confirmation-dialog` shared component~~ — **Deleted**. Replaced by voice-driven `pendingIntent` flow.
+- [ ] T106 [US3] Extend voice NgRx store with pending state (`pendingIntent`, `pendingItemName` from `VoiceCommandResult`; `selectIsConfirmationRequired` derived from `pendingIntent === "ConfirmUpdate"`; `selectPendingState` selector; `dismissConfirmation` clears pending) in `frontend/src/app/voice/store/`
+- [~~] ~~T107 [US3] Wire `confirmation-dialog` into `app.component.html`~~ — **Deleted**. `ConfirmationDialogComponent` removed from `AppComponent`; no visual dialog.
 
 **Checkpoint**: Voice "Add" command creates new items; duplicate voice-add triggers a spoken + visual confirmation prompt; confirmed updates are reflected immediately in the item list.
 
@@ -225,29 +225,29 @@
 - [X] T110 [P] [US4] Write xUnit tests for Action CRUD command handlers in `backend/tests/Mapi.Application.Tests/Actions/`
 - [X] T111 [P] [US4] Write xUnit tests for `CommandService` trigger matching logic (phrase prefix match, multi-action execution in SortOrder, no-match fallback) in `backend/tests/Mapi.Application.Tests/Voice/CommandServiceTriggerTests.cs`
 - [X] T112 [P] [US4] Write Jest tests for triggers NgRx store (actions, reducers, effects, selectors) in `frontend/src/app/triggers/store/`
-- [X] T113 [P] [US4] Write Jest tests for `trigger-form` and `action-link-form` components in `frontend/src/app/triggers/components/`
+- [X] T113 [P] [US4] Write Jest tests for `trigger-form` component (phrase + actionId selection) in `frontend/src/app/triggers/components/` — `action-link-form` tests deleted (component removed)
 
 ### Implementation for User Story 4
 
-- [ ] T114 [P] [US4] Create `Trigger` entity (UserId FK, Phrase) in `backend/src/Mapi.Domain/Entities/Trigger.cs`
-- [ ] T115 [P] [US4] Create `Action` entity (UserId FK, ActionType enum, ResponseTemplate) + `ActionType` enum in `backend/src/Mapi.Domain/Entities/Action.cs` and `backend/src/Mapi.Domain/Enums/ActionType.cs`
-- [ ] T116 [US4] Create `TriggerActionMap` entity (TriggerId FK, ActionId FK, SortOrder; unique composite index) in `backend/src/Mapi.Domain/Entities/TriggerActionMap.cs`
-- [ ] T117 [P] [US4] Create `ITriggerRepository` and `IActionRepository` interfaces in `backend/src/Mapi.Domain/Interfaces/`
-- [ ] T118 [US4] Create `TriggerConfiguration`, `ActionConfiguration`, `TriggerActionMapConfiguration` in `backend/src/Mapi.Infrastructure/Persistence/Configurations/`
-- [ ] T119 [US4] Implement `TriggerRepository`, `ActionRepository`, `TriggerActionMapRepository` in `backend/src/Mapi.Infrastructure/Persistence/Repositories/`
-- [ ] T120 [US4] Add `Triggers`, `Actions`, `TriggerActionMaps` DbSets and global query filters to `ApplicationDbContext` in `backend/src/Mapi.Infrastructure/Persistence/ApplicationDbContext.cs`
-- [ ] T121 [US4] Implement Trigger CRUD commands/queries + DTOs + validators in `backend/src/Mapi.Application/Triggers/`
-- [ ] T122 [US4] Implement Action CRUD commands/queries + DTOs + validators in `backend/src/Mapi.Application/Actions/`
-- [ ] T123 [US4] Implement `LinkActionCommand` + `UnlinkActionCommand` + handlers + validators in `backend/src/Mapi.Application/Triggers/Commands/`
-- [ ] T124 [US4] Create `TriggersEndpoints` (GET/POST/PUT/DELETE trigger; POST/DELETE trigger actions link) in `backend/src/Mapi.API/Endpoints/TriggersEndpoints.cs`
-- [ ] T125 [US4] Create `ActionsEndpoints` (GET/POST/PUT/DELETE; 409 Conflict on delete if linked) in `backend/src/Mapi.API/Endpoints/ActionsEndpoints.cs`
+- [ ] T114 [P] [US4] Create `Trigger` entity (UserId FK, Phrase, ActionId FK → seeded Action) in `backend/src/Mapi.Domain/Entities/Trigger.cs`
+- [ ] T115 [P] [US4] Create `Action` entity (no UserId — globally seeded; ActionType enum, ResponseTemplate) + `ActionType` enum in `backend/src/Mapi.Domain/Entities/Action.cs` and `backend/src/Mapi.Domain/Enums/ActionType.cs`
+- [~~] ~~T116 [US4] Create `TriggerActionMap` entity~~ — **Deleted**. Many-to-many join table removed; `Trigger` holds a direct `ActionId` FK.
+- [ ] T117 [P] [US4] Create `ITriggerRepository` interface in `backend/src/Mapi.Domain/Interfaces/` — `IActionRepository` deleted (actions queried via generic repo or direct EF query)
+- [ ] T118 [US4] Create `TriggerConfiguration` and `ActionConfiguration` (with seeded data) in `backend/src/Mapi.Infrastructure/Persistence/Configurations/` — `TriggerActionMapConfiguration` deleted
+- [ ] T119 [US4] Implement `TriggerRepository` in `backend/src/Mapi.Infrastructure/Persistence/Repositories/` — `ActionRepository` and `TriggerActionMapRepository` deleted
+- [ ] T120 [US4] Add `Triggers` and `Actions` DbSets; apply global query filter on `Trigger` only; `Action` has no per-user filter; seed 4 actions in `ApplicationDbContext` in `backend/src/Mapi.Infrastructure/Persistence/ApplicationDbContext.cs`
+- [ ] T121 [US4] Implement Trigger CRUD commands/queries (CreateTrigger, UpdateTrigger, DeleteTrigger, GetTriggers, GetTriggerById with `actionId` field) + DTOs + validators in `backend/src/Mapi.Application/Triggers/`
+- [ ] T122 [US4] Implement Action query only (`GetActionsQuery` — returns 4 seeded actions) in `backend/src/Mapi.Application/Actions/` — no create/update/delete commands
+- [~~] ~~T123 [US4] Implement `LinkActionCommand` + `UnlinkActionCommand`~~ — **Deleted**. Action linked directly on Trigger via `ActionId` at create/update time.
+- [ ] T124 [US4] Create `TriggersEndpoints` (GET /triggers, GET /triggers/{id}, POST /triggers with `phrase`+`actionId`, PUT /triggers/{id}, DELETE /triggers/{id}) in `backend/src/Mapi.API/Endpoints/TriggersEndpoints.cs`
+- [ ] T125 [US4] Create `ActionsEndpoints` (GET /actions only — returns 4 seeded actions; no POST/PUT/DELETE) in `backend/src/Mapi.API/Endpoints/ActionsEndpoints.cs`
 - [ ] T126 [US4] Extend `CommandService` with trigger-first matching (case-insensitive prefix match against user's Triggers; execute linked Actions in SortOrder; resolve response template `{name}` / `{price}` placeholders) in `backend/src/Mapi.Infrastructure/Services/CommandService.cs`
 - [ ] T127 [US4] Add and apply EF migration `AddTriggersActionsAndMaps` — run `dotnet ef migrations add AddTriggersActionsAndMaps`
 - [X] T128 [US4] Implement `TriggersStepDefinitions` for Triggers.feature in `backend/tests/Mapi.API.IntegrationTests/StepDefinitions/TriggersStepDefinitions.cs`
 - [X] T129 [US4] Create triggers NgRx store (models, loadTriggers/createTrigger/deleteTrigger/linkAction/unlinkAction actions + reducers + effects + api service) in `frontend/src/app/triggers/store/`
-- [X] T130 [US4] Create `trigger-form` component (Reactive Form: Phrase field) in `frontend/src/app/triggers/components/trigger-form/trigger-form.component.{ts,html,scss}`
-- [X] T131 [US4] Create `action-link-form` component (select actionId from user's actions, set sortOrder) in `frontend/src/app/triggers/components/action-link-form/action-link-form.component.{ts,html,scss}`
-- [X] T132 [US4] Create `triggers` smart component (lists triggers with linked actions; compose trigger-form + action-link-form) in `frontend/src/app/triggers/triggers.component.{ts,html,scss}`
+- [X] T130 [US4] Create `trigger-form` component (Reactive Form: Phrase field + actionId dropdown from seeded actions) in `frontend/src/app/triggers/components/trigger-form/trigger-form.component.{ts,html,scss}`
+- [~~X~~] ~~T131 [US4] Create `action-link-form` component~~ — **Deleted**. Component removed; action selection is part of `trigger-form` directly.
+- [X] T132 [US4] Create `triggers` smart component (lists triggers with their action; compose trigger-form) in `frontend/src/app/triggers/triggers.component.{ts,html,scss}`
 - [ ] T133 [US4] Create `triggers.routes.ts` and register as lazy-loaded route in `frontend/src/app/app.routes.ts`
 
 **Checkpoint**: User can create a trigger "What's the price of", link a Query action, speak the phrase, and hear the action's response template filled with the item's price.
